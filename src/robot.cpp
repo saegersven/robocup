@@ -39,6 +39,23 @@ void Robot::m(int8_t left, int8_t right, int16_t duration) {
 	}
 }
 
+void Robot::button(uint8_t pin) {
+	return digitalRead(pin) == HIGH;
+}
+
+void Robot::button_wait(uint8_t pin, uint32_t timeout = 0) {
+	if(timeout != 0) {
+		auto start_time = std::chrono::system_clock::now();
+		while(!Robot::button(pin)) {
+			auto now = std::chrono::system_clock::now();
+			if(std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() >= timeout) {
+				return;
+			}
+		}
+	}
+	while(!Robot::button(pin)) {}
+}
+
 void Robot::stop() {
 	digitalWrite(M1_1, LOW);
 	digitalWrite(M1_2, LOW);

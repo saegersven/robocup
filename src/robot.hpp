@@ -9,6 +9,12 @@
 #define M2_2 12
 #define M2_E 7
 
+#define BTN_RESTART 36
+#define BTN_DEBUG 35
+
+#define DIST_1 33, 32
+#define DIST_2 31, 29
+
 class Robot {
 	Robot();
 
@@ -16,6 +22,8 @@ class Robot {
 	void stop();
 	void turn(int8_t degrees);
 	void servo();
+	void button(uint8_t pin);
+	uint16_t distance();
 }
 
 float clip(float n, float lower, float upper) {
