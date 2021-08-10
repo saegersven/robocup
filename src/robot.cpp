@@ -66,7 +66,7 @@ void Robot::stop() {
 	softPwmWrite(M2_E, 0);
 }
 
-Robot::distance(int echo, int trig) {
+uint16_t Robot::distance(uint8_t echo, uint8_t trig) {
 	digitalWrite(trig, HIGH);
 	std::this_thread::sleep_for(std::chrono::milliseconds(0.00001));
 	digitalWrite(trig, LOW);
@@ -79,7 +79,7 @@ Robot::distance(int echo, int trig) {
 		auto stopTime = std::chrono::system_clock::now();
 	}
 
-	int timeElapsed = stopTime - startTime
+	uint16_t timeElapsed = stopTime - startTime
 
 	// multiply with acoustic velocity (34300 cm/s) and divide by 2
 	return = (timeElapsed * 34300) / 2
