@@ -2,12 +2,12 @@
 #include <wiringPi.h>
 #include <cmath>
 
-#define M1_1 0
-#define M1_2 0
-#define M1_E 0
-#define M2_1 0
-#define M2_2 0
-#define M2_E 0
+#define M1_1 16
+#define M1_2 18
+#define M1_E 22
+#define M2_1 11
+#define M2_2 12
+#define M2_E 7
 
 class Robot {
 	Robot();

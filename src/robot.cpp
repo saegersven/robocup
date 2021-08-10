@@ -2,8 +2,7 @@
 
 Robot::Robot() {
 	// Initialize the robot
-
-	wiringPiSetup();
+	wiringPiSetupPhys();
 	pinMode(M1_1, OUTPUT);
 	pinMode(M1_2, OUTPUT);
 	pinMode(M2_1, OUTPUT);
