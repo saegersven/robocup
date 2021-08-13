@@ -39,6 +39,53 @@ void Robot::m(int8_t left, int8_t right, int16_t duration) {
 	}
 }
 
+uint16_t retrieve_encoder_values() {
+	encoder_values = 0;
+}
+
+void set_encoder_anchor() {
+	encoder_anchor = encoder_values;
+}
+
+uint8_t encoder_value_a() {
+	// Return eight lest significant bits for a
+	return (uint8_t)(encoder_values - encoder_anchor);
+}
+
+uint8_t encoder_value_b() {
+	// Return eight most significant bits for b
+	return (uint8_t)((encoder_values - encoder_anchor) >> 8);
+}
+
+// Go in a straight line
+void Robot::forward(float distance, int8_t speed = 100) {
+	int8_t sign = distance < 0 ? -1 : 1;
+
+	float distance_travelled = 0.0f;
+
+	while(distance_travelled < distance) {
+		retrieve_encoder_values();
+		// encoder_value_x() gives us 0 now
+
+		// Difference in pulses
+		uint8_t d_encoder_a = encoder_value_a();
+		uint8_t d_encoder_b = encoder_value_b();
+		
+		// Average encoder deltas to calculate distance travelled
+		distance_travelled += (d_encoder_a + d_encoder_b) / 2.0f *
+			PULSES_PER_REVOLUTION * GEAR_RATIO * WHEEL_CIRCUMFERENCE
+
+		int16_t error = d_encoder_b - d_encoder_a;
+
+		m(sign * (speed + error * FORWARD_CORRECTION_FACTOR),
+			sign * (speed - error * FORWARD_CORRECTION_FACTOR), 0);
+		
+		set_encoder_anchor(); // Reset encoder to zero
+	}
+
+	stop();
+}
+
 void Robot::button(uint8_t pin) {
 	return digitalRead(pin) == HIGH;
 }

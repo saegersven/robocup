@@ -15,7 +15,18 @@
 #define DIST_1 32, 33
 #define DIST_2 29, 31
 
+#define FORWARD_CORRECTION_FACTOR 0.1f
+// cm
+#define WHEEL_CIRCUMFERENCE 5.0f
+#define GEAR_RATIO 100.0f
+#define PULSES_PER_REVOLUTION 20.0f
+
 class Robot {
+private:
+	uint16_t encoder_values = 0;
+	uint16_t encoder_anchor = 0;
+
+public:
 	Robot();
 
 	void m(int8_t left, int8_t right, int16_t duration);
