@@ -30,49 +30,17 @@ Robot::Robot() {
 }
 
 int Robot::init_camera(int id, bool calibrated = false, int width = 320, int height = 192, int fps = 60) {
-	CameraProperties cam();
-	cam.cap = cv::VideoCapture(id);
-	cam.cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
-	cam.cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
-	cam.cap.set(cv::CAP_PROP_FPS, fps);
-
-	if(!cam.cap.isOpened()) {
-		std::cerr << "Could not open camera" << std::endl;
-		exit(ERRCODE_CAM_SETUP);
-	}
-
-	cam.image_size = cv::Size(width, height);
-
-	if(calibrated) {
-		cam.calibration_from_file("cc_" + std::to_string(id) + ".bin");
-		cam.new_camera_matrix = cv::getOptimalNewCameraMatrix(
-			cam.camera_matrix, cam.distortion_matrix, cam.image_size, 1.0);
-		cam.calibrated = true;
-	}
+	Camera cam(id, calibrated, width, height, fps);
 
 	cams.push_back(cam);
 	return cams.size() - 1;
 }
 
 cv::Mat Robot::retrieve_frame(int cam_id, bool undistort = false) {
-	cv::Mat frame;
-
-	cams[cam_id].cap.grab();
-	cams[cam_id].cap.retrieve(frame);
-
-	if(frame.empty()) {
-		std::cerr << "Error grabbing frame from main camera" << std::endl;
-		exit(ERRCODE_CAM_GRAB_FRAME);
-	}
-
-	if(undistort && cams[cam_id].calibrated) {
-		frame = cv::undistort(frame, cams[cam_id]);
-	}
-
-	return frame;
+	return cams[cam_id].retrieve_frame(undistort);
 }
 
-void Robot::m(int8_t left, int8_t right, int16_t duration) {
+void Robot::m(int8_t left, int8_t right, int16_t duration = 0) {
 	left = clip(left, -100, 100);
 	right = clip(right, -100, 100);
 
@@ -103,6 +71,23 @@ uint8_t Robot::encoder_value_b() {
 	// Read from GPIOB register of MCP23017
 	return wiringPiI2CReadReg8(mcp_fd, ENCODER_PORTB);
 }
+
+/*// Speed in mm/s
+void Robot::set_motor_speed(int8_t left, int8_t right, int16_t duration) {
+	int8_t speed_l = clip(left / WHEEL_CIRCUMFERENCE / 10
+		* PULSES_PER_REVOLUTION * GEAR_RATIO * MOTOR_SPEED_CONVERSION_FACTOR, 0, 100);
+	int8_t speed_r = clip(right / WHEEL_CIRCUMFERENCE / 10
+		* PULSES_PER_REVOLUTION * GEAR_RATIO * MOTOR_SPEED_CONVERSION_FACTOR, 0, 100);
+
+	m(initial_sped_l, initial_speed_r);
+	if(duration != 0) auto start_time = std::chrono::system_clock::now();
+
+	while(duration == 0 || std::chrono::duration_cast<std::chrono::milliseconds>
+		(std::chrono::system_clock::now() - start_time).count() < duration) {
+
+	}
+	stop();
+}*/
 
 // Go in a straight line
 void Robot::drive_distance(float distance, int8_t speed = 100) {

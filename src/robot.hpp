@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
@@ -23,28 +24,35 @@
 
 // Encoder movement parameters
 #define FORWARD_CORRECTION_FACTOR 0.1f
-// cm
-#define WHEEL_CIRCUMFERENCE 5.0f
+// mm
+#define WHEEL_CIRCUMFERENCE 50.0f
 #define GEAR_RATIO 100.0f
 #define PULSES_PER_REVOLUTION 20.0f
 
-// Register IDs of GPIO expander GPIOA and GPIOB
+// Register Ids of GPIO expander GPIOA and GPIOB
 #define ENCODER_PORTA 0x12
 #define ENCODER_PORTB 0x13
 
+// Encoder pulses per second * MOTOR_SPEED_CONVERSION_FACTOR = 0-100
+// Approximate value; Used for initial speed setting
+//#define MOTOR_SPEED_CONVERSION_FACTOR 0.01f // TODO: Change value
+
+#define CALIBRATION_FILE_NAME(id) "cc_" + std::to_string(id) + ".bin"
+
 class Robot {
 private:
-	std::vector<CameraProperties> cams;
+	std::vector<Camera> cams;
 
-	int mcp_fd; // WiringPi ID of encoder GPIO expander
+	int mcp_fd; // WiringPi Id of encoder GPIO expander
 
 	uint8_t encoder_value_a();
 	uint8_t encoder_value_b();
 
+	void m(int8_t left, int8_t right, int16_t duration = 0);
+
 public:
 	Robot();
-
-	void m(int8_t left, int8_t right, int16_t duration);
+	//void set_motor_speed(int8_t left, int8_t right, int16_t duration);
 	void drive_distance(float distance, int8_t speed = 100);
 	void stop();
 	void turn(int8_t degrees);

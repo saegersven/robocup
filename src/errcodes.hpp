@@ -1,3 +1,4 @@
+#pragma once
 #define ERRCODE_CAM_SETUP 1
 #define ERRCODE_CAM_GRAB_FRAME 2
 #define ERRCODE_BOT_SETUP_I2C 3
