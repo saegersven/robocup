@@ -36,7 +36,7 @@ public:
 	Robot();
 
 	void m(int8_t left, int8_t right, int16_t duration);
-	void forward(float distance, int8_t speed = 100);
+	void drive_distance(float distance, int8_t speed = 100);
 	void stop();
 	void turn(int8_t degrees);
 

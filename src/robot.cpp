@@ -57,7 +57,7 @@ uint8_t Robot::encoder_value_b() {
 }
 
 // Go in a straight line
-void Robot::forward(float distance, int8_t speed = 100) {
+void Robot::drive_distance(float distance, int8_t speed = 100) {
 	int8_t sign = distance < 0 ? -1 : 1;
 
 	float distance_travelled = 0.0f;
