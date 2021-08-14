@@ -9,6 +9,7 @@ Robot::Robot() {
 	mcp_fd = wiringPiI2CSetup(0x20); // TODO: Check if this is the actual ID of MCP23017
 	if(mcp_fd == -1) {
 		std::cout << "Error setting up I2C for Encoder board" << std::endl;
+		exit(ERRCODE_BOT_SETUP_I2C);
 	}
 
 	// Setup Drive motor pins
@@ -20,10 +21,41 @@ Robot::Robot() {
 	// Create PWM for the two drive motors
 	if(softPwmCreate(M1_E, 0, 100)) {
 		std::cout << "Error setting up PWM for M1" << std::endl;
+		exit(ERROCDE_BOT_SETUP_PWM);
 	}
 	if(softPwmCreate(M2_E, 0, 100)) {
 		std::cout << "Error setting up PWM for M2" << std::endl;
+		exit(ERROCDE_BOT_SETUP_PWM);
 	}
+}
+
+int Robot::init_camera(int id, int width = 320, int height = 192, int fps = 60) {
+	cv::VideoCapture cam(id);
+	cam.set(cv::CAP_PROP_FRAME_WIDTH, width);
+	cam.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+	cam.set(cv::CAP_PROP_FPS, fps);
+
+	if(!cap.isOpened()) {
+		std::cerr << "Could not open camera" << std::endl;
+		exit(ERRCODE_CAM_SETUP);
+	}
+
+	cams.push_back(cam);
+	return cams.size() - 1;
+}
+
+cv::Mat Robot::retrieve_frame(int cam_id) {
+	cv::Mat frame;
+
+	cams[cam_id].grab();
+	cams[cam_id].retrieve(frame);
+
+	if(frame.empty()) {
+		std::cerr << "Error grabbing frame from main camera" << std::endl;
+		exit(ERRCODE_CAM_GRAB_FRAME);
+	}
+
+	return frame;
 }
 
 void Robot::m(int8_t left, int8_t right, int16_t duration) {
@@ -49,10 +81,12 @@ void Robot::m(int8_t left, int8_t right, int16_t duration) {
 }
 
 uint8_t Robot::encoder_value_a() {
+	// Read from GPIOA register of MCP23017
 	return wiringPiI2CReadReg8(mcp_fd, ENCODER_PORTA);
 }
 
 uint8_t Robot::encoder_value_b() {
+	// Read from GPIOB register of MCP23017
 	return wiringPiI2CReadReg8(mcp_fd, ENCODER_PORTB);
 }
 
@@ -92,13 +126,13 @@ void Robot::drive_distance(float distance, int8_t speed = 100) {
 	stop();
 }
 
-void Robot::button(uint8_t pin) {
+bool Robot::button(uint8_t pin) {
 	return digitalRead(pin) == HIGH;
 }
 
-void Robot::button_wait(uint8_t pin, uint32_t timeout = 0xffffffff) {
+void Robot::button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff) {
 	auto start_time = std::chrono::system_clock::now();
-	while(!Robot::button(pin)) {
+	while(Robot::button(pin) != state) {
 		auto now = std::chrono::system_clock::now();
 		if(std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() >= timeout) {
 			return;

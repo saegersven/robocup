@@ -2,6 +2,10 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <cmath>
+#include <vector>
+#include <chrono>
+#include "utils.hpp"
+#include "errcodes.hpp"
 
 #define M1_1 16
 #define M1_2 18
@@ -29,6 +33,8 @@
 
 class Robot {
 private:
+	std::vector<cv::VideoCapture> cams;
+
 	int mcp_fd; // WiringPi ID of encoder GPIO expander
 
 	uint8_t encoder_value_a();
@@ -44,10 +50,7 @@ public:
 
 	void servo();
 	
-	void button(uint8_t pin);
+	bool button(uint8_t pin);
+	void Robot::button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
 	uint16_t distance(uint8_t echo, uint8_t trig);
-}
-
-float clip(float n, float lower, float upper) {
-	return std::max(lower, std::min(n, upper));
 }
