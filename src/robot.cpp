@@ -29,30 +29,44 @@ Robot::Robot() {
 	}
 }
 
-int Robot::init_camera(int id, int width = 320, int height = 192, int fps = 60) {
-	cv::VideoCapture cam(id);
-	cam.set(cv::CAP_PROP_FRAME_WIDTH, width);
-	cam.set(cv::CAP_PROP_FRAME_HEIGHT, height);
-	cam.set(cv::CAP_PROP_FPS, fps);
+int Robot::init_camera(int id, bool calibrated = false, int width = 320, int height = 192, int fps = 60) {
+	CameraProperties cam();
+	cam.cap = cv::VideoCapture(id);
+	cam.cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
+	cam.cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+	cam.cap.set(cv::CAP_PROP_FPS, fps);
 
-	if(!cap.isOpened()) {
+	if(!cam.cap.isOpened()) {
 		std::cerr << "Could not open camera" << std::endl;
 		exit(ERRCODE_CAM_SETUP);
+	}
+
+	cam.image_size = cv::Size(width, height);
+
+	if(calibrated) {
+		cam.calibration_from_file("cc_" + std::to_string(id) + ".bin");
+		cam.new_camera_matrix = cv::getOptimalNewCameraMatrix(
+			cam.camera_matrix, cam.distortion_matrix, cam.image_size, 1.0);
+		cam.calibrated = true;
 	}
 
 	cams.push_back(cam);
 	return cams.size() - 1;
 }
 
-cv::Mat Robot::retrieve_frame(int cam_id) {
+cv::Mat Robot::retrieve_frame(int cam_id, bool undistort = false) {
 	cv::Mat frame;
 
-	cams[cam_id].grab();
-	cams[cam_id].retrieve(frame);
+	cams[cam_id].cap.grab();
+	cams[cam_id].cap.retrieve(frame);
 
 	if(frame.empty()) {
 		std::cerr << "Error grabbing frame from main camera" << std::endl;
 		exit(ERRCODE_CAM_GRAB_FRAME);
+	}
+
+	if(undistort && cams[cam_id].calibrated) {
+		frame = cv::undistort(frame, cams[cam_id]);
 	}
 
 	return frame;

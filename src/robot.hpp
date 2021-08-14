@@ -6,6 +6,7 @@
 #include <chrono>
 #include "utils.hpp"
 #include "errcodes.hpp"
+#include "vision.hpp"
 
 #define M1_1 16
 #define M1_2 18
@@ -33,7 +34,7 @@
 
 class Robot {
 private:
-	std::vector<cv::VideoCapture> cams;
+	std::vector<CameraProperties> cams;
 
 	int mcp_fd; // WiringPi ID of encoder GPIO expander
 
