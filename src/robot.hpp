@@ -1,5 +1,6 @@
 #include <iostream>
 #include <wiringPi.h>
+#include <wiringPiI2C.h>
 #include <cmath>
 
 #define M1_1 16
@@ -21,18 +22,26 @@
 #define GEAR_RATIO 100.0f
 #define PULSES_PER_REVOLUTION 20.0f
 
+#define ENCODER_PORTA 0x12
+#define ENCODER_PORTB 0x13
+
 class Robot {
 private:
-	uint16_t encoder_values = 0;
-	uint16_t encoder_anchor = 0;
+	int mcp_fd;
+
+	uint8_t encoder_value_a();
+	uint8_t encoder_value_b();
 
 public:
 	Robot();
 
 	void m(int8_t left, int8_t right, int16_t duration);
+	void forward(float distance, int8_t speed = 100);
 	void stop();
 	void turn(int8_t degrees);
+
 	void servo();
+	
 	void button(uint8_t pin);
 	uint16_t distance(uint8_t echo, uint8_t trig);
 }
