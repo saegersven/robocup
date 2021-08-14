@@ -72,6 +72,7 @@ void Robot::drive_distance(float distance, int8_t speed = 100) {
 		uint8_t encoder_b = encoder_value_b();
 
 		// Difference in pulses
+		// No need to account for counter overflow, as deltas will overflow too
 		uint8_t d_encoder_a = encoder_a - last_encoder_a;
 		uint8_t d_encoder_b = encoder_b - last_encoder_b;
 		
@@ -115,21 +116,24 @@ void Robot::stop() {
 	softPwmWrite(M2_E, 0);
 }
 
-uint16_t Robot::distance(uint8_t echo, uint8_t trig) {
-	digitalWrite(trig, HIGH);
-	std::this_thread::sleep_for(std::chrono::milliseconds(0.00001));
-	digitalWrite(trig, LOW);
+uint16_t Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations = 1) {
+	float timeElapsed = 0.0f;
+	for(uint16_t i = 0; i < iterations; i++) {
+		digitalWrite(trig, HIGH);
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
+		digitalWrite(trig, LOW);
 
-	while (digitalRead(echo) == LOW) {
-		auto startTime = std::chrono::system_clock::now();
+		while (digitalRead(echo) == LOW) {
+			auto startTime = std::chrono::system_clock::now();
+		}
+
+		while (digitalRead(echo) == HIGH) {
+			auto stopTime = std::chrono::system_clock::now();
+		}
+
+		timeElapsed += std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count();
+		if(i != 0) timeElapsed /= 2.0f;
 	}
-
-	while (digitalRead(echo) == HIGH) {
-		auto stopTime = std::chrono::system_clock::now();
-	}
-
-	uint16_t timeElapsed = stopTime - startTime
-
-	// multiply with acoustic velocity (34300 cm/s) and divide by 2
-	return = (timeElapsed * 34300) / 2
+	// Multiply with speed of sound (34,3 cm/ms) and divide by 2 to get one-way distance
+	return (timeElapsed * 34.3f) / 2
 }

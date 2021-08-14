@@ -16,18 +16,20 @@
 #define DIST_1 32, 33
 #define DIST_2 29, 31
 
+// Encoder movement parameters
 #define FORWARD_CORRECTION_FACTOR 0.1f
 // cm
 #define WHEEL_CIRCUMFERENCE 5.0f
 #define GEAR_RATIO 100.0f
 #define PULSES_PER_REVOLUTION 20.0f
 
+// Register IDs of GPIO expander GPIOA and GPIOB
 #define ENCODER_PORTA 0x12
 #define ENCODER_PORTB 0x13
 
 class Robot {
 private:
-	int mcp_fd;
+	int mcp_fd; // WiringPi ID of encoder GPIO expander
 
 	uint8_t encoder_value_a();
 	uint8_t encoder_value_b();
