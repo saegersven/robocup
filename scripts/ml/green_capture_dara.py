@@ -17,7 +17,6 @@ GPIO.setmode(GPIO.BOARD)
 
 GPIO.setup(35, GPIO.IN)
 
-<<<<<<< HEAD
 try:
 	while True:
 		if GPIO.input(35) == GPIO.HIGH:
