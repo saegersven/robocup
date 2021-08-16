@@ -9,7 +9,7 @@ def capture(path, res):
 	camera.capture(path)
 
 folder = str(input("Input folder name: "))
-res = (320, 192)
+res = (80, 48)
 
 num_images = len([name for name in os.listdir(folder) if os.path.isfile(os.path.join(folder, name))]) + 1
 
