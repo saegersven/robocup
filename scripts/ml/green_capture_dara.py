@@ -3,8 +3,9 @@ import RPi.GPIO as GPIO
 import time
 import os, os.path
 
+camera = PiCamera()
+
 def capture(path, res):
-	camera = PiCamera()
 	camera.resolution = res
 	camera.capture(path)
 
