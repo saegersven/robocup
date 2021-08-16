@@ -52,6 +52,13 @@ private:
 
 public:
 	Robot();
+
+	int init_camera(int id, bool calibrated = false,
+		int width = 320, int height = 192, int fps = 60);
+	cv::Mat capture(int cam_id, bool undistort = false);
+	void start_video(int cam_id);
+	void stop_video(int cam_id);
+
 	//void set_motor_speed(int8_t left, int8_t right, int16_t duration);
 	void drive_distance(float distance, int8_t speed = 100);
 	void stop();

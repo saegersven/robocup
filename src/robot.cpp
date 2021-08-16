@@ -36,8 +36,20 @@ int Robot::init_camera(int id, bool calibrated = false, int width = 320, int hei
 	return cams.size() - 1;
 }
 
-cv::Mat Robot::retrieve_frame(int cam_id, bool undistort = false) {
-	return cams[cam_id].retrieve_frame(undistort);
+cv::Mat Robot::capture(int cam_id, bool undistort = false) {
+	if(cams[cam_id].cap.isOpened()) {
+		return cams[cam_id].retrieve_frame(undistort);
+	} else {
+		return cams[cam_id].single_capture(undistort);
+	}
+}
+
+void Robot::start_video(int cam_id) {
+	cams[cam_id].start_video();
+}
+
+void Robot::stop_video(int cam_id) {
+	cams[cam_id].stop_video();
 }
 
 void Robot::m(int8_t left, int8_t right, int16_t duration = 0) {

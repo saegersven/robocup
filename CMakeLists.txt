@@ -5,5 +5,5 @@ project(robocup VERSION 1.0)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_executable(robocup src/main.cpp src/robot.cpp src/utils.cpp)
+add_executable(robocup src/main.cpp src/robot.cpp src/utils.cpp src/vision.cpp src/line.cpp)
 target_link_libraries(robocup ${OpenCV_LIBS})
