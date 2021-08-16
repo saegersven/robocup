@@ -3,12 +3,6 @@ import RPi.GPIO as GPIO
 import time
 import os, os.path
 
-camera = PiCamera()
-
-def capture(path, res):
-	camera.resolution = res
-	camera.capture(path)
-
 folder = str(input("Input folder name: "))
 res = (80, 48)
 
