@@ -1,4 +1,5 @@
 import cv2
+<<<<<<< HEAD
 import os
 
 path = r'D:\Programmieren\Robocup\2022\Main Repo 2020\robocup\scripts\ml\data\right'
@@ -19,3 +20,13 @@ for fileName in fileNames:
 	pathToSave = pathToSave + fileName
 
 	cv2.imwrite(pathToSave, image)
+=======
+import os, os.path
+
+data_dir = str(input("Input data dir: "))
+
+images_right = os.listdir(os.path.join(data_dir, "right"))
+images_left = os.listdir(os.path.join(data_dir, "left"))
+images_deadend = os.listdir(os.path.join(data_dir, "deadend"))
+images_no_intersection = os.listdir(os.path.join(data_dir, "no_intersection"))
+>>>>>>> 000b0000787a76aa0dbfa71b7e606c92a739bbdf
