@@ -11,7 +11,7 @@ def capture(path, res):
 folder = str(input("Input folder name: "))
 res = (320, 192)
 
-num_images = len([name for name in os.listdir(folder) if os.path.isfile(os.path.join(folder, name))])
+num_images = len([name for name in os.listdir(folder) if os.path.isfile(os.path.join(folder, name))]) + 1
 
 GPIO.setmode(GPIO.BOARD)
 
@@ -22,3 +22,4 @@ while True:
 		pic_name = str(num_images) + ".jpg"
 		capture(os.path.join(folder, pic_name), res)
 		print(f"Captured '{pic_name}'")
+		num_images = num_images + 1
