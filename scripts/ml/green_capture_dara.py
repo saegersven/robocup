@@ -23,3 +23,4 @@ while True:
 		capture(os.path.join(folder, pic_name), res)
 		print(f"Captured '{pic_name}'")
 		num_images = num_images + 1
+camera.close()
