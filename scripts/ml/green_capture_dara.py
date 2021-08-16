@@ -17,10 +17,10 @@ GPIO.setup(35, GPIO.IN)
 
 try:
 	while True:
-		if GPIO.input(35) == GPIO.HIGH:
-			pic_name = str(num_images) + ".jpg"
-			camera.capture(os.path.join(folder, pic_name))
-			print(f"Captured '{pic_name}'")
-			num_images = num_images + 1
+		input("Press enter to capture image: ")
+		pic_name = str(num_images) + ".jpg"
+		camera.capture(os.path.join(folder, pic_name))
+		print(f"Captured '{pic_name}'")
+		num_images = num_images + 1
 except:
 	camera.close()
