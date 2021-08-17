@@ -31,5 +31,9 @@
 *.out
 *.app
 
-#FTPSync (contains credentials)
+# FTPSync (contains credentials)
 ftpsync.settings
+
+# Machine Learning datasets
+ml/**/data
+ml/**/original_data
