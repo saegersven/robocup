@@ -4,6 +4,7 @@ import pathlib
 import tensorflow as tf
 import os
 import math
+import time
 
 from tensorflow import keras
 from keras.preprocessing import image
@@ -26,7 +27,11 @@ model.compile(optimizer="adam",
 	loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
 	metrics=["accuracy"])
 
+t_start = time.time()
 predictions = model.predict(test_images)
+
+print(f"Took: {time.time() - t_start}s")
+
 print(predictions)
 
 plt.figure(figsize=(10, 10))
