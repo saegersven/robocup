@@ -37,3 +37,5 @@ ftpsync.settings
 # Machine Learning datasets
 ml/**/data
 ml/**/original_data
+
+**/CMakeFiles
