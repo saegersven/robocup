@@ -38,4 +38,6 @@ ftpsync.settings
 ml/**/data
 ml/**/original_data
 
-**/CMakeFiles
+# CMake junk
+CMakeFiles
+CMakeCache.txt

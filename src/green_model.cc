@@ -28,6 +28,7 @@ GreenResult GreenModel::evaluate(cv::Mat& frame) {
 	interpreter->Invoke();
 
 	// Output layer consists of four floats, ordered as in the GreenResult enum
+	// Maximum value is the prediction of the NN
 	int max_index = 0;
 	float max = std::numeric_limits<float>::lowest();
 

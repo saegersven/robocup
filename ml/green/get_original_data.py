@@ -1,11 +1,12 @@
 import os
+import subprocess
 
 folders = ["left", "right"]
 
-os.system("mkdir original_data")
+subprocess.call("mkdir original_data", shell=False)
 
 for folder in folders:
-	os.system(f"cd original_data && mkdir {folder} && cd ..")
+	subprocess.call(f"cd original_data && mkdir {folder} && cd ..", shell=False)
 	for fileL in os.listdir(f"data/{folder}"):
 		if(len(fileL) == 4 or len(fileL) == 5):
-			os.system(f"copy data\\{folder}\\{fileL} original_data\\{folder}\\{fileL}")
+			subprocess.call(f"copy data\\{folder}\\{fileL} original_data\\{folder}\\{fileL}", shell=False)

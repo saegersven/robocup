@@ -1,7 +1,8 @@
 from picamera import PiCamera
 import RPi.GPIO as GPIO
 import time
-import os, os.path
+import os
+import os.path
 
 folder = str(input("Input folder name: "))
 res = (80, 48)
@@ -22,5 +23,5 @@ try:
 		camera.capture(os.path.join(folder, pic_name))
 		print(f"Captured '{pic_name}'")
 		num_images = num_images + 1
-except:
+except KeyboardInterrupt:
 	camera.close()
