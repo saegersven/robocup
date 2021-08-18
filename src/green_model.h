@@ -26,5 +26,5 @@ private:
 public:
 	GreenModel();
 	~GreenModel();
-	green_result evaluate(cv::Mat& frame);
+	GreenResult evaluate(cv::Mat& frame);
 }

@@ -13,7 +13,7 @@ GreenModel::~GreenModel() {
 	// TODO
 }
 
-GreenResult GreenModel::evaluate(cv::Mat& frame) {
+GreenResult GreenModel::evaluate(cv::Mat& frame, float& confidence) {
 	interpreter->AllocateTensors(); // TODO: Maybe move to constructor
 
 	// Get input and output layers
@@ -30,11 +30,11 @@ GreenResult GreenModel::evaluate(cv::Mat& frame) {
 	// Output layer consists of four floats, ordered as in the GreenResult enum
 	// Maximum value is the prediction of the NN
 	int max_index = 0;
-	float max = std::numeric_limits<float>::lowest();
+	confidence = std::numeric_limits<float>::lowest();
 
 	for(int i = 0; i < 4; i++) {
-		if(output_layer[i] > max) {
-			max = output_layer[i];
+		if(output_layer[i] > confidence) {
+			confidence = output_layer[i];
 			max_index = i;
 		}
 	}

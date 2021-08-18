@@ -33,22 +33,31 @@
 #define ENCODER_PORTA 0x12
 #define ENCODER_PORTB 0x13
 
-// Encoder pulses per second * MOTOR_SPEED_CONVERSION_FACTOR = 0-100
+// Wheel tangential speed * MOTOR_SPEED_CONVERSION_FACTOR = 0-100
 // Approximate value; Used for initial speed setting
-//#define MOTOR_SPEED_CONVERSION_FACTOR 0.01f // TODO: Change value
+#define MOTOR_SPEED_CONVERSION_FACTOR 0.01f // TODO: Change value
 
 #define CALIBRATION_FILE_NAME(id) "cc_" + std::to_string(id) + ".bin"
 
 class Robot {
 private:
+	// Main lock
+	std::mutex io_mutex;
 	std::vector<Camera> cams;
+
+	// Async speed control
+	//std::mutex asc_mutex;
+	std::thread motor_update_thread;
+	std::atomic<float> asc_speed_left = 0.0f;
+	std::atomic<float> asc_speed_right = 0.0f;
 
 	int mcp_fd; // WiringPi Id of encoder GPIO expander
 
 	uint8_t encoder_value_a();
 	uint8_t encoder_value_b();
 
-	void m(int8_t left, int8_t right, int16_t duration = 0);
+	void m(float left, float right, int16_t duration = 0);
+	void asc();
 
 public:
 	Robot();
@@ -63,6 +72,8 @@ public:
 	void drive_distance(float distance, int8_t speed = 100);
 	void stop();
 	void turn(int8_t degrees);
+
+	void motor_speed(int8_t left, int8_t right, int16_t duration = 0);
 
 	void servo();
 	
