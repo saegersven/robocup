@@ -9,6 +9,5 @@ For more information about our team, our previous robots and other stuff visit:
 + [Our YouTube channel](https://www.youtube.com/channel/UCC9BH-tkFcYVH9Up8JBV4LQ)
 
 ```python
-s = "Python syntax highlighting"
 print("ENJOY!")
 ```
