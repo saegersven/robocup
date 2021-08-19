@@ -5,7 +5,7 @@ image = cv2.imread("./images/silver_test_images/2.jpg")
 
 resized = cv2.resize(image, (400, 240))
 
-while 1:
+while True:
 	# highly effictive stuff going on here:
 	p1 = random.randint(0, 300)
 	p2 = random.randint(0, 300)
