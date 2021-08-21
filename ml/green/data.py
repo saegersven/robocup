@@ -64,11 +64,11 @@ model = Sequential([
 	#layers.MaxPooling2D(),
 	layers.Flatten(),
 	layers.Dense(64, activation="relu"), # 128
-	layers.Dense(num_classes)
+	layers.Dense(num_classes, activation="softmax")
 ])
 
 model.compile(optimizer="adam",
-	loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+	loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
 	metrics=["accuracy"])
 
 model.summary()

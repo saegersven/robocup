@@ -64,7 +64,7 @@ model = Sequential([
 	layers.MaxPooling2D(),
 	layers.Flatten(),
 	layers.Dense(128, activation="relu"),
-	layers.Dense(num_classes)
+	layers.Dense(num_classes, activation="softmax")
 ])
 
 model.compile(optimizer="adam",
