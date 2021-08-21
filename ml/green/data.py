@@ -55,6 +55,7 @@ val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 
 model = Sequential([
+	layers.Input(shape=(img_height, img_width, 3), dtype="uint8"),
 	layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
 	layers.Conv2D(16, 3, padding="same", activation="relu"),
 	layers.MaxPooling2D(),
@@ -73,7 +74,7 @@ model.compile(optimizer="adam",
 
 model.summary()
 
-epochs = 10
+epochs = 3
 history = model.fit(
 	train_ds,
 	validation_data=val_ds,
