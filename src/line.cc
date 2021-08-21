@@ -28,7 +28,7 @@ Line::line(cv::Mat& frame) {
 	cv::Mat green_cut = frame(cv::Range(10, 70), cv::Range(8, 40));
 
 	// TODO: Green color values and threshold
-	if(pixel_count_over_threshold(green_cut, cv::Scalar(0, 0, 0), cv::Scalar(0, 0, 0), 10)) {
+	if(pixel_count_over_threshold_hue(green_cut, 110, 140, 40, 1000)) {
 		// Consult the mighty AI
 		float confidence = 0.0f;
 		switch(neural_networks.infere(GREEN_NN_ID, frame, confidence)) {

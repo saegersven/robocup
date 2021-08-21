@@ -25,9 +25,9 @@ int main() {
 	cv::namedWindow("Video", cv::WINDOW_AUTOSIZE);
 
 	State state = State::line;
-	Robot* robot = new Robot();
+	const Robot* robot = new Robot();
 
-	auto time = std::chrono::system_clock::now();
+	const auto start_time = std::chrono::system_clock::now();
 
 	// CAMERA SETUP
 	const int FRONT_CAM = robot->init_camera(0, false, 80, 48, 60); // Front camera

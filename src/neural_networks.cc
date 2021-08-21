@@ -57,8 +57,6 @@ int NeuralNetworks::infere(int id, cv::Mat& frame, float& confidence) {
 	// Compute model instance
 	interpreters[id]->Invoke();
 
-	// Output layer consists of four floats, ordered as in the GreenResult enum
-	// Maximum value is the prediction of the NN
 	int max_index = 0;
 	confidence = std::numeric_limits<float>::lowest();
 
