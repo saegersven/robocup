@@ -2,13 +2,15 @@
 
 class Rescue {
 private:
+	std::mutex rescue_mutex;
+
 	Robot* robot;
 	std::thread::native_handle_type native_handle;
 
-	rescue();
+	void rescue();
 
 public:
 	Rescue();
-	start();
-	stop();
+	void start();
+	void stop();
 }
