@@ -4,6 +4,44 @@ float clip(float n, float lower, float upper) {
 	return std::max(lower, std::min(n, upper));
 }
 
+float point_distance(cv::Point a, cv::Point b) {
+	return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
+}
+
+cv::Mat inRange_hue(cv::Mat& in, uint8_t lower, uint8_t upper, uint8_t min_value) {
+	int rows = in.rows;
+	int cols = in.cols;
+
+	uint8_t* p;
+
+	cv::Mat out(rows, cols, cv::CV_8UC1);
+
+	int i, j;
+	for(i = 0; i < rows; ++i) {
+		p = in.ptr<uint8_t>(i);
+		p_out = out.ptr<uint8_t>(i);
+		for(j = 0; j < cols; ++j) {
+			uint8_t value;
+			uint8_t hue = bgr_to_hue(p[j * 3], p[j * 3 + 1], p[j * 3 + 2], value);
+			if(value >= min_value && hue >= lower && hue <= upper) {
+				p_out[j] = 0x01;
+			} else {
+				p_out[j] = 0x00;
+			}
+		}
+	}
+
+	return out;
+}
+
+uint8_t bgr_to_lightness(cv::Vec3b in) {
+	return bgr_to_lightness(in[0], in[1], in[2]);
+}
+
+uint8_t bgr_to_lightness(uint8_t b, uint8_t g, uint8_t r) {
+	return (b + g + r) / 3;
+}
+
 uint8_t bgr_to_hue(cv::Vec3b in) {
 	return bgr_to_hue(in[0], in[1], in[2]);
 }
@@ -30,7 +68,7 @@ bool pixel_count_over_threshold(cv::Mat& in, cv::Vec3b lower, cv::Vec3b upper, u
 	CV_Assert(in.channels() == 3); // TODO: Support for more channels
 
 	int rows = in.rows;
-	int cols = in.cols * 3;
+	int cols = in.cols;
 
 	// If the matrix is continuous, we don't have to get a new pointer for
 	// every row. Treating the matrix as having one row is faster.
@@ -46,9 +84,9 @@ bool pixel_count_over_threshold(cv::Mat& in, cv::Vec3b lower, cv::Vec3b upper, u
 	for(i = 0; i < rows; ++i) {
 		p = in.ptr<uint8_t>(i);
 		for(j = 0; j < cols; ++j) {
-			if(p[j][0] >= lower[0] && p[j][0] <= upper[0] &&
-				p[j][1] >= lower[1] && p[j][1] <= upper[1] &&
-				p[j][2] >= lower[2] && p[j][2] <= upper[2]) {
+			if(p[j * 3][0] >= lower[0] && p[j * 3][0] <= upper[0] &&
+				p[j * 3][1] >= lower[1] && p[j * 3][1] <= upper[1] &&
+				p[j * 3][2] >= lower[2] && p[j * 3][2] <= upper[2]) {
 				++counter;
 				if(counter == num_pixels) return true;
 			}
@@ -63,7 +101,7 @@ bool pixel_count_over_threshold_hue(cv::Mat& in, uint8_t lower, uint8_t upper, u
 	CV_Assert(in.channels() == 3); // TODO: Support for more channels
 
 	int rows = in.rows;
-	int cols = in.cols * 3;
+	int cols = in.cols;
 
 	// If the matrix is continuous, we don't have to get a new pointer for
 	// every row. Treating the matrix as having one row is faster.

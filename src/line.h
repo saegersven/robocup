@@ -5,10 +5,10 @@
 #define GREEN_NN_ID 0
 #define SILVER_NN_ID 1
 
-#define GREEN_RESULT_DEAD_END 0
+#define GREEN_RESULT_NO_INTERSECTION 0
 #define GREEN_RESULT_LEFT 1
-#define GREEN_RESULT_NO_INTERSECTION 2
-#define GREEN_RESULT_RIGHT 3
+#define GREEN_RESULT_RIGHT 2
+#define GREEN_RESULT_DEAD_END 3
 
 class Line {
 private:
@@ -23,4 +23,5 @@ public:
 	void start();
 	void stop();
 	void line(cv::Mat& frame);
+	uint8_t green(cv::Mat& frame);
 }
