@@ -17,11 +17,12 @@ private:
 	Robot* robot;
 
 	bool running = false;
+	cv::Mat inRange_green(cv::Mat& in);
+	uint8_t green(cv::Mat& frame);
 
 public:
 	Line(Robot* robot, NeuralNetworks neural_networks);
 	void start();
 	void stop();
 	void line(cv::Mat& frame);
-	uint8_t green(cv::Mat& frame);
 }

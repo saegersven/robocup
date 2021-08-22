@@ -8,6 +8,10 @@ float point_distance(cv::Point a, cv::Point b) {
 	return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
 }
 
+inline float deg_to_rad(float deg) {
+	return deg * 0.01745329251f;
+}
+
 cv::Mat inRange_hue(cv::Mat& in, uint8_t lower, uint8_t upper, uint8_t min_value) {
 	int rows = in.rows;
 	int cols = in.cols;

@@ -5,6 +5,8 @@ float clip(float n, float lower, float upper);
 
 float point_distance(cv::Point a, cv::Point b);
 
+inline float deg_to_rad(float deg);
+
 cv::Mat inRange_hue(cv::Mat& in);
 
 uint8_t bgr_to_gray(cv::Vec3b in);

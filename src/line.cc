@@ -48,55 +48,112 @@ void Line::line(cv::Mat& frame) {
 	}
 }
 
+cv::Mat Line::inRange_green(cv::Mat& in) {
+	int rows = in.rows;
+	int cols = in.cols;
+
+	uint8_t* p;
+	cv::Mat out(rows, cols, cv::CV_8UC1);
+
+	int i, j;
+	for(i = 0; i < rows; ++i) {
+		p = in.ptr<uint8_t>(i);
+		p_out = out.ptr<uint8_t>(i);
+		for(j = 0; j < cols; ++j) {
+			float sum = (float)p[j][0] + (float)p[j][2];
+			if(sum == 0.0f) continue;
+			ratio = (float)p[j][1] / sum;
+
+			p_out[j] = ratio > 0.85f && p[j][1] > 40 ? 0xFF : 0x00;
+		}
+	}
+	return out;
+}
+
 // TODO: Find better values
 uint8_t Line::green(cv::Mat& frame) {
-	cv::Mat green = inRange_hue(frame, 110, 140, 40);
+	cv::Mat green = inRange_green(frame);
 
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(green, contours, cv::RETR_TREE, cv::CV_CHAIN_APPROX_SIMPLE);
 
-	// Four positions are possible:
-	//	  4|2
-	//	------
-	//    0|1
-	// green_points is a bitmask
-	// We don't account for the top two
-	uint8_t green_points;
-
-	cv::Point bottom_center(frame.cols / 2, frame.rows - 1);
-
-	const float check_distance_factor = 0.1f; // Go a tenth of the size of the rect to check
-
 	for(int i = 0; i < contours.size(); ++i) {
 		cv::RotatedRect r = cv::minAreaRect(contours[i]);
-		// Only consider contour if it is near the bottom center of the image
-		if(point_distance(bottom_center, r.center) > 25.0f)
-			continue;
-		// For each contour, compute the position relative to the nearest line
-		// by checking the colors at the edges of the min area rects
-		uint8_t black;
-		float angle, cx, cy;
-		int i = 0;
-		for(float angle_offset = 0.0f; angle_offset < 360.0f; angle_offset += 90.0f) {
-			angle = r.angle + angle_offset;
-			cx = r.center.x + std::cos(angle) * r.size.width * check_distance_factor;
-			cy = r.center.y + std::sin(angle) * r.size.height * check_distance_factor;
-			black |= (bgr_to_lightness(frame.at<cv::Vec3b>((int)cx, (int)cy)) < 30 ? 0x01 : 0x00) << i;
-			++i;
+		// Only consider contour if it is big enough
+		if(r.size.width * r.size.height < 40.0f) continue;
+
+		float initial_angle = deg_to_rad(r.angle);
+		if(initial_angle > deg_to_rad(45.0f)) initial_angle -= deg_to_rad(360.0f);
+		float angle = initial_angle;
+
+		std::vector<cv::Point2f> black_points;
+		black_points.reserve(30);
+
+		for(int x = 0; x < 30; ++x) {
+			angle = deg_to_rad(360.0f / 30.0f * x);
+
+			float sin = std::sin(angle);
+			float cos = std::cos(angle);
+
+			float cx = r.center.x + sin * (r.size.width * 0.75f);
+			float cy = r.center.y - cos * (r.size.height * 0.75f);
+
+			for(int y = 0; y < 4; ++y) {
+				cx += sin * y * 0.5f;
+				cy -= cos * y * 0.5f;
+
+				cv::Vec3b pix = frame.at<cv::Vec3b>((int)cy, (int)cx);
+				float lightness = ((float)pix[0] + (float)pix[1] + (float)pix[2]) / 3.0f;
+				float saturation = std::max(pix[0], pix[1], pix[2]) - std::min(pix[0], pix[1], pix[2]);
+				if(lightness <= 20.0f && saturation <= 20.0f) {
+					black_points.push_back(cv::Point2f(cx, cy));
+					break;
+				}
+			}
 		}
 
-		switch(black) {
-			case 0b00001001:
-				// Bottom left, bit for line right (1st) and line top (4th) are set
-				green_points |= 0x01; // Set first bit
-				break;
-			case 0b00001100:
-				// Bottom right, bit for line left (3rd) and line top (4th) are set
-				green_points |= 0x02; // Set second bit
-				break;
-			default:
-				// Ignore green points at the top
+		if(black_points.size() > 5) {
+			float mean_x, mean_y;
+			for(cv::Point2f p : black_points) {
+				mean_x += p.x;
+				mean_y += p.y;
+			}
+
+			mean_x /= black_points.size();
+			mean_y /= black_points.size();
+
+			float relative_black_angle = std::atan2(r.center.y - mean_y, r.center.x - mean_x) - initial_angle;
+
+			if(relative_black_angle > 90.0f && relative_black_angle < 90.0f) {
+				// If angle is positive, green is left
+				green_points |= relative_black_angle > 0.0f ? 0x01 : 0x02;
+			}
 		}
+
+		// // For each contour, compute the position relative to the nearest line
+		// // by checking the colors at the edges of the min area rects
+		// uint8_t black = 0;
+		// float angle = deg_to_rad(r.angle);
+		// float cx, cy;
+		// for(int x = 0; x < 4; ++x) {
+		// 	angle += deg_to_rad(90.0f);
+		// 	cx = r.center.x + std::cos(angle) * r.size.width * check_distance_factor;
+		// 	cy = r.center.y + std::sin(angle) * r.size.height * check_distance_factor;
+		// 	black |= (bgr_to_lightness(frame.at<cv::Vec3b>((int)cx, (int)cy)) < 30 ? 0x01 : 0x00) << x;
+		// }
+
+		// switch(black) {
+		// 	case 0b00001001:
+		// 		// Bottom left, bit for line right (1st) and line top (4th) are set
+		// 		green_points |= 0x01; // Set first bit
+		// 		break;
+		// 	case 0b00001100:
+		// 		// Bottom right, bit for line left (3rd) and line top (4th) are set
+		// 		green_points |= 0x02; // Set second bit
+		// 		break;
+		// 	default:
+		// 		// Ignore green points at the top
+		// }
 	}
 	// If both left and right green is there, return value is 3
 	// If only left or right, return value is 1 or 2
