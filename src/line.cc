@@ -24,14 +24,14 @@ void Line::stop() {
 }
 
 void Line::line(cv::Mat& frame) {
+	follow(frame);
+
 	//cv::Mat frame = robot->capture(front_cam_id); // Retrieve video frame
 	cv::Mat green_cut = frame(cv::Range(10, 70), cv::Range(8, 40));
 
 	// TODO: Green color values and threshold
-	if(pixel_count_over_threshold_hue(green_cut, 110, 140, 40, 1000)) {
-		
-		// Consult the mighty AI
-		float confidence = 0.0f;
+	if(pixel_count_over_threshold_primary_color(green_cut, 1, 0.85f, 40, 1000)) {
+		//float confidence = 0.0f;
 		//switch(neural_networks.infere(GREEN_NN_ID, frame, confidence)) {
 		switch(green(frame)) {
 			case GREEN_RESULT_LEFT:
@@ -48,6 +48,125 @@ void Line::line(cv::Mat& frame) {
 				break;
 		}
 	}
+}
+
+bool Line::is_black(cv::Mat& in, uint8_t x, uint8_t y) {
+	cv::Vec3b pix = in.at<cv::Vec3b>(y, x);
+	float lightness = ((float)pix[0] + (float)pix[1] + (float)pix[2]) / 3.0f;
+	float saturation = std::max(pix[0], pix[1], pix[2]) - std::min(pix[0], pix[1], pix[2]);
+	return lightness <= 20.0f && saturation <= 20.0f;
+}
+
+void Line::follow(cv::Mat& frame) {
+	const int8_t check_y = 40;
+	const int8_t padding = 10; // Applied on both sides
+	const int8_t width = frame.cols - padding * 2;
+	
+	const uint8_t min_line_width = 2;
+
+	uint8_t line_x = last_line_x;
+	uint8_t line_check_left = last_line_x - 1;
+	uint8_t line_check_right = last_line_x + 1;
+
+	// 0 -> No line yet
+	// 1 -> On line
+	// 1 + line width -> No line again
+	bool flag_left = 0;
+	bool flag_right = 0;
+
+	uint8_t line_left = 200;
+	uint8_t line_right = 200;
+
+	bool line_not_centered = false;
+
+	bool first = true;
+	while(true) {
+		if(flag_left == 0 && is_black(frame, line_check_left, check_y)) {
+			flag_left = 1;
+			// If we haven't started on the line (line_not_centered),
+			// both edges of the line will be found in the same direction.
+			if(line_not_centered) line_right = line_check_left;
+		}
+		if(flag_right == 0 && is_black(frame, line_check_right, check_y)) {
+			flag_right = 1;
+			if(line_not_centered) line_left = line_check_right;
+		}
+
+		if(first && (flag_left == 0 || flag_right == 0)) line_not_centered = true;
+
+		if(flag_left <= min_line_width && !is_black(frame, line_check_left, check_y)) {
+			++flag_left;
+			line_left = line_check_left;
+		}
+		if(flag_right <= 1 + min_line_width && !is_black(frame, line_check_right, check_y)) {
+			++flag_right;
+			line_right = line_check_right;
+		}
+
+		if(line_right - line_left >= min_line_width) {
+			// Minimum line width is reached
+			if(line_not_centered) {
+				if((flag_right == 2 || flag_left == 2)) {
+					break;
+				}
+			} else {
+				if(flag_right == 2 && flag_left == 2) {
+					break;
+				}
+			}
+		}
+
+		if(line_check_left == padding) {
+			// We have reached the border. One of the line edges is not set, set it to the border.
+			if(line_left == 200) line_left = padding;
+			if(line_right == 200) line_right = frame.cols - padding;
+			break;
+		}
+
+		--line_check_left;
+		++line_check_right;
+
+		first = false;
+	}
+
+	line_x = (uint8_t)((uint16_t)line_left + (uint16_t)line_right) >> 1;
+
+	last_line_x = line_x;
+
+	float angle = 0.0f;
+
+	const float line_x_f = (float)line_x;
+	const float radius = 15.0f; // in pixels
+	const uint8_t res = 15;
+	// We have the horizontal position of the line, now get the angle
+	float angle_offset = 0.0f;
+	float sin, cos, cx_l, cx_r, cy;
+	for(uint8_t i = 0; i <= res; ++i) {
+		sin = std::sin(angle_offset);
+		cos = std::cos(angle_offset);
+
+		cx_l = line_x_f + sin * radius;
+		cx_r = line_x_f - sin * radius;
+
+		cy = check_y + cos * radius;
+
+		if(is_black(frame, (uint8_t)cx_l, (uint8_t)cy)) {
+			angle = -angle_offset;
+			break;
+		} else if(is_black(frame, (uint8_t)cx_r, (uint8_t)cy)) {
+			angle = angle_offset;
+			break;
+		}
+
+		angle_offset += deg_to_rad(90.0f / res);
+	}
+
+	// Now we have the line x-position at the bottom and the angle of the line
+	float error = (line_x_f - frame.cols / 2.0f) * FOLLOW_HORIZONTAL_SENSITIVITY;
+	error += angle * FOLLOW_ANGLE_SENSITIVITY;
+
+	// Finally set motor speed to follow line
+	robot->m_asc(FOLLOW_MOTOR_SPEED + error, FOLLOW_MOTOR_SPEED - error);
 }
 
 // TODO: Find better values
@@ -84,10 +203,7 @@ uint8_t Line::green(cv::Mat& frame) {
 				cx += sin * y * 0.5f;
 				cy -= cos * y * 0.5f;
 
-				cv::Vec3b pix = frame.at<cv::Vec3b>((int)cy, (int)cx);
-				float lightness = ((float)pix[0] + (float)pix[1] + (float)pix[2]) / 3.0f;
-				float saturation = std::max(pix[0], pix[1], pix[2]) - std::min(pix[0], pix[1], pix[2]);
-				if(lightness <= 20.0f && saturation <= 20.0f) {
+				if(is_black(frame, (uint8_t)cx, (uint8_t)cy)) {
 					black_points.push_back(cv::Point2f(cx, cy));
 					break;
 				}
@@ -111,31 +227,6 @@ uint8_t Line::green(cv::Mat& frame) {
 				green_points |= relative_black_angle > 0.0f ? 0x01 : 0x02;
 			}
 		}
-
-		// // For each contour, compute the position relative to the nearest line
-		// // by checking the colors at the edges of the min area rects
-		// uint8_t black = 0;
-		// float angle = deg_to_rad(r.angle);
-		// float cx, cy;
-		// for(int x = 0; x < 4; ++x) {
-		// 	angle += deg_to_rad(90.0f);
-		// 	cx = r.center.x + std::cos(angle) * r.size.width * check_distance_factor;
-		// 	cy = r.center.y + std::sin(angle) * r.size.height * check_distance_factor;
-		// 	black |= (bgr_to_lightness(frame.at<cv::Vec3b>((int)cx, (int)cy)) < 30 ? 0x01 : 0x00) << x;
-		// }
-
-		// switch(black) {
-		// 	case 0b00001001:
-		// 		// Bottom left, bit for line right (1st) and line top (4th) are set
-		// 		green_points |= 0x01; // Set first bit
-		// 		break;
-		// 	case 0b00001100:
-		// 		// Bottom right, bit for line left (3rd) and line top (4th) are set
-		// 		green_points |= 0x02; // Set second bit
-		// 		break;
-		// 	default:
-		// 		// Ignore green points at the top
-		// }
 	}
 	// If both left and right green is there, return value is 3
 	// If only left or right, return value is 1 or 2
