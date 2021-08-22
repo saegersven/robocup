@@ -51,7 +51,7 @@ int main() {
 			bool p = false; // Is button pressed down
 			while(1) {
 				// TODO: Show debug camera views while waiting
-
+				
 				if(robot->button(BTN_RESTART) && !p) p == true;
 				else if(!robot->button(BTN_RESTART) && p) break; // Button released after press
 			}

@@ -12,32 +12,6 @@ inline float deg_to_rad(float deg) {
 	return deg * 0.01745329251f;
 }
 
-cv::Mat inRange_hue(cv::Mat& in, uint8_t lower, uint8_t upper, uint8_t min_value) {
-	int rows = in.rows;
-	int cols = in.cols;
-
-	uint8_t* p;
-
-	cv::Mat out(rows, cols, cv::CV_8UC1);
-
-	int i, j;
-	for(i = 0; i < rows; ++i) {
-		p = in.ptr<uint8_t>(i);
-		p_out = out.ptr<uint8_t>(i);
-		for(j = 0; j < cols; ++j) {
-			uint8_t value;
-			uint8_t hue = bgr_to_hue(p[j * 3], p[j * 3 + 1], p[j * 3 + 2], value);
-			if(value >= min_value && hue >= lower && hue <= upper) {
-				p_out[j] = 0x01;
-			} else {
-				p_out[j] = 0x00;
-			}
-		}
-	}
-
-	return out;
-}
-
 uint8_t bgr_to_lightness(cv::Vec3b in) {
 	return bgr_to_lightness(in[0], in[1], in[2]);
 }
@@ -67,9 +41,79 @@ uint8_t bgr_to_hue(uint8_t b, uint8_t g, uint8_t r, uint8_t& value) {
 	return (uint8_t)(42.5f * ((r - g) / delta + 4.0f));
 }
 
+bool detect_primary_color(uint8_t c, uint8_t c1, uint8_t c2, float min_ratio, uint8_t min_value) {
+	float sum = c1 + c2;
+	if(sum == 0.0f) return false;
+	ratio = (float)c / sum;
+
+	return ratio > min_ratio && c > min_value;
+}
+
+cv::Mat in_range_primary_color(cv::Mat& in, uint8_t channel_index, float min_ratio, uint8_t min_value) {
+	cv::CV_Assert(in.channels() == 3);
+	cv::CV_Assert(in.depth() == cv::CV_8U);
+
+	int a, b;
+	switch(channel_index) {
+		case 0:
+			a = 1;
+			b = 2;
+			break;
+		case 1:
+			a = 0;
+			b = 2;
+			break;
+		case 2:
+			a = 0;
+			b = 1;
+	}
+
+	int rows = in.rows;
+	int cols = in.cols;
+
+	uint8_t* p;
+	cv::Mat out(rows, cols, cv::CV_8UC1);
+
+	int i, j;
+	for(i = 0; i < rows; ++i) {
+		p = in.ptr<uint8_t>(i);
+		p_out = out.ptr<uint8_t>(i);
+		for(j = 0; j < cols; ++j) {
+			p_out[j] = detect_primary_color(p[j][channel_index], p[j][a], p[j][b], min_ratio, min_value) ? 0xFF : 0x00;
+		}
+	}
+	return out;
+}
+
+cv::Mat in_range_hue(cv::Mat& in, uint8_t lower, uint8_t upper, uint8_t min_value) {
+	int rows = in.rows;
+	int cols = in.cols;
+
+	uint8_t* p;
+
+	cv::Mat out(rows, cols, cv::CV_8UC1);
+
+	int i, j;
+	for(i = 0; i < rows; ++i) {
+		p = in.ptr<uint8_t>(i);
+		p_out = out.ptr<uint8_t>(i);
+		for(j = 0; j < cols; ++j) {
+			uint8_t value;
+			uint8_t hue = bgr_to_hue(p[j * 3], p[j * 3 + 1], p[j * 3 + 2], value);
+			if(value >= min_value && hue >= lower && hue <= upper) {
+				p_out[j] = 0x01;
+			} else {
+				p_out[j] = 0x00;
+			}
+		}
+	}
+
+	return out;
+}
+
 bool pixel_count_over_threshold(cv::Mat& in, cv::Vec3b lower, cv::Vec3b upper, uint32_t num_pixels) {
-	CV_Assert(in.depth() == cv::CV_8U);
-	CV_Assert(in.channels() == 3); // TODO: Support for more channels
+	cv::CV_Assert(in.depth() == cv::CV_8U);
+	cv::CV_Assert(in.channels() == 3); // TODO: Support for more channels
 
 	int rows = in.rows;
 	int cols = in.cols;
@@ -101,8 +145,8 @@ bool pixel_count_over_threshold(cv::Mat& in, cv::Vec3b lower, cv::Vec3b upper, u
 }
 
 bool pixel_count_over_threshold_hue(cv::Mat& in, uint8_t lower, uint8_t upper, uint8_t min_value, uint32_t num_pixels) {
-	CV_Assert(in.depth() == cv::CV_8U);
-	CV_Assert(in.channels() == 3); // TODO: Support for more channels
+	cv::CV_Assert(in.depth() == cv::CV_8U);
+	cv::CV_Assert(in.channels() == 3); // TODO: Support for more channels
 
 	int rows = in.rows;
 	int cols = in.cols;

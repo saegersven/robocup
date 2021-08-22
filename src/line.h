@@ -17,7 +17,7 @@ private:
 	Robot* robot;
 
 	bool running = false;
-	cv::Mat inRange_green(cv::Mat& in);
+	
 	uint8_t green(cv::Mat& frame);
 
 public:

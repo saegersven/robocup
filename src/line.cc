@@ -29,9 +29,11 @@ void Line::line(cv::Mat& frame) {
 
 	// TODO: Green color values and threshold
 	if(pixel_count_over_threshold_hue(green_cut, 110, 140, 40, 1000)) {
+		
 		// Consult the mighty AI
 		float confidence = 0.0f;
-		switch(neural_networks.infere(GREEN_NN_ID, frame, confidence)) {
+		//switch(neural_networks.infere(GREEN_NN_ID, frame, confidence)) {
+		switch(green(frame)) {
 			case GREEN_RESULT_LEFT:
 				// TODO: Go left
 				std::cout << "Left (" << std::to_string(confidence) << ")" << std::endl;
@@ -48,31 +50,11 @@ void Line::line(cv::Mat& frame) {
 	}
 }
 
-cv::Mat Line::inRange_green(cv::Mat& in) {
-	int rows = in.rows;
-	int cols = in.cols;
-
-	uint8_t* p;
-	cv::Mat out(rows, cols, cv::CV_8UC1);
-
-	int i, j;
-	for(i = 0; i < rows; ++i) {
-		p = in.ptr<uint8_t>(i);
-		p_out = out.ptr<uint8_t>(i);
-		for(j = 0; j < cols; ++j) {
-			float sum = (float)p[j][0] + (float)p[j][2];
-			if(sum == 0.0f) continue;
-			ratio = (float)p[j][1] / sum;
-
-			p_out[j] = ratio > 0.85f && p[j][1] > 40 ? 0xFF : 0x00;
-		}
-	}
-	return out;
-}
-
 // TODO: Find better values
 uint8_t Line::green(cv::Mat& frame) {
-	cv::Mat green = inRange_green(frame);
+	uint8_t green_points = 0;
+
+	cv::Mat green = in_range_primary_color(frame, 1, 0.85f, 40);
 
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(green, contours, cv::RETR_TREE, cv::CV_CHAIN_APPROX_SIMPLE);
