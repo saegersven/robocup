@@ -1,12 +1,13 @@
 #include <iostream>
-#include <chrono>
-#include <opencv2/opencv.hpp>
 #include <cmath>
+#include <chrono>
+
+#include <opencv2/opencv.hpp>
+
 #include "line.h"
 #include "robot.h"
 #include "utils.h"
 #include "neural_networks.h"
-//#include "rescue.h"
 
 #define GREEN_MODEL_PATH "ml/green/model.tflite"
 #define SILVER_MODEL_PATH "ml/silver/model.tflite"
@@ -30,9 +31,9 @@ int main() {
 	const auto start_time = std::chrono::system_clock::now();
 
 	// CAMERA SETUP
-	const int FRONT_CAM = robot->init_camera(0, false, 80, 48, 60); // Front camera
-	const int BACK_LEFT_CAM = robot->init_camera(1, true); // Back left camera
-	const int BACK_RIGHT_CAM = robot->init_camera(2, true); // Back right camera
+	const int FRONT_CAM = robot->init_camera(0, false, 80, 48, 60);	// Front camera
+	const int BACK_LEFT_CAM = robot->init_camera(1, true);			// Back left camera
+	const int BACK_RIGHT_CAM = robot->init_camera(2, true);			// Back right camera
 
 	NeuralNetworks neural_networks;
 	neural_networks.load(GREEN_MODEL_PATH);
@@ -48,12 +49,12 @@ int main() {
 		if(robot->button(BTN_RESTART)) {
 			robot->button_wait(BTN_RESTART, false);
 			// Wait for button to be pressed and released to resume
-			bool p = false; // Is button pressed down
+			bool p = false;
 			while(1) {
 				// TODO: Show debug camera views while waiting
 				
 				if(robot->button(BTN_RESTART) && !p) p == true;
-				else if(!robot->button(BTN_RESTART) && p) break; // Button released after press
+				else if(!robot->button(BTN_RESTART) && p) break;
 			}
 			// Reset
 			state = State::line;

@@ -1,8 +1,12 @@
 #pragma once
+
 #include <opencv2/opencv.hpp>
-#include "errcodes.hpp"
 
 struct Camera {
+private:
+	cv::Mat undistort(cv::Mat in);
+
+public:
 	int hardware_id;
 	cv::VideoCapture cap;
 	cv::Size image_size;
@@ -25,5 +29,3 @@ struct CameraPropertiesSerialized {
 	float fx, fy, cx, cy;
 	float k1, k2, p1, p2, k3;
 }
-
-cv::Mat undistort(cv::Mat in, CameraMatrix cam, DistortionMatrix dist);

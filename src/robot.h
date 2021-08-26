@@ -1,10 +1,17 @@
 #pragma once
+
 #include <iostream>
-#include <wiringPi.h>
-#include <wiringPiI2C.h>
-#include <cmath>
 #include <vector>
 #include <chrono>
+#include <mutex>
+#include <atomic>
+#include <thread>
+#include <cmath>
+
+#include <wiringPi.h>
+#include <wiringPiI2C.h>
+#include <opencv2/opencv.hpp>
+
 #include "utils.hpp"
 #include "errcodes.hpp"
 #include "vision.hpp"
@@ -35,48 +42,59 @@
 
 // Wheel tangential speed * MOTOR_SPEED_CONVERSION_FACTOR = 0-100
 // Approximate value; Used for initial speed setting
-#define MOTOR_SPEED_CONVERSION_FACTOR 0.01f // TODO: Change value
+#define MOTOR_SPEED_CONVERSION_FACTOR 0.01f
+// Factor for correction of motor speed
+#define MOTOR_SPEED_CORRECTION_FACTOR 10.0f
 
 #define CALIBRATION_FILE_NAME(id) "cc_" + std::to_string(id) + ".bin"
 
 class Robot {
 private:
-	// Main lock
+	// Main IO lock. Robot is the only class doing IO work
 	std::mutex io_mutex;
+	// Vector of all initialized cameras
 	std::vector<Camera> cams;
 
-	// Async speed control
-	//std::mutex asc_mutex;
+	// Async speed control thread
 	std::thread motor_update_thread;
-	std::atomic<float> asc_speed_left = 0.0f;
-	std::atomic<float> asc_speed_right = 0.0f;
+	// Speed variables for both motors
+	std::atomic<float> asc_speed_left;
+	std::atomic<float> asc_speed_right;
+	std::atomic<bool> asc_has_duration;
+	// Speed values will be set to zero at this point in time
+	std::atomic<std::chrono::time_point> asc_stop_time;
 
-	int mcp_fd; // WiringPi Id of encoder GPIO expander
+	// WiringPI id of Encoder GPIO Expander
+	int mcp_fd;
 
+	// Get encoder value via I2C
 	uint8_t encoder_value_a();
 	uint8_t encoder_value_b();
 
-	void m(float left, float right, int16_t duration = 0);
+	// Directly set motor speed
+	void m(float left, float right, uint16_t duration = 0);
+	// Main Async speed control function, runs in its own thread
 	void asc();
 
 public:
 	Robot();
 
+	// CAMERA
 	int init_camera(int id, bool calibrated = false,
 		int width = 320, int height = 192, int fps = 60);
 	cv::Mat capture(int cam_id, bool undistort = false);
 	void start_video(int cam_id);
 	void stop_video(int cam_id);
 
-	//void set_motor_speed(int8_t left, int8_t right, int16_t duration);
-	void drive_distance(float distance, int8_t speed = 100);
+	// MOVEMENT
 	void stop();
 	void turn(int8_t degrees);
 
-	void motor_speed(int8_t left, int8_t right, int16_t duration = 0);
+	void m_asc(int8_t left, int8_t right, uint16_t duration = 0, bool wait = false);
 
 	void servo();
 	
+	// SENSORS
 	bool button(uint8_t pin);
 	void Robot::button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
 	uint16_t distance(uint8_t echo, uint8_t trig);

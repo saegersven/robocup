@@ -1,5 +1,11 @@
 #include "utils.h"
 
+#include <algorithm>
+
+#include <cmath>
+
+#include <opencv2/opencv.hpp>
+
 float clip(float n, float lower, float upper) {
 	return std::max(lower, std::min(n, upper));
 }
@@ -142,7 +148,7 @@ bool pixel_count_over_threshold(cv::Mat& in, cv::Vec3b lower, cv::Vec3b upper, u
 
 bool pixel_count_over_threshold_hue(cv::Mat& in, uint8_t lower, uint8_t upper, uint8_t min_value, uint32_t num_pixels) {
 	cv::CV_Assert(in.depth() == cv::CV_8U);
-	cv::CV_Assert(in.channels() == 3); // TODO: Support for more channels
+	cv::CV_Assert(in.channels() == 3);
 
 	int rows = in.rows;
 	int cols = in.cols;
@@ -175,7 +181,7 @@ bool pixel_count_over_threshold_hue(cv::Mat& in, uint8_t lower, uint8_t upper, u
 
 bool pixel_count_over_threshold_primary_color(cv::Mat& in, uint8_t channel, float min_ratio, uint8_t min_value, uint32_t num_pixels) {
 	cv::CV_Assert(in.depth() == cv::CV_8U);
-	cv::CV_Assert(in.channels() == 3); // TODO: Support for more channels
+	cv::CV_Assert(in.channels() == 3);
 
 	int rows = in.rows;
 	int cols = in.cols;

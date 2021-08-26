@@ -1,4 +1,8 @@
-#include "vision.hpp"
+#include "vision.h"
+
+#include <opencv2/opencv.hpp>
+
+#include "errcodes.hpp"
 
 Camera::Camera(int hardware_id, bool calibrated, int width, int height, int fps) {
 	this->hardware_id = hardware_id;
@@ -65,7 +69,7 @@ cv::Mat Camera::retrieve_video_frame(bool undistort = false) {
 	}
 
 	if(undistort && this->calibrated) {
-		frame = undistort(frame, this);
+		frame = undistort(frame);
 	}
 
 	return frame;
@@ -78,8 +82,8 @@ cv::Mat Camera::single_capture(bool undistort = false) {
 	return image;
 }
 
-cv::Mat undistort(cv::Mat in, Camera* cam) {
+cv::Mat Camera::undistort(cv::Mat in) {
 	cv::Mat out;
-	cv::undistort(in, out, cam->camera_matrix, cam->distortion_matrix, cam->new_camera_matrix);
+	cv::undistort(in, out, this->camera_matrix, this->distortion_matrix, this->new_camera_matrix);
 	return out;
 }

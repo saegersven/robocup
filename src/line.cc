@@ -1,9 +1,18 @@
 #include "line.h"
 
+#include <algorithm>
+#include <vector>
+
+#include <opencv2/opencv.hpp>
+
+#include "robot.h"
+#include "utils.h"
+#include "neural_networks.h"
+
 Line::Line(int front_cam_id, Robot* robot, NeuralNetworks neural_networks) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
-	this->neural_networks = neural_networks
+	this->neural_networks = neural_networks;
 
 	reset();
 }
@@ -59,7 +68,7 @@ bool Line::is_black(cv::Mat& in, uint8_t x, uint8_t y) {
 
 void Line::follow(cv::Mat& frame) {
 	const int8_t check_y = 40;
-	const int8_t padding = 10; // Applied on both sides
+	const int8_t padding = 10;
 	const int8_t width = frame.cols - padding * 2;
 	
 	const uint8_t min_line_width = 2;
@@ -220,7 +229,8 @@ uint8_t Line::green(cv::Mat& frame) {
 			mean_x /= black_points.size();
 			mean_y /= black_points.size();
 
-			float relative_black_angle = std::atan2(r.center.y - mean_y, r.center.x - mean_x) - initial_angle;
+			float relative_black_angle = std::atan2(r.center.y - mean_y, r.center.x - mean_x);
+			relative_black_angle -= initial_angle;
 
 			if(relative_black_angle > 90.0f && relative_black_angle < 90.0f) {
 				// If angle is positive, green is left

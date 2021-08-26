@@ -1,5 +1,13 @@
 #include "neural_networks.h"
 
+#include <vector>
+#include <memory>
+
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/model.h"
+#include "tensorflow/lite/tools/gen_op_registration.h"
+
 void NeuralNetworks::load_model(std::string& path) {
 	int id = this->models.size();
 

@@ -1,7 +1,24 @@
 #include "robot.hpp"
 
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <mutex>
+#include <atomic>
+#include <thread>
+#include <cmath>
+
+#include <wiringPi.h>
+#include <wiringPiI2C.h>
+#include <opencv2/opencv.hpp>
+
+#include "utils.hpp"
+#include "errcodes.hpp"
+#include "vision.hpp"
+
 Robot::Robot() {
 	io_mutex.lock();
+
 	// Initialize the robot
 	// Setup GPIO
 	wiringPiSetupPhys();
@@ -30,18 +47,22 @@ Robot::Robot() {
 	}
 	io_mutex.unlock();
 
+	this->asc_speed_left = 0.0f;
+	this->asc_speed_right = 0.0f;
+	this->asc_has_duration = false;
+
 	motor_update_thread(asc); // Create async motor control thread
 	motor_update_thread.detach();
 }
 
-int Robot::init_camera(int id, bool calibrated = false, int width = 80, int height = 48, int fps = 60) {
+int Robot::init_camera(int id, bool calibrated, int width, int height, int fps) {
 	Camera cam(id, calibrated, width, height, fps);
 
 	cams.push_back(cam);
 	return cams.size() - 1;
 }
 
-cv::Mat Robot::capture(int cam_id, bool undistort = false) {
+cv::Mat Robot::capture(int cam_id, bool undistort) {
 	if(cams[cam_id].cap.isOpened()) {
 		return cams[cam_id].retrieve_frame(undistort);
 	} else {
@@ -57,7 +78,7 @@ void Robot::stop_video(int cam_id) {
 	cams[cam_id].stop_video();
 }
 
-void Robot::m(int8_t left, int8_t right, int16_t duration = 0) {
+void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 	left = clip(left, -100, 100);
 	right = clip(right, -100, 100);
 
@@ -99,9 +120,14 @@ uint8_t Robot::encoder_value_b() {
 	return value;
 }
 
-void m_asc(int8_t left, int8_t right, int16_t duration = 0) {
+void m_asc(int8_t left, int8_t right, uint16_t duration, bool wait) {
 	asc_speed_left = left;
 	asc_speed_right = right;
+
+	if(duration != 0) {
+		asc_has_duration = true;
+		asc_stop_time = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(duration);
+	}
 }
 
 void asc() {
@@ -116,7 +142,16 @@ void asc() {
 
 	std::chrono::time_point last_update = std::chrono::high_resolution_clock::now();
 	while(1) {
-		if(asc_speed_left == 0.0f && asc_speed_right == 0.0f) return;
+		if(asc_speed_left == 0.0f && asc_speed_right == 0.0f) continue;
+
+		std::chrono::time_point now = std::chrono::high_resolution_clock::now();
+
+		if(asc_has_duration && now > asc_stop_time) {
+			asc_speed_left == 0.0f;
+			asc_speed_right == 0.0f;
+			asc_has_duration = false;
+			continue;
+		}
 
 		int8_t speed_sign_left = asc_speed_left < 0.0f ? -1 : 1;
 		int8_t speed_sign_left = asc_speed_right < 0.0f ? -1 : 1;
@@ -124,7 +159,6 @@ void asc() {
 		real_speed_left = asc_speed_left * MOTOR_SPEED_CONVERSION_FACTOR;
 		real_speed_right = asc_speed_right * MOTOR_SPEED_CONVERSION_FACTOR;
 
-		std::chrono::time_point now = std::chrono::high_resolution_clock::now();
 		float delta_t = std::chrono::duration_cast<std::chrono::seconds>(
 			now - last_update);
 		last_update = now;
@@ -141,32 +175,15 @@ void asc() {
 		float left_error = speed_left * speed_sign_left - asc_speed_left;
 		float right_error = speed_right * speed_sign_right - asc_speed_right;
 
-		real_speed_offset_left += (int8_t)left_error * 10.0f;
-		real_speed_offset_right += (int8_t)right_error * 10.0f;
+		real_speed_offset_left -= (int8_t)left_error * MOTOR_SPEED_CORRECTION_FACTOR;
+		real_speed_offset_right -= (int8_t)right_error * MOTOR_SPEED_CORRECTION_FACTOR;
 
 		m(real_speed_left + real_speed_offset_left, real_speed_right + real_speed_offset_right);
 	}
 }
 
-/*// Speed in mm/s
-void Robot::set_motor_speed(int8_t left, int8_t right, int16_t duration) {
-	int8_t speed_l = clip(left / WHEEL_CIRCUMFERENCE / 10
-		* PULSES_PER_REVOLUTION * GEAR_RATIO * MOTOR_SPEED_CONVERSION_FACTOR, 0, 100);
-	int8_t speed_r = clip(right / WHEEL_CIRCUMFERENCE / 10
-		* PULSES_PER_REVOLUTION * GEAR_RATIO * MOTOR_SPEED_CONVERSION_FACTOR, 0, 100);
-
-	m(initial_sped_l, initial_speed_r);
-	if(duration != 0) auto start_time = std::chrono::system_clock::now();
-
-	while(duration == 0 || std::chrono::duration_cast<std::chrono::milliseconds>
-		(std::chrono::system_clock::now() - start_time).count() < duration) {
-
-	}
-	stop();
-}*/
-
-// Go in a straight line
-void Robot::drive_distance(float distance, int8_t speed = 100) {
+/*// Go in a straight line
+void Robot::drive_distance(float distance, int8_t speed) {
 	int8_t sign = distance < 0 ? -1 : 1;
 
 	float distance_travelled = 0.0f;
@@ -201,7 +218,7 @@ void Robot::drive_distance(float distance, int8_t speed = 100) {
 	io_mutex.unlock();
 
 	stop();
-}
+}*/
 
 bool Robot::button(uint8_t pin) {
 	io_mutex.lock();
@@ -210,7 +227,7 @@ bool Robot::button(uint8_t pin) {
 	return button_down;
 }
 
-void Robot::button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff) {
+void Robot::button_wait(uint8_t pin, bool state, uint32_t timeout) {
 	io_mutex.lock();
 	auto start_time = std::chrono::system_clock::now();
 	while(Robot::button(pin) != state) {
@@ -234,7 +251,7 @@ void Robot::stop() {
 	io_mutex.unlock();
 }
 
-uint16_t Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations = 1) {
+uint16_t Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations) {
 	float timeElapsed = 0.0f;
 	io_mutex.lock();
 	for(uint16_t i = 0; i < iterations; i++) {

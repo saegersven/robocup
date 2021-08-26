@@ -1,4 +1,5 @@
 #pragma once
+
 #include <opencv2/opencv.hpp>
 
 float clip(float n, float lower, float upper);

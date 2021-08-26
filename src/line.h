@@ -1,5 +1,7 @@
 #pragma once
-#include "utils.h"
+#include <opencv2/opencv.hpp>
+
+#include "robot.h"
 #include "neural_networks.h"
 
 #define GREEN_NN_ID 0
