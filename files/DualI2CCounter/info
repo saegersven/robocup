@@ -1,0 +1,150 @@
+{
+  "uuid": "dae972df520b2dfeeeb8bc2cffc158a9",
+  "path": "Offline/DualI2CCounter",
+  "name": "DualI2CCounter",
+  "content": "",
+  "created_at": "2021-08-13 15:58:19",
+  "updated_at": "2021-08-16 13:31:01",
+  "stick": "",
+  "documents": [
+    {
+      "uuid": "e0b923f983af3e67b2c74a211e9adeca",
+      "title": "Sheet_1",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "73fdd93ed5c9430387b87845fcf3ebf9": 1,
+        "8fa8d2fe3a46425687af796b4ecfbe8b": 2,
+        "3ec77201bbcd4ecd8722658d581a4e60": 1,
+        "404aa9221ff94de597b8734806e7c74f": 2,
+        "bb009484ef804a24ac5d18c54b249586": 2,
+        "a7291ceaee5442a999df26c55c7e675d": 1
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "HDR-F-2.54_1x2",
+          1,
+          "HDR-F-2.54_1X2",
+          "H1",
+          {
+            "BOM_Supplier Part": "C49661",
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "36b1306a115341f4b4d9407fb34974e0",
+            "uuid": "3ec77201bbcd4ecd8722658d581a4e60"
+          }
+        ],
+        [
+          "HDR-F-2.54_1x3",
+          1,
+          "HDR-F-2.54_1X3",
+          "H2",
+          {
+            "BOM_Supplier Part": "C146690",
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "f83673d09e13450d934ca6be4be5af8f",
+            "uuid": "a7291ceaee5442a999df26c55c7e675d"
+          }
+        ],
+        [
+          "HDR-M-2.54_1x1",
+          2,
+          "HDR-M-2.54_1X1",
+          "J1,J2",
+          {
+            "BOM_Supplier Part": "C81276",
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer Part": "",
+            "puuid": "19c77e72422b43b59c26b9fa67af5de4",
+            "uuid": "404aa9221ff94de597b8734806e7c74f"
+          }
+        ],
+        [
+          "10k",
+          2,
+          "GENERIC THROUGH-HOLE RESISTOR",
+          "R1,R2",
+          {
+            "BOM_Supplier Part": "",
+            "BOM_Supplier": "",
+            "BOM_Manufacturer Part": "",
+            "puuid": "18dfbc9db5b5456181e1e333b6b90918",
+            "uuid": "bb009484ef804a24ac5d18c54b249586"
+          }
+        ],
+        [
+          "MCP23017-E/SP",
+          1,
+          "DIP-28_L35.0-W6.5-P2.54-LS7.6-BL",
+          "U1",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C647352",
+            "BOM_Manufacturer": "Microchip Tech",
+            "BOM_Manufacturer Part": "MCP23017-E/SP",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "05f9034a01ac44779a501276e87f7948",
+            "uuid": "73fdd93ed5c9430387b87845fcf3ebf9"
+          }
+        ],
+        [
+          "SN74HC590AN",
+          2,
+          "DIP16",
+          "U2,U3",
+          {
+            "BOM_Manufacturer Part": "",
+            "puuid": "36387ea742a04602bc24d100c866268f",
+            "uuid": "8fa8d2fe3a46425687af796b4ecfbe8b"
+          }
+        ]
+      ],
+      "updateTime": 1628870359,
+      "createTime": 1628865488,
+      "histories": [],
+      "created_at": "2021-08-13 16:38:08",
+      "updated_at": "2021-08-13 17:59:19"
+    },
+    {
+      "uuid": "d3e4cb3e69bf40b07b7184d4b7f598a4",
+      "puuid": "dae972df520b2dfeeeb8bc2cffc158a9",
+      "title": "PCB_DualI2CCounter",
+      "filename": "PCB_DualI2CCounter.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "36b1306a115341f4b4d9407fb34974e0": 1,
+        "f83673d09e13450d934ca6be4be5af8f": 1,
+        "19c77e72422b43b59c26b9fa67af5de4": 2,
+        "05f9034a01ac44779a501276e87f7948": 1,
+        "36387ea742a04602bc24d100c866268f": 2,
+        "18dfbc9db5b5456181e1e333b6b90918": 2
+      },
+      "BOM": [],
+      "updateTime": 1629113461,
+      "createTime": 1628867594,
+      "histories": [],
+      "created_at": "2021-08-13 17:13:14",
+      "updated_at": "2021-08-16 13:31:01"
+    }
+  ],
+  "sort": [],
+  "title": "DualI2CCounter",
+  "foldername": "DualI2CCounter",
+  "schfilename": "DualI2CCounter.json",
+  "schfilemtime": 1628870359133
+}
