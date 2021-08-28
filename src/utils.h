@@ -25,4 +25,6 @@ bool pixel_count_over_threshold(cv::Mat& in, cv::Vec3b lower, cv::Vec3b upper, u
 
 bool pixel_count_over_threshold_hue(cv::Mat& in, uint8_t lower, uint8_t upper, uint32_t num_pixels);
 
-bool pixel_count_over_threshold_primary_color(cv::Mat& in, uint8_t channel, float min_ratio, uint8_t min_value, uint32_t num_pixels)
+bool pixel_count_over_threshold_primary_color(cv::Mat& in, uint8_t channel, float min_ratio, uint8_t min_value, uint32_t num_pixels);
+
+float map(float s, float a1, float a2, float b1, float b2);

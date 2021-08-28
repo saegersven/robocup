@@ -13,8 +13,6 @@ Line::Line(int front_cam_id, Robot* robot, NeuralNetworks neural_networks) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
 	this->neural_networks = neural_networks;
-
-	reset();
 }
 
 void Line::start() {
@@ -45,15 +43,15 @@ void Line::line(cv::Mat& frame) {
 		switch(green(frame)) {
 			case GREEN_RESULT_LEFT:
 				// TODO: Go left
-				std::cout << "Left (" << std::to_string(confidence) << ")" << std::endl;
+				std::cout << "Left" << std::endl;
 				break;
 			case GREEN_RESULT_RIGHT:
 				// TODO: Go right
-				std::cout << "Right (" << std::to_string(confidence) << ")" << std::endl;
+				std::cout << "Right" << std::endl;
 				break;
 			case GREEN_RESULT_DEAD_END:
 				// TODO: Turn around
-				std::cout << "Dead End (" << std::to_string(confidence) << ")" << std::endl;
+				std::cout << "Dead End" << std::endl;
 				break;
 		}
 	}

@@ -45,6 +45,18 @@ Robot::Robot() {
 		std::cout << "Error setting up PWM for M2" << std::endl;
 		exit(ERROCDE_BOT_SETUP_PWM);
 	}
+
+	// Setup Servo motor pins
+	// 50Hz has a period of 20ms, so multiply value by 100 to get period in microseconds
+	if(softPwmCreate(SERVO_1, 0, 200)) {
+		std::cout << "Error setting up PWM for Servo 1" << std::endl;
+		exit(ERRCODE_BOT_SETUP_PWM);
+	}
+	if(softPwmCreate(SERVO_2, 0, 200)) {
+		std::cout << "Error setting up PWM for Servo 2" << std::endl;
+		exit(ERRCODE_BOT_SETUP_PWM);
+	}
+
 	io_mutex.unlock();
 
 	this->asc_speed_left = 0.0f;
@@ -180,6 +192,11 @@ void asc() {
 
 		m(real_speed_left + real_speed_offset_left, real_speed_right + real_speed_offset_right);
 	}
+}
+
+void Robot::servo(uint8_t pin, int8_t angle) {
+	softPwmWrite(pin,map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE,
+		SERVO_MIN_PULSE, SERVO_MAX_PULSE));
 }
 
 /*// Go in a straight line

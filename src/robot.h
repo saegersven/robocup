@@ -16,6 +16,7 @@
 #include "errcodes.hpp"
 #include "vision.hpp"
 
+// PINS
 #define M1_1 16
 #define M1_2 18
 #define M1_E 22
@@ -29,11 +30,21 @@
 #define DIST_1 32, 33
 #define DIST_2 29, 31
 
+#define SERVO_1 37
+#define SERVO_2 40
+
+// Servo parameters
+#define SERVO_MIN_PULSE 500
+#define SERVO_MAX_PULSE 2500
+#define SERVO_MIN_ANGLE -70
+#define SERVO_MAX_ANGLE 70
+
 // Encoder movement parameters
 #define FORWARD_CORRECTION_FACTOR 0.1f
-// mm
+// Unit: mm
 #define WHEEL_CIRCUMFERENCE 50.0f
 #define GEAR_RATIO 100.0f
+// Encoder pulses per revolution of encoder shaft
 #define PULSES_PER_REVOLUTION 20.0f
 
 // Register Ids of GPIO expander GPIOA and GPIOB
@@ -43,16 +54,17 @@
 // Wheel tangential speed * MOTOR_SPEED_CONVERSION_FACTOR = 0-100
 // Approximate value; Used for initial speed setting
 #define MOTOR_SPEED_CONVERSION_FACTOR 0.01f
-// Factor for correction of motor speed
+// Factor for proportional control of motor speed
 #define MOTOR_SPEED_CORRECTION_FACTOR 10.0f
 
+// Filename macro for camera calibration files
 #define CALIBRATION_FILE_NAME(id) "cc_" + std::to_string(id) + ".bin"
 
 class Robot {
 private:
-	// Main IO lock. Robot is the only class doing IO work
+	// Main IO lock
 	std::mutex io_mutex;
-	// Vector of all initialized cameras
+	// List of all initialized cameras
 	std::vector<Camera> cams;
 
 	// Async speed control thread
@@ -92,7 +104,7 @@ public:
 
 	void m_asc(int8_t left, int8_t right, uint16_t duration = 0, bool wait = false);
 
-	void servo();
+	void servo(uint8_t pin, uint8_t angle);
 	
 	// SENSORS
 	bool button(uint8_t pin);
