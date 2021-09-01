@@ -1,4 +1,4 @@
-#include "robot.hpp"
+#include "robot.h"
 
 #include <iostream>
 #include <vector>
@@ -10,13 +10,16 @@
 
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
+#include <softPwm.h>
 #include <opencv2/opencv.hpp>
 
-#include "utils.hpp"
-#include "errcodes.hpp"
-#include "vision.hpp"
+#include "utils.h"
+#include "errcodes.h"
+#include "vision.h"
 
-Robot::Robot() {
+Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
+	std::cout << "Robot setup" << std::endl;
+
 	io_mutex.lock();
 
 	// Initialize the robot
@@ -39,11 +42,11 @@ Robot::Robot() {
 	// Create PWM for the two drive motors
 	if(softPwmCreate(M1_E, 0, 100)) {
 		std::cout << "Error setting up PWM for M1" << std::endl;
-		exit(ERROCDE_BOT_SETUP_PWM);
+		exit(ERRCODE_BOT_SETUP_PWM);
 	}
 	if(softPwmCreate(M2_E, 0, 100)) {
 		std::cout << "Error setting up PWM for M2" << std::endl;
-		exit(ERROCDE_BOT_SETUP_PWM);
+		exit(ERRCODE_BOT_SETUP_PWM);
 	}
 
 	// Setup Servo motor pins
@@ -63,7 +66,7 @@ Robot::Robot() {
 	this->asc_speed_right = 0.0f;
 	this->asc_has_duration = false;
 
-	motor_update_thread(asc); // Create async motor control thread
+	std::thread motor_update_thread(&Robot::asc, this); // Create async motor control thread
 	motor_update_thread.detach();
 }
 
@@ -76,14 +79,14 @@ int Robot::init_camera(int id, bool calibrated, int width, int height, int fps) 
 
 cv::Mat Robot::capture(int cam_id, bool undistort) {
 	if(cams[cam_id].cap.isOpened()) {
-		return cams[cam_id].retrieve_frame(undistort);
+		return cams[cam_id].retrieve_video_frame(undistort);
 	} else {
 		return cams[cam_id].single_capture(undistort);
 	}
 }
 
 void Robot::start_video(int cam_id) {
-	cams[cam_id].start_video();
+	cams[cam_id].open_video();
 }
 
 void Robot::stop_video(int cam_id) {
@@ -132,7 +135,7 @@ uint8_t Robot::encoder_value_b() {
 	return value;
 }
 
-void m_asc(int8_t left, int8_t right, uint16_t duration, bool wait) {
+void Robot::m_asc(int8_t left, int8_t right, uint16_t duration, bool wait) {
 	asc_speed_left = left;
 	asc_speed_right = right;
 
@@ -142,7 +145,7 @@ void m_asc(int8_t left, int8_t right, uint16_t duration, bool wait) {
 	}
 }
 
-void asc() {
+void Robot::asc() {
 	uint8_t last_encoder_value_left = encoder_value_a();
 	uint8_t last_encoder_value_right = encoder_value_b();
 
@@ -152,13 +155,13 @@ void asc() {
 	int8_t real_speed_offset_left = 0;
 	int8_t real_speed_offset_right = 0;
 
-	std::chrono::time_point last_update = std::chrono::high_resolution_clock::now();
+	auto last_update = std::chrono::high_resolution_clock::now();
 	while(1) {
 		if(asc_speed_left == 0.0f && asc_speed_right == 0.0f) continue;
 
-		std::chrono::time_point now = std::chrono::high_resolution_clock::now();
+		auto now = std::chrono::high_resolution_clock::now();
 
-		if(asc_has_duration && now > asc_stop_time) {
+		if(asc_has_duration && now > asc_stop_time.load()) {
 			asc_speed_left == 0.0f;
 			asc_speed_right == 0.0f;
 			asc_has_duration = false;
@@ -166,13 +169,12 @@ void asc() {
 		}
 
 		int8_t speed_sign_left = asc_speed_left < 0.0f ? -1 : 1;
-		int8_t speed_sign_left = asc_speed_right < 0.0f ? -1 : 1;
+		int8_t speed_sign_right = asc_speed_right < 0.0f ? -1 : 1;
 		
 		real_speed_left = asc_speed_left * MOTOR_SPEED_CONVERSION_FACTOR;
 		real_speed_right = asc_speed_right * MOTOR_SPEED_CONVERSION_FACTOR;
 
-		float delta_t = std::chrono::duration_cast<std::chrono::seconds>(
-			now - last_update);
+		float delta_t = std::chrono::duration_cast<std::chrono::seconds>(now - last_update).count();
 		last_update = now;
 
 		uint8_t delta_left = encoder_value_a() - last_encoder_value_left;
@@ -276,12 +278,14 @@ uint16_t Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations) {
 		std::this_thread::sleep_for(std::chrono::microseconds(100));
 		digitalWrite(trig, LOW);
 
+		std::chrono::time_point<std::chrono::high_resolution_clock> startTime, stopTime;
+
 		while (digitalRead(echo) == LOW) {
-			auto startTime = std::chrono::system_clock::now();
+			startTime = std::chrono::high_resolution_clock::now();
 		}
 
 		while (digitalRead(echo) == HIGH) {
-			auto stopTime = std::chrono::system_clock::now();
+			stopTime = std::chrono::high_resolution_clock::now();
 		}
 
 		timeElapsed += std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count();
@@ -289,5 +293,5 @@ uint16_t Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations) {
 	}
 	io_mutex.unlock();
 	// Multiply with speed of sound (34,3 cm/ms) and divide by 2 to get one-way distance
-	return (timeElapsed * 34.3f) / 2
+	return (timeElapsed * 34.3f) / 2;
 }

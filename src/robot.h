@@ -12,9 +12,9 @@
 #include <wiringPiI2C.h>
 #include <opencv2/opencv.hpp>
 
-#include "utils.hpp"
-#include "errcodes.hpp"
-#include "vision.hpp"
+#include "utils.h"
+#include "errcodes.h"
+#include "vision.h"
 
 // PINS
 #define M1_1 16
@@ -57,9 +57,6 @@
 // Factor for proportional control of motor speed
 #define MOTOR_SPEED_CORRECTION_FACTOR 10.0f
 
-// Filename macro for camera calibration files
-#define CALIBRATION_FILE_NAME(id) "cc_" + std::to_string(id) + ".bin"
-
 class Robot {
 private:
 	// Main IO lock
@@ -68,13 +65,13 @@ private:
 	std::vector<Camera> cams;
 
 	// Async speed control thread
-	std::thread motor_update_thread;
+	//std::thread motor_update_thread;
 	// Speed variables for both motors
 	std::atomic<float> asc_speed_left;
 	std::atomic<float> asc_speed_right;
 	std::atomic<bool> asc_has_duration;
 	// Speed values will be set to zero at this point in time
-	std::atomic<std::chrono::time_point> asc_stop_time;
+	std::atomic<std::chrono::time_point<std::chrono::high_resolution_clock>> asc_stop_time;
 
 	// WiringPI id of Encoder GPIO Expander
 	int mcp_fd;
@@ -84,7 +81,7 @@ private:
 	uint8_t encoder_value_b();
 
 	// Directly set motor speed
-	void m(float left, float right, uint16_t duration = 0);
+	void m(int8_t left, int8_t right, uint16_t duration = 0);
 	// Main Async speed control function, runs in its own thread
 	void asc();
 
@@ -104,10 +101,10 @@ public:
 
 	void m_asc(int8_t left, int8_t right, uint16_t duration = 0, bool wait = false);
 
-	void servo(uint8_t pin, uint8_t angle);
+	void servo(uint8_t pin, int8_t angle);
 	
 	// SENSORS
 	bool button(uint8_t pin);
-	void Robot::button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
-	uint16_t distance(uint8_t echo, uint8_t trig);
-}
+	void button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
+	uint16_t distance(uint8_t echo, uint8_t trig, uint16_t iterations);
+};

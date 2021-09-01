@@ -39,5 +39,5 @@ ml/**/data
 ml/**/original_data
 
 # CMake junk
-CMakeFiles
-CMakeCache.txt
+**/CMakeFiles
+**/CMakeCache.txt

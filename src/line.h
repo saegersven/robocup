@@ -19,7 +19,7 @@
 
 class Line {
 private:
-	//int front_cam_id;
+	int front_cam_id;
 	NeuralNetworks neural_networks;
 	Robot* robot;
 
@@ -31,9 +31,11 @@ private:
 	bool is_black(cv::Mat& in, uint8_t x, uint8_t y);
 	uint8_t green(cv::Mat& frame);
 
+	void follow(cv::Mat& frame);
+
 public:
-	Line(Robot* robot, NeuralNetworks neural_networks);
+	Line(int front_cam_id, Robot* robot, NeuralNetworks neural_networks);
 	void start();
 	void stop();
 	void line(cv::Mat& frame);
-}
+};

@@ -1,3 +1,6 @@
-if make -j4 ; then
-	./robocup
+cd build
+if ninja ;
+then
+	./robocup ;
 fi
+cd ..

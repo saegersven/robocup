@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 
+#include <opencv2/opencv.hpp>
+
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/model.h"
@@ -14,10 +16,10 @@
 
 class NeuralNetworks {
 private:
-	std::vector<std::unique_ptr<tflite::FlatBufferModel>> nets;
-	std::vector<std::unique_ptr<tflite::Interpreter>> interpreters;
+	std::vector<std::shared_ptr<tflite::FlatBufferModel>> models;
+	std::vector<std::shared_ptr<tflite::Interpreter>> interpreters;
 
 public:
-	void load_model(std::string& path);
-	int infere(cv::Mat& frame);
-}
+	void load_model(const std::string& path);
+	int infere(int id, cv::Mat& frame, float& confidence);
+};

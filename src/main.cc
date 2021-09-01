@@ -6,11 +6,9 @@
 
 #include "line.h"
 #include "robot.h"
+#include "rescue.h"
 #include "utils.h"
 #include "neural_networks.h"
-
-#define GREEN_MODEL_PATH "ml/green/model.tflite"
-#define SILVER_MODEL_PATH "ml/silver/model.tflite"
 
 #define SILVER_NN_ID 1
 #define SILVER_RESULT_NEGATIVE 0
@@ -19,14 +17,19 @@
 enum class State {
 	line,
 	rescue
-}
+};
 
 int main() {
+	std::cout << "Init" << std::endl;
+
+	const std::string GREEN_MODEL_PATH = "ml/green/model.tflite";
+	const std::string SILVER_MODEL_PATH = "ml/silver/model.tflite";
+
 	// DEBUG SETUP
 	cv::namedWindow("Video", cv::WINDOW_AUTOSIZE);
 
 	State state = State::line;
-	const Robot* robot = new Robot();
+	Robot* robot = new Robot();
 
 	const auto start_time = std::chrono::system_clock::now();
 
@@ -36,13 +39,13 @@ int main() {
 	const int BACK_RIGHT_CAM = robot->init_camera(2, true);			// Back right camera
 
 	NeuralNetworks neural_networks;
-	neural_networks.load(GREEN_MODEL_PATH);
-	neural_networks.load(SILVER_MODEL_PATH);
+	neural_networks.load_model(GREEN_MODEL_PATH);
+	neural_networks.load_model(SILVER_MODEL_PATH);
 
 	Line line(FRONT_CAM, robot, neural_networks);
 	line.start();
 
-	Rescue rescue();
+	//Rescue rescue();
 
 	// MAIN LOOP
 	while(1) {
@@ -58,7 +61,7 @@ int main() {
 			}
 			// Reset
 			state = State::line;
-			rescue.stop();
+			//rescue.stop();
 
 			line.stop();
 			line.start();
@@ -66,6 +69,7 @@ int main() {
 
 		switch(state) {
 			case State::line:
+			{
 				cv::Mat frame = robot->capture(FRONT_CAM);
 				// Line is synchronised
 				line.line(frame);
@@ -76,16 +80,18 @@ int main() {
 					case SILVER_RESULT_POSITIVE:
 						// Switch to rescue
 						line.stop();
-						rescue.start();
+						//rescue.start();
 						state = State::rescue;
 						break;
-					default:
 				}
 				break;
+			}
 			case State::rescue:
+			{
 				// Monitor rescue thread
 
 				break;
+			}
 		}
 	}
 

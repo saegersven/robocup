@@ -2,7 +2,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "errcodes.hpp"
+#include "errcodes.h"
 
 Camera::Camera(int hardware_id, bool calibrated, int width, int height, int fps) {
 	this->hardware_id = hardware_id;
@@ -10,14 +10,14 @@ Camera::Camera(int hardware_id, bool calibrated, int width, int height, int fps)
 	this->image_size = cv::Size(width, height);
 
 	if(calibrated) {
-		calibration_from_file(CALIBRATION_FILE_NAME(id));
+		calibration_from_file("cc_" + std::to_string(hardware_id) + ".bin");
 		this->new_camera_matrix = cv::getOptimalNewCameraMatrix(
 			this->camera_matrix, this->distortion_matrix, this->image_size, 1.0);
 		this->calibrated = true;
 	}
 }
 
-void Camera::calibration_from_file(std::string& file_name) {
+void Camera::calibration_from_file(const std::string& file_name) {
 	FILE* file = fopen(file_name.c_str(), "rb");
 	if(!file) {
 		std::cout << "Could not open camera calibration file '" <<
@@ -28,15 +28,19 @@ void Camera::calibration_from_file(std::string& file_name) {
 	CameraPropertiesSerialized c;
 	fread(&c, sizeof(CameraPropertiesSerialized), 1, file);
 
-	this->camera_matrix = cv::Mat(3, 3, cv::CV_32F, {
-		c.fx, 0.0f, 0.0f,
-		0.0f, c.fy, 0.0f,
-		c.cx, c.cy, 0.0f
-	});
+	float camera_matrix_data[3][3] = {
+		{c.fx, 0.0f, 0.0f},
+		{0.0f, c.fy, 0.0f},
+		{c.cx, c.cy, 0.0f}
+	};
 
-	this->distortion_matrix = cv::Mat(1, 5, cv::CV_32F, {
+	this->camera_matrix = cv::Mat(3, 3, CV_32F, &camera_matrix_data);
+
+	float distortion_matrix_data[5] = {
 		c.k1, c.k2, c.p1, c.p2, c.k3
-	});
+	};
+
+	this->distortion_matrix = cv::Mat(1, 5, CV_32F, &distortion_matrix_data);
 
 	fclose(file);
 }
@@ -57,7 +61,7 @@ void Camera::stop_video() {
 	cap.release();
 }
 
-cv::Mat Camera::retrieve_video_frame(bool undistort = false) {
+cv::Mat Camera::retrieve_video_frame(bool undist) {
 	cv::Mat frame;
 
 	this->cap.grab();
@@ -68,16 +72,16 @@ cv::Mat Camera::retrieve_video_frame(bool undistort = false) {
 		exit(ERRCODE_CAM_GRAB_FRAME);
 	}
 
-	if(undistort && this->calibrated) {
+	if(undist && this->calibrated) {
 		frame = undistort(frame);
 	}
 
 	return frame;
 }
 
-cv::Mat Camera::single_capture(bool undistort = false) {
-	open_video(hardware_id);
-	cv::Mat image = retrieve_video_frame(undistort);
+cv::Mat Camera::single_capture(bool undist) {
+	open_video();
+	cv::Mat image = retrieve_video_frame(undist);
 	stop_video();
 	return image;
 }

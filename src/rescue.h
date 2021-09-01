@@ -13,4 +13,4 @@ public:
 	Rescue();
 	void start();
 	void stop();
-}
+};

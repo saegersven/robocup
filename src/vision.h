@@ -2,6 +2,9 @@
 
 #include <opencv2/opencv.hpp>
 
+// Filename macro for camera calibration files
+#define CALIBRATION_FILE_NAME(id) "cc_" + std::to_string(id) + ".bin"
+
 struct Camera {
 private:
 	cv::Mat undistort(cv::Mat in);
@@ -18,14 +21,14 @@ public:
 
 	Camera(int hardware_id, bool calibrated, int width, int height, int fps);
 
-	void calibration_from_file(std::string& file_name);
+	void calibration_from_file(const std::string& file_name);
 	void open_video();
 	void stop_video();
 	cv::Mat retrieve_video_frame(bool undistort = false);
 	cv::Mat single_capture(bool undistort = false);
-}
+};
 
 struct CameraPropertiesSerialized {
 	float fx, fy, cx, cy;
 	float k1, k2, p1, p2, k3;
-}
+};
