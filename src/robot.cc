@@ -24,7 +24,7 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 
 	// Initialize the robot
 	// Setup GPIO
-	wiringPiSetupPhys();
+	wiringPiSetupGpio();
 
 	// Setup I2C
 	mcp_fd = wiringPiI2CSetup(0x20); // TODO: Check if this is the actual ID of MCP23017
@@ -197,8 +197,10 @@ void Robot::asc() {
 }
 
 void Robot::servo(uint8_t pin, int8_t angle) {
-	softPwmWrite(pin,map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE,
-		SERVO_MIN_PULSE, SERVO_MAX_PULSE));
+	int duty_cycle = map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE,
+		SERVO_MIN_PULSE, SERVO_MAX_PULSE);
+	std::cout << std::to_string(duty_cycle) << std::endl;
+	softPwmWrite(pin, duty_cycle / 100.0f);
 }
 
 /*// Go in a straight line

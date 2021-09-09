@@ -17,27 +17,27 @@
 #include "vision.h"
 
 // PINS
-#define M1_1 16
-#define M1_2 18
-#define M1_E 22
-#define M2_1 11
-#define M2_2 12
-#define M2_E 7
+#define M1_1 23
+#define M1_2 24
+#define M1_E 25
+#define M2_1 17
+#define M2_2 18
+#define M2_E 4
 
-#define BTN_RESTART 36
-#define BTN_DEBUG 35
+#define BTN_RESTART 16
+#define BTN_DEBUG 19
 
-#define DIST_1 32, 33
-#define DIST_2 29, 31
+#define DIST_1 12, 13
+#define DIST_2 5, 6
 
-#define SERVO_1 37
-#define SERVO_2 40
+#define SERVO_1 26
+#define SERVO_2 21
 
 // Servo parameters
-#define SERVO_MIN_PULSE 500
-#define SERVO_MAX_PULSE 2500
-#define SERVO_MIN_ANGLE -70
-#define SERVO_MAX_ANGLE 70
+#define SERVO_MIN_PULSE 1000
+#define SERVO_MAX_PULSE 2000
+#define SERVO_MIN_ANGLE -45
+#define SERVO_MAX_ANGLE 45
 
 // Encoder movement parameters
 #define FORWARD_CORRECTION_FACTOR 0.1f
