@@ -196,11 +196,12 @@ void Robot::asc() {
 	}
 }
 
-void Robot::servo(uint8_t pin, int8_t angle) {
-	int duty_cycle = map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE,
-		SERVO_MIN_PULSE, SERVO_MAX_PULSE);
-	std::cout << std::to_string(duty_cycle) << std::endl;
-	softPwmWrite(pin, duty_cycle / 100.0f);
+void Robot::servo(uint8_t pin, int8_t angle, bool wait) {
+	io_mutex.lock();
+	softPwmWrite(pin, map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE,
+		SERVO_MIN_PULSE, SERVO_MAX_PULSE) / 100.0f);
+	io_mutex.unlock();
+	if(wait) std::this_thread::sleep_for(std::chrono::milliseconds(10 * angle));
 }
 
 /*// Go in a straight line

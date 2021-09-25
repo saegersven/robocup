@@ -80,8 +80,6 @@ private:
 	uint8_t encoder_value_a();
 	uint8_t encoder_value_b();
 
-	// Directly set motor speed
-	void m(int8_t left, int8_t right, uint16_t duration = 0);
 	// Main Async speed control function, runs in its own thread
 	void asc();
 
@@ -99,9 +97,12 @@ public:
 	void stop();
 	void turn(int8_t degrees);
 
+	// Directly set motor speed
+	void m(int8_t left, int8_t right, uint16_t duration = 0);
+	// Set motor speed with async speed control
 	void m_asc(int8_t left, int8_t right, uint16_t duration = 0, bool wait = false);
 
-	void servo(uint8_t pin, int8_t angle);
+	void servo(uint8_t pin, int8_t angle, bool wait = false);
 	
 	// SENSORS
 	bool button(uint8_t pin);

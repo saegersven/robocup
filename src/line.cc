@@ -34,7 +34,7 @@ void Line::line(cv::Mat& frame) {
 	follow(frame);
 
 	//cv::Mat frame = robot->capture(front_cam_id); // Retrieve video frame
-	cv::Mat green_cut = frame(cv::Range(10, 70), cv::Range(8, 40));
+	/*cv::Mat green_cut = frame(cv::Range(10, 70), cv::Range(8, 40));
 
 	// TODO: Green color values and threshold
 	if(pixel_count_over_threshold_primary_color(green_cut, 1, 0.85f, 40, 1000)) {
@@ -54,7 +54,7 @@ void Line::line(cv::Mat& frame) {
 				std::cout << "Dead End" << std::endl;
 				break;
 		}
-	}
+	}*/
 }
 
 bool Line::is_black(cv::Mat& in, uint8_t x, uint8_t y) {
@@ -65,6 +65,8 @@ bool Line::is_black(cv::Mat& in, uint8_t x, uint8_t y) {
 }
 
 void Line::follow(cv::Mat& frame) {
+	cv::Mat debug = frame.clone();
+	std::cout << "Follow" << std::endl;
 	const int8_t check_y = 40;
 	const int8_t padding = 10;
 	const int8_t width = frame.cols - padding * 2;
@@ -191,6 +193,11 @@ void Line::follow(cv::Mat& frame) {
 	// Now we have the line x-position at the bottom and the angle of the line
 	float error = (line_x_f - frame.cols / 2.0f) * FOLLOW_HORIZONTAL_SENSITIVITY;
 	error += angle * FOLLOW_ANGLE_SENSITIVITY;
+
+	std::cout << std::to_string(error) << std::endl;
+
+	cv::imshow("Debug", debug);
+	cv::waitKey(10);
 
 	// Finally set motor speed to follow line
 	robot->m_asc(FOLLOW_MOTOR_SPEED + error, FOLLOW_MOTOR_SPEED - error);

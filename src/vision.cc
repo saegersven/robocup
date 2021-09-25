@@ -47,9 +47,10 @@ void Camera::calibration_from_file(const std::string& file_name) {
 
 void Camera::open_video() {
 	this->cap.open(hardware_id);
-	this->cap.set(cv::CAP_PROP_FRAME_WIDTH, this->image_size.width);
-	this->cap.set(cv::CAP_PROP_FRAME_HEIGHT, this->image_size.height);
+	this->cap.set(cv::CAP_PROP_FRAME_WIDTH, std::max(160, this->image_size.width));
+	this->cap.set(cv::CAP_PROP_FRAME_HEIGHT, std::max(96, this->image_size.height));
 	this->cap.set(cv::CAP_PROP_FPS, this->fps);
+	this->cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 
 	if(!this->cap.isOpened()) {
 		std::cerr << "Could not open camera " << std::to_string(this->hardware_id) << std::endl;
@@ -71,6 +72,8 @@ cv::Mat Camera::retrieve_video_frame(bool undist) {
 		std::cerr << "Error grabbing frame from main camera" << std::endl;
 		exit(ERRCODE_CAM_GRAB_FRAME);
 	}
+
+	//frame = quarter_image(frame);
 
 	if(undist && this->calibrated) {
 		frame = undistort(frame);
