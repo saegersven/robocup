@@ -5,13 +5,12 @@ import os
 import os.path
 
 folder = str(input("Input folder name: "))
-res = (80, 48)
+res = (160, 96)
 
 camera = PiCamera()
 camera.resolution = res
 
 num_images = len([name for name in os.listdir(folder) if os.path.isfile(os.path.join(folder, name))]) + 1
-
 GPIO.setmode(GPIO.BOARD)
 
 GPIO.setup(35, GPIO.IN)
