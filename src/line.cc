@@ -13,6 +13,8 @@ Line::Line(int front_cam_id, Robot* robot, NeuralNetworks neural_networks) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
 	this->neural_networks = neural_networks;
+
+	this->average_silver = cv::imread(RUNTIME_AVERAGE_SILVER_PATH);
 }
 
 void Line::start() {
@@ -30,8 +32,38 @@ void Line::stop() {
 	running = false;
 }
 
+bool Line::check_silver(cv::Mat& frame) {
+	cv::Mat a = frame(cv::Range(SILVER_Y), cv::Range(SILVER_X));
+
+	// Calculate difference between frame cutout
+	int rows = a.rows;
+	int cols = a.cols;
+
+	uint32_t total_difference = 0;
+
+	uint8_t* p;
+	uint8_t* p_b;
+
+	int i, j;
+	for(i = 0; i < rows; ++i) {
+		p = a.ptr<uint8_t>(i);
+		p_b = average_silver.ptr<uint8_t>(i);
+		for(j = 0; j < cols; ++j) {
+			total_difference += std::abs((int16_t)a[j][0] - p_out[j][0])
+				+ std::abs((int16_t)a[j][1] - p_out[j][2])
+				+ std::abs((int16_t)a[j][1] - p_out[j][2]);
+		}
+	}
+
+	return total_difference < 20'000;
+}
+
 void Line::line(cv::Mat& frame) {
 	follow(frame);
+
+	if(check_silver(frame)) {
+		// SILVER!!!
+	}
 
 	//cv::Mat frame = robot->capture(front_cam_id); // Retrieve video frame
 	/*cv::Mat green_cut = frame(cv::Range(10, 70), cv::Range(8, 40));

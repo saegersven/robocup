@@ -17,11 +17,17 @@
 
 #define FOLLOW_MOTOR_SPEED 30.0f
 
+#define RUNTIME_AVERAGE_SILVER_PATH "../runtime_data/average_silver.png"
+#define SILVER_X 29, 52
+#define SILVER_Y 27, 33
+
 class Line {
 private:
 	int front_cam_id;
 	NeuralNetworks neural_networks;
 	Robot* robot;
+
+	cv::Mat average_silver;
 
 	bool running = false;
 
@@ -32,6 +38,8 @@ private:
 	uint8_t green(cv::Mat& frame);
 
 	void follow(cv::Mat& frame);
+
+	bool check_silver(cv::Mat& frame);
 
 public:
 	Line(int front_cam_id, Robot* robot, NeuralNetworks neural_networks);

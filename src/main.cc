@@ -54,10 +54,7 @@ int main() {
 	//const int BACK_RIGHT_CAM = robot->init_camera(2, true);			// Back right camera
 
 	//robot->start_video(FRONT_CAM);
-	cv::Mat frame = robot->capture(FRONT_CAM);
-
-	cv::imshow("F", frame);
-	cv::waitKey(2000);
+	//cv::Mat frame = robot->capture(FRONT_CAM);
 
 	NeuralNetworks neural_networks;
 	neural_networks.load_model(GREEN_MODEL_PATH);
