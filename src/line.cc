@@ -9,10 +9,10 @@
 #include "utils.h"
 //#include "neural_networks.h"
 
-Line::Line(int front_cam_id, Robot* robot) {
+Line::Line(int front_cam_id, std::shared_ptr<Robot> robot) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
-	this->neural_networks = neural_networks;
+	//this->neural_networks = neural_networks;
 
 	this->average_silver = cv::imread(RUNTIME_AVERAGE_SILVER_PATH);
 }
@@ -35,6 +35,11 @@ void Line::stop() {
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat a = frame(cv::Range(SILVER_Y), cv::Range(SILVER_X));
 
+	cv::Mat a_resized;
+	cv::resize(a, a_resized, cv::Size(),10.0, 10.0);
+	cv::imshow("Silver Cut", a_resized);
+	cv::waitKey(100);
+
 	// Calculate difference between frame cutout
 	int rows = a.rows;
 	int cols = a.cols;
@@ -49,20 +54,20 @@ bool Line::check_silver(cv::Mat& frame) {
 		p = a.ptr<uint8_t>(i);
 		p_b = average_silver.ptr<uint8_t>(i);
 		for(j = 0; j < cols; ++j) {
-			total_difference += std::abs((int16_t)a[j][0] - p_out[j][0])
-				+ std::abs((int16_t)a[j][1] - p_out[j][2])
-				+ std::abs((int16_t)a[j][1] - p_out[j][2]);
+			total_difference += std::abs((int16_t)p[j + 0] - p_b[j + 0])
+				+ std::abs((int16_t)p[j + 1] - p_b[j + 2])
+				+ std::abs((int16_t)p[j + 1] - p_b[j + 2]) * 2;
 		}
 	}
+
+	std::cout << std::to_string(total_difference) << std::endl;
 
 	return total_difference < 20'000;
 }
 
 void Line::line(cv::Mat& frame) {
-	follow(frame);
-
 	if(check_silver(frame)) {
-		// SILVER!!!
+		std::cout<<"NICE"<<std::endl;
 	}
 
 	//cv::Mat frame = robot->capture(front_cam_id); // Retrieve video frame

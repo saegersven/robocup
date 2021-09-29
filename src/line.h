@@ -18,12 +18,12 @@
 
 #define RUNTIME_AVERAGE_SILVER_PATH "../runtime_data/average_silver.png"
 #define SILVER_X 29, 52
-#define SILVER_Y 27, 33
+#define SILVER_Y 30, 36
 
 class Line {
 private:
 	int front_cam_id;
-	Robot* robot;
+	std::shared_ptr<Robot> robot;
 
 	cv::Mat average_silver;
 
@@ -40,7 +40,7 @@ private:
 	bool check_silver(cv::Mat& frame);
 
 public:
-	Line(int front_cam_id, Robot* robot);
+	Line(int front_cam_id, std::shared_ptr<Robot> robot);
 	void start();
 	void stop();
 	void line(cv::Mat& frame);

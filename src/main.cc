@@ -10,8 +10,8 @@
 #include "utils.h"
 //#include "neural_networks.h"
 
-#define TEST
-#define TEST_MOTORS
+//#define TEST
+//#define TEST_MOTORS
 //#define TEST_SERVO_1
 //#define TEST_SERVO_2
 //#define TEST_BUTTON_RESTART
@@ -40,7 +40,7 @@ int main() {
 	//cv::namedWindow("Video", cv::WINDOW_AUTOSIZE);
 
 	State state = State::line;
-	std::shared_ptr<Robot> robot = new Robot();
+	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
 #ifdef TEST
 	test(robot);
