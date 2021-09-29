@@ -7,9 +7,9 @@
 
 #include "robot.h"
 #include "utils.h"
-#include "neural_networks.h"
+//#include "neural_networks.h"
 
-Line::Line(int front_cam_id, Robot* robot, NeuralNetworks neural_networks) {
+Line::Line(int front_cam_id, Robot* robot) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
 	this->neural_networks = neural_networks;

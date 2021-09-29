@@ -8,7 +8,7 @@
 #include "robot.h"
 #include "rescue.h"
 #include "utils.h"
-#include "neural_networks.h"
+//#include "neural_networks.h"
 
 #define TEST
 #define TEST_MOTORS
@@ -56,11 +56,11 @@ int main() {
 	//robot->start_video(FRONT_CAM);
 	//cv::Mat frame = robot->capture(FRONT_CAM);
 
-	NeuralNetworks neural_networks;
-	neural_networks.load_model(GREEN_MODEL_PATH);
+	//NeuralNetworks neural_networks;
+	//neural_networks.load_model(GREEN_MODEL_PATH);
 	//neural_networks.load_model(SILVER_MODEL_PATH);
 
-	Line line(FRONT_CAM, robot, neural_networks);
+	Line line(FRONT_CAM, robot);
 	line.start();
 
 	//Rescue rescue();

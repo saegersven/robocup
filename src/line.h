@@ -2,7 +2,6 @@
 #include <opencv2/opencv.hpp>
 
 #include "robot.h"
-#include "neural_networks.h"
 
 #define GREEN_NN_ID 0
 #define SILVER_NN_ID 1
@@ -24,7 +23,6 @@
 class Line {
 private:
 	int front_cam_id;
-	NeuralNetworks neural_networks;
 	Robot* robot;
 
 	cv::Mat average_silver;
@@ -42,7 +40,7 @@ private:
 	bool check_silver(cv::Mat& frame);
 
 public:
-	Line(int front_cam_id, Robot* robot, NeuralNetworks neural_networks);
+	Line(int front_cam_id, Robot* robot);
 	void start();
 	void stop();
 	void line(cv::Mat& frame);
