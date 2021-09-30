@@ -5,7 +5,7 @@ import os
 import os.path
 
 folder = str(input("Input folder name: "))
-res = (160, 96)
+res = (80, 48)
 
 camera = PiCamera()
 camera.resolution = res
