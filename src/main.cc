@@ -56,6 +56,14 @@ int main() {
 	//robot->start_video(FRONT_CAM);
 	//cv::Mat frame = robot->capture(FRONT_CAM);
 
+	// for (int i = 0; i < 100; i++) {
+	// 	robot->m(-i, 0, 20);
+	// }
+	//robot->m(50, 50, 5000);
+	while (1) {
+		std::cout<<robot->distance(DIST_2, 10)<<std::endl;
+	}
+
 	//NeuralNetworks neural_networks;
 	//neural_networks.load_model(GREEN_MODEL_PATH);
 	//neural_networks.load_model(SILVER_MODEL_PATH);

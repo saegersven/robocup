@@ -17,12 +17,14 @@
 #include "vision.h"
 
 // PINS
-#define M1_1 23
-#define M1_2 24
-#define M1_E 25
-#define M2_1 17
-#define M2_2 18
-#define M2_E 4
+#define M1_1 18
+#define M1_2 17
+#define M1_E 4
+#define M2_1 23
+#define M2_2 24
+#define M2_E 22
+
+#define BUZZER 25
 
 #define BTN_RESTART 16
 #define BTN_DEBUG 19
@@ -103,6 +105,8 @@ public:
 	void m_asc(int8_t left, int8_t right, uint16_t duration = 0, bool wait = false);
 
 	void servo(uint8_t pin, int8_t angle, bool wait = false);
+
+	void beep(uint16_t ms);
 	
 	// SENSORS
 	bool button(uint8_t pin);

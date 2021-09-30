@@ -2,6 +2,8 @@
 
 #include <opencv2/opencv.hpp>
 
+#define delay(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms))
+
 float clip(float n, float lower, float upper);
 
 float point_distance(cv::Point a, cv::Point b);

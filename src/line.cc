@@ -38,6 +38,7 @@ bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat a_resized;
 	cv::resize(a, a_resized, cv::Size(),10.0, 10.0);
 	cv::imshow("Silver Cut", a_resized);
+	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, a);
 	cv::waitKey(100);
 
 	// Calculate difference between frame cutout

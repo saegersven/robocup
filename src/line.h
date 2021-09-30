@@ -17,7 +17,7 @@
 #define FOLLOW_MOTOR_SPEED 30.0f
 
 #define RUNTIME_AVERAGE_SILVER_PATH "../runtime_data/average_silver.png"
-#define SILVER_X 29, 52
+#define SILVER_X 27, 54
 #define SILVER_Y 30, 36
 
 class Line {
