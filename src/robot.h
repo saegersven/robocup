@@ -29,10 +29,14 @@
 #define LED_1 20
 #define LED_2 27
 
-#define BTN_RESTART 16
-#define BTN_DEBUG 19
+#define BTN_RESTART 19
+#define BTN_DEBUG 16
 
+#define DIST_1_ECHO 12
+#define DIST_1_TRIG 13
 #define DIST_1 12, 13
+#define DIST_2_ECHO 5
+#define DIST_2_TRIG 6
 #define DIST_2 5, 6
 
 #define SERVO_1 26
@@ -99,7 +103,7 @@ public:
 	void stop_video(int cam_id);
 
 	// MOVEMENT
-	void stop();
+	void stop(uint8_t brake_duty_cycle = 100);
 	void turn(int8_t degrees);
 
 	// Directly set motor speed
@@ -114,5 +118,5 @@ public:
 	// SENSORS
 	bool button(uint8_t pin);
 	void button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
-	uint16_t distance(uint8_t echo, uint8_t trig, uint16_t iterations);
+	float distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t timeout = 1000);
 };

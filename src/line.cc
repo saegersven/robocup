@@ -35,11 +35,11 @@ void Line::stop() {
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat a = frame(cv::Range(SILVER_Y), cv::Range(SILVER_X));
 
-	cv::Mat a_resized;
-	cv::resize(a, a_resized, cv::Size(),10.0, 10.0);
-	cv::imshow("Silver Cut", a_resized);
+	//cv::Mat a_resized;
+	//cv::resize(a, a_resized, cv::Size(),10.0, 10.0);
+	//cv::imshow("Silver Cut", a_resized);
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, a);
-	cv::waitKey(100);
+	//cv::waitKey(100);
 
 	// Calculate difference between frame cutout
 	int rows = a.rows;
@@ -68,7 +68,10 @@ bool Line::check_silver(cv::Mat& frame) {
 
 void Line::line(cv::Mat& frame) {
 	if(check_silver(frame)) {
-		std::cout<<"NICE"<<std::endl;
+		robot->stop();
+		std::cout << "NICE" << std::endl;
+	} else {
+		robot->m(100, 100);
 	}
 
 	//cv::Mat frame = robot->capture(front_cam_id); // Retrieve video frame

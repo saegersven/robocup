@@ -57,20 +57,33 @@ int main() {
 	Line line(FRONT_CAM, robot);
 	line.start();
 
+	while(!robot->button(BTN_DEBUG));
+	while(robot->button(BTN_DEBUG));
+	delay(50);
+
 	//Rescue rescue();
 
 	// MAIN LOOP
 	while(1) {
-		if(robot->button(BTN_RESTART)) {
-			robot->button_wait(BTN_RESTART, false);
-			// Wait for button to be pressed and released to resume
-			bool p = false;
-			while(1) {
-				// TODO: Show debug camera views while waiting
+		if(robot->button(BTN_DEBUG)) {
+			// robot->button_wait(BTN_DEBUG, false);
+			// // Wait for button to be pressed and released to resume
+			// bool p = false;
+			// while(1) {
+			// 	std::cout << "Waiting" << std::endl;
+			// 	// TODO: Show debug camera views while waiting
 				
-				if(robot->button(BTN_RESTART) && !p) p == true;
-				else if(!robot->button(BTN_RESTART) && p) break;
-			}
+			// 	if(robot->button(BTN_DEBUG) && !p) p == true;
+			// 	else if(!robot->button(BTN_DEBUG) && p) break;
+			// }
+			while(robot->button(BTN_DEBUG));
+			robot->stop();
+			delay(50);
+			while(!robot->button(BTN_DEBUG));
+			delay(50);
+			while(robot->button(BTN_DEBUG));
+			delay(100);
+
 			// Reset
 			state = State::line;
 			//rescue.stop();

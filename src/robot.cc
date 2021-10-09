@@ -38,12 +38,18 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	pinMode(M1_2, OUTPUT);
 	pinMode(M2_1, OUTPUT);
 	pinMode(M2_2, OUTPUT);
+
 	pinMode(BUZZER, OUTPUT);
 	pinMode(LED_1, OUTPUT);
 	pinMode(LED_2, OUTPUT);
 
 	pinMode(BTN_DEBUG, INPUT);
 	pinMode(BTN_RESTART, INPUT);
+
+	pinMode(DIST_1_ECHO, INPUT);
+	pinMode(DIST_1_TRIG, OUTPUT);
+	pinMode(DIST_2_ECHO, INPUT);
+	pinMode(DIST_2_TRIG, OUTPUT);
 
 	// Create PWM for the two drive motors
 	if(softPwmCreate(M1_E, 0, 100)) {
@@ -126,6 +132,18 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 		stop();
 	}
+}
+
+void Robot::stop(uint8_t brake_duty_cycle) {
+	io_mutex.lock();
+	digitalWrite(M1_1, LOW);
+	digitalWrite(M1_2, LOW);
+	digitalWrite(M2_1, LOW);
+	digitalWrite(M2_2, LOW);
+
+	softPwmWrite(M1_E, brake_duty_cycle);
+	softPwmWrite(M2_E, brake_duty_cycle);
+	io_mutex.unlock();
 }
 
 uint8_t Robot::encoder_value_a() {
@@ -276,19 +294,7 @@ void Robot::button_wait(uint8_t pin, bool state, uint32_t timeout) {
 	io_mutex.unlock();
 }
 
-void Robot::stop() {
-	io_mutex.lock();
-	digitalWrite(M1_1, LOW);
-	digitalWrite(M1_2, LOW);
-	digitalWrite(M2_1, LOW);
-	digitalWrite(M2_2, LOW);
-
-	softPwmWrite(M1_E, 0);
-	softPwmWrite(M2_E, 0);
-	io_mutex.unlock();
-}
-
-uint16_t Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations) {
+float Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t timeout) {
 	float timeElapsed = 0.0f;
 	io_mutex.lock();
 	for(uint16_t i = 0; i < iterations; i++) {
@@ -296,20 +302,32 @@ uint16_t Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations) {
 		std::this_thread::sleep_for(std::chrono::microseconds(100));
 		digitalWrite(trig, LOW);
 
-		std::chrono::time_point<std::chrono::high_resolution_clock> startTime, stopTime;
+		std::chrono::time_point<std::chrono::high_resolution_clock> start_time, signal_start, signal_stop;
 
 		while (digitalRead(echo) == LOW) {
-			startTime = std::chrono::high_resolution_clock::now();
+			signal_start = std::chrono::high_resolution_clock::now();
+
+			if(std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::high_resolution_clock::now() - start_time).count() > timeout) {
+				// Timeout
+				continue;
+			}
 		}
 
 		while (digitalRead(echo) == HIGH) {
-			stopTime = std::chrono::high_resolution_clock::now();
+			signal_stop = std::chrono::high_resolution_clock::now();
+
+			if(std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::high_resolution_clock::now() - start_time).count() > timeout) {
+				// Timeout
+				continue;
+			}
 		}
 
-		timeElapsed += std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count();
-		if(i != 0) timeElapsed /= 2.0f;
+		timeElapsed += std::chrono::duration_cast<std::chrono::microseconds>(signal_stop - signal_start).count();
+		delay(5);
 	}
 	io_mutex.unlock();
-	// Multiply with speed of sound (34,3 cm/ms) and divide by 2 to get one-way distance
-	return (timeElapsed * 34.3f) / 2;
+	// Multiply with speed of sound (0,0343 cm/us) and divide by 2 to get one-way distance
+	return timeElapsed / (float)iterations * 0.0343f * 0.5f;
 }
