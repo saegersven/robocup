@@ -27,11 +27,11 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	wiringPiSetupGpio();
 
 	// Setup I2C
-	mcp_fd = wiringPiI2CSetup(0x20); // TODO: Check if this is the actual ID of MCP23017
+	/*mcp_fd = wiringPiI2CSetup(0x20); // TODO: Check if this is the actual ID of MCP23017
 	if(mcp_fd == -1) {
 		std::cout << "Error setting up I2C for Encoder board" << std::endl;
 		exit(ERRCODE_BOT_SETUP_I2C);
-	}
+	}*/
 
 	// Setup Drive motor pins
 	pinMode(M1_1, OUTPUT);
@@ -39,11 +39,11 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	pinMode(M2_1, OUTPUT);
 	pinMode(M2_2, OUTPUT);
 	pinMode(BUZZER, OUTPUT);
+	pinMode(LED_1, OUTPUT);
+	pinMode(LED_2, OUTPUT);
 
-
-	digitalWrite(17, HIGH);
-	delay(5000);
-	digitalWrite(17, LOW);
+	pinMode(BTN_DEBUG, INPUT);
+	pinMode(BTN_RESTART, INPUT);
 
 	// Create PWM for the two drive motors
 	if(softPwmCreate(M1_E, 0, 100)) {
@@ -109,8 +109,8 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 	//digitalWrite(M1_1, left < 0 ? HIGH : LOW);
 	//digitalWrite(M1_2, left <= 0 ? LOW : HIGH);
 
-	digitalWrite(M1_1, LOW);
-	digitalWrite(M1_2, HIGH);
+	digitalWrite(M1_1, left < 0 ? HIGH : LOW);
+	digitalWrite(M1_2, left <= 0 ? LOW : HIGH);
 
 	digitalWrite(M2_1, right < 0 ? HIGH : LOW);
 	digitalWrite(M2_2, right <= 0 ? LOW : HIGH);
@@ -213,10 +213,10 @@ void Robot::servo(uint8_t pin, int8_t angle, bool wait) {
 	if(wait) std::this_thread::sleep_for(std::chrono::milliseconds(10 * angle));
 }
 
-void Robot::beep(uint16_t ms) {
-	digitalWrite(BUZZER, HIGH);
+void Robot::beep(uint16_t ms, uint8_t pin) {
+	digitalWrite(pin, HIGH);
 	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-	digitalWrite(BUZZER, LOW);
+	digitalWrite(pin, LOW);
 
 }
 /*// Go in a straight line

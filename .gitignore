@@ -33,6 +33,7 @@
 
 # FTPSync (contains credentials)
 ftpsync.settings
+simple-ftp-deploy.json
 
 # Machine Learning datasets
 ml/**/data

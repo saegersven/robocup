@@ -26,6 +26,9 @@
 
 #define BUZZER 25
 
+#define LED_1 20
+#define LED_2 27
+
 #define BTN_RESTART 16
 #define BTN_DEBUG 19
 
@@ -106,7 +109,7 @@ public:
 
 	void servo(uint8_t pin, int8_t angle, bool wait = false);
 
-	void beep(uint16_t ms);
+	void beep(uint16_t ms, uint8_t pin = BUZZER);
 	
 	// SENSORS
 	bool button(uint8_t pin);

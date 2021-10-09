@@ -10,16 +10,6 @@
 #include "utils.h"
 //#include "neural_networks.h"
 
-//#define TEST
-//#define TEST_MOTORS
-//#define TEST_SERVO_1
-//#define TEST_SERVO_2
-//#define TEST_BUTTON_RESTART
-//#define TEST_BUTTON_DEBUG
-//#define TEST_DISTANCE
-
-#include "test.h"
-
 #define SILVER_NN_ID 1
 #define SILVER_RESULT_NEGATIVE 0
 #define SILVER_RESULT_POSITIVE 1
@@ -42,10 +32,6 @@ int main() {
 	State state = State::line;
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
-#ifdef TEST
-	test(robot);
-#endif
-
 	const auto start_time = std::chrono::system_clock::now();
 
 	// CAMERA SETUP
@@ -60,9 +46,9 @@ int main() {
 	// 	robot->m(-i, 0, 20);
 	// }
 	//robot->m(50, 50, 5000);
-	while (1) {
-		std::cout<<robot->distance(DIST_2, 10)<<std::endl;
-	}
+	// while (1) {
+	// 	std::cout<<robot->distance(DIST_2, 10)<<std::endl;
+	// }
 
 	//NeuralNetworks neural_networks;
 	//neural_networks.load_model(GREEN_MODEL_PATH);
