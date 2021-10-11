@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <vector>
+#include <limits>
+#include <cmath>
 
 #include <opencv2/opencv.hpp>
 
@@ -122,20 +124,15 @@ float Line::line_weight(float distance) {
 	//return 3*distance*distance - 2*distance*distance*distance;
 }
 
-float Line::motor_weight(float line_pos) {
-	//return std::pow(2, -10.0f * line_pos * line_pos);
-	return 1.0f;
-}
-
 float Line::pixel_weight(float distance) {
 	return 0.2f + 0.8f * std::pow(2, -std::pow(distance * 8, 2));
 }
 
-float Line::average_black(cv::Mat in, uint32_t& num_pixels) {
+float Line::average_black(cv::Mat in, uint32_t& num_pixels, bool weigh_pixels) {
 	float v = 0.0f;
 	num_pixels = 0;
 
-	float average_pixel_weight = 1.0f;
+	float average_pixel_weight = 0.0f;
 
 	int rows = in.rows;
 	int cols = in.cols;
@@ -150,14 +147,14 @@ float Line::average_black(cv::Mat in, uint32_t& num_pixels) {
 				float dist_to_center = (float)j / in.cols * 2.0f - 1.0f;
 				float dist_to_last = dist_to_center - last_line_pos;
 				float p_weight = pixel_weight(dist_to_last);
-				v += p_weight * dist_to_center;
+				v += (weigh_pixels ? p_weight : 1.0f) * dist_to_center;
 				average_pixel_weight += p_weight;
 			}
 		}
 	}
 	average_pixel_weight /= (float)num_pixels;
 	v /= (float)num_pixels;
-	v /= average_pixel_weight;
+	if(weigh_pixels) v /= average_pixel_weight;
 	return v;
 }
 
@@ -177,111 +174,115 @@ cv::Mat Line::in_range_black(cv::Mat& in) {
 		p = in.ptr<cv::Vec3b>(i);
 		p_out = out.ptr<uint8_t>(i);
 		for(j = 0; j < cols; j++) {
-			p_out[j] = ((float)p[j][0] + p[j][1] + p[j][2]) / 3 < 100 ? 0xFF : 0x00;
+			p_out[j] = is_black(p[j][0], p[j][1], p[j][2]) ? 0xFF : 0x00;
 		}
 	}
 	return out;
 }
 
+float Line::angle_weight(float x) {
+	return 0.85f * std::pow(50, -std::pow((x - 0.6f), 2)) + 0.25f * x;
+}
+
+float Line::difference_weight(float x) {
+	return 0.25f + 0.75f * std::pow(2, -std::pow(x * 10, 2));
+}
+
+float Line::distance_weight(float x) {
+	return std::pow(2, -std::pow(((x - 0.5) * 4), 2));
+}
+
+float Line::circular_line(cv::Mat& in) {
+	float average_line_angle;
+	std::vector<std::pair<float, float>> line_angles; // Map of angle and distance
+
+	cv::Vec3b* p;
+
+	cv::Point2f center(in.cols / 2, in.rows); // Bottom center
+	float center_x = in.cols / 2.0f;
+	float center_y = in.rows;
+
+	int i, j;
+	for(i = 0; i < in.rows; ++i) {
+		p = in.ptr<cv::Vec3b>(i);
+		for(j = 0; j < in.cols; ++j) {
+			if(is_black(p[j][0], p[j][1], p[j][2])) {
+				// Put point into array based on distance to center
+				float x = (float)j;
+				float y = (float)i;
+				float distance = std::sqrt(std::pow(y - center_y, 2) + std::pow(x - center_x, 2));
+				if(distance > MINIMUM_DISTANCE && distance < MAXIMUM_DISTANCE) {
+					float angle = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
+					line_angles.push_back(std::pair<float, float>(angle, distance));
+				}
+			}
+		}
+	}
+
+	float average_difference_weight = 0.0f;
+	for(std::pair<float, float> angle : line_angles) {
+		float angle_difference_weight = difference_weight((angle.first - last_line_angle) / PI * 2.0f);
+		float angle_distance_weight = distance_weight(map(angle.second, MINIMUM_DISTANCE, MAXIMUM_DISTANCE, 0.0f, 1.0f));
+
+		average_line_angle += angle_difference_weight * angle_distance_weight * angle.first;
+		average_difference_weight += angle_difference_weight;
+	}
+
+	average_line_angle /= (float)line_angles.size();
+	average_line_angle /= average_difference_weight / (float)line_angles.size();
+
+	return average_line_angle;
+}
+
 void Line::follow(cv::Mat& frame) {
 	auto start_time = std::chrono::high_resolution_clock::now();
+#ifdef DEBUG
 	cv::Mat debug = frame.clone();
+#endif
 	//std::cout << "Follow" << std::endl;
-
-	int16_t line_angle = 0;
 
 	float line_pos = 0.0f;
 	float line_pos_weighted = 0.0f;
 
 	uint8_t line_search_offset = 0;
+	
+	float line_angle = circular_line(frame);
 
-	bool line_found = false;
+	last_line_angle = line_angle;
 
-	while(!line_found && (line_search_offset + BLACK_Y_BOTTOM_OFFSET < frame.size[0])) {
-		cv::Mat black_cut = frame(
-			cv::Range(BLACK_Y_TOP_OFFSET + line_search_offset, BLACK_Y_BOTTOM_OFFSET + line_search_offset),
-			cv::Range(0, frame.cols)
-			);
+	if(std::isnan(line_angle)) line_angle = 0.0f;
 
-		uint32_t num_pixels = 0;
-		line_pos = average_black(black_cut, num_pixels);
+	std::cout << line_angle << std::endl;
 
-		if(num_pixels > 30) {
-			line_found = true;
+#ifdef DEBUG
+	cv::Point center(debug.cols / 2, debug.rows);
 
-			cv::line(debug, cv::Point((line_pos + 1.0f) * frame.size[1] / 2, line_search_offset + BLACK_Y_TOP_OFFSET),
-				cv::Point((line_pos + 1.0f) * frame.size[1] / 2, line_search_offset + BLACK_Y_BOTTOM_OFFSET),
-				cv::Scalar(0, 0, 255),
-				2);
+	cv::circle(debug, center, MINIMUM_DISTANCE, cv::Scalar(0, 255, 0), 2);
+	cv::circle(debug, center, MAXIMUM_DISTANCE, cv::Scalar(0, 255, 0), 2);
 
-			line_pos_weighted = line_weight(line_pos) * line_pos;
-			last_line_pos = line_pos;
-			std::cout << std::to_string(line_pos_weighted) << "\t";
-			std::cout << std::to_string(line_pos) << std::endl;
-		}
-
-		/*cv::Mat black_out = in_range_black(black_cut);
-		cv::imshow("Black out", black_out);
-		
-		std::vector<std::vector<cv::Point>> contours;
-		std::vector<cv::Vec4i> hierarchy;
-		cv::findContours(black_out, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
-
-		if(contours.size() > 0) {
-			int distance = 128;
-			cv::RotatedRect rect;
-			int index = -1;
-			for(int i = 0; i < contours.size(); i++) {
-				cv::RotatedRect r = cv::minAreaRect(contours[i]);
-				int d = last_line_pos + frame.size[1] - r.center.x;
-				float size = r.size.width * r.size.height;
-				if(d < distance && size > 20.0f) {
-					index = i;
-					rect = r;
-					distance = d;
-				}
-			}
-
-			if(index != -1) {
-				line_found = true;
-				// rect is now the minarearect of the contour with the largest area
-				draw_rotated_rect(debug, rect, cv::Scalar(255, 0, 0), 2);
-
-				line_angle = (int16_t)rect.angle;
-
-				// Normalize angle between -90° and 90°
-				while(line_angle > 45) {
-					line_angle -= 90;
-				}
-
-				while(line_angle < -45) {
-					line_angle += 90;
-				}
-
-				line_pos = (int8_t)(rect.center.x - frame.size[1] / 2);
-				last_line_pos = line_pos;
-			}
-		}*/
-		line_search_offset += 2;
-	}
+	cv::line(debug,
+		cv::Point(std::sin(line_angle) * MINIMUM_DISTANCE, -std::cos(line_angle) * MINIMUM_DISTANCE) + center,
+		cv::Point(std::sin(line_angle) * MAXIMUM_DISTANCE, -std::cos(line_angle) * MAXIMUM_DISTANCE) + center,
+		cv::Scalar(0, 255, 0), 2
+		);
 
 	//std::cout << "Pos:\t" << std::to_string(line_pos) << "\tAngle:\t" << std::to_string(line_angle) << "\r" << std::endl;
 
 	cv::imshow("Debug", debug);
 	cv::waitKey(1);
+#endif
 
 	//int16_t error = line_pos * FOLLOW_HORIZONTAL_SENSITIVITY + line_angle * FOLLOW_ANGLE_SENSITIVITY;
 
-	int16_t error = line_pos_weighted * FOLLOW_HORIZONTAL_SENSITIVITY;
-	float mw = motor_weight(line_pos_weighted);
+	int16_t error = angle_weight(line_angle) * line_angle * FOLLOW_HORIZONTAL_SENSITIVITY;
 
-	robot->m(FOLLOW_MOTOR_SPEED * mw + error, FOLLOW_MOTOR_SPEED * mw - error);
+	robot->m(FOLLOW_MOTOR_SPEED + error, FOLLOW_MOTOR_SPEED - error);
 
-	std::cout << std::to_string(error) << std::endl;
+	//std::cout << std::to_string(error) << std::endl;
 
 	auto end_time = std::chrono::high_resolution_clock::now();
 	uint16_t us = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
-	//std::cout << "Took: " << std::to_string(us) << "μs" << std::endl;
+	std::cout << "Took: " << std::to_string(us) << "μs" << std::endl;
 }
 
 // TODO: Find better values
