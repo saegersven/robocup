@@ -105,7 +105,7 @@ void Robot::stop_video(int cam_id) {
 	cams[cam_id].stop_video();
 }
 
-void Robot::m(int8_t left, int8_t right, uint16_t duration) {
+void Robot::m(int8_t left, int8_t right, uint16_t duration, uint8_t brake_duty_cycle) {
 	left = clip(left, -100, 100);
 	right = clip(right, -100, 100);
 
@@ -130,7 +130,7 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 	// Wait for duration and stop
 	if(duration != 0) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(duration));
-		stop();
+		stop(brake_duty_cycle);
 	}
 }
 

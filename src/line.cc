@@ -35,11 +35,12 @@ void Line::stop() {
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat a = frame(cv::Range(SILVER_Y), cv::Range(SILVER_X));
 
+	//cv::rectangle(frame, cv::Rect(30, 36, 27, 54), cv::Scalar(0, 255, 0), 2);
+
 	//cv::Mat a_resized;
 	//cv::resize(a, a_resized, cv::Size(),10.0, 10.0);
 	//cv::imshow("Silver Cut", a_resized);
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, a);
-	//cv::waitKey(100);
 
 	// Calculate difference between frame cutout
 	int rows = a.rows;
@@ -61,7 +62,7 @@ bool Line::check_silver(cv::Mat& frame) {
 		}
 	}
 
-	std::cout << std::to_string(total_difference) << std::endl;
+	//std::cout << std::to_string(total_difference) << std::endl;
 
 	return total_difference < 20'000;
 }
@@ -69,10 +70,19 @@ bool Line::check_silver(cv::Mat& frame) {
 void Line::line(cv::Mat& frame) {
 	if(check_silver(frame)) {
 		robot->stop();
-		std::cout << "NICE" << std::endl;
+		std::cout << "DETECTED SILVER" << std::endl;
+		robot->m(60, -60, 600);
+		delay(500);
+		robot->m(20, 20, 300);
+		robot->stop_video(front_cam_id);
+		robot->start_video(front_cam_id);
+		delay(500);
 	} else {
-		robot->m(100, 100);
+		follow(frame);
 	}
+
+	cv::imshow("Frame", frame);
+	cv::waitKey(1);
 
 	//cv::Mat frame = robot->capture(front_cam_id); // Retrieve video frame
 	/*cv::Mat green_cut = frame(cv::Range(10, 70), cv::Range(8, 40));
@@ -98,155 +108,186 @@ void Line::line(cv::Mat& frame) {
 	}*/
 }
 
-bool Line::is_black(cv::Mat& in, uint8_t x, uint8_t y) {
-	cv::Vec3b pix = in.at<cv::Vec3b>(y, x);
-	float lightness = ((float)pix[0] + (float)pix[1] + (float)pix[2]) / 3.0f;
-	float saturation = std::max(pix[0], std::max(pix[1], pix[2])) - std::min(pix[0], std::min(pix[1], pix[2]));
-	return lightness <= 20.0f && saturation <= 20.0f;
+bool Line::is_black(uint8_t b, uint8_t g, uint8_t r) {
+	float lightness = ((float)b + g + r) / 3.0f;
+	//float saturation = std::max(b, std::max(g, r)) - std::min(b, std::min(g, r));
+	return lightness < 100.0f;
+}
+
+float Line::line_weight(float distance) {
+	distance = std::abs(distance);
+	return 0.85f * std::pow(50, -std::pow((distance - 0.6f), 2)) + 0.25f * distance;
+	//return 0.7f * std::pow(50, -std::pow((distance - 0.6f), 2)) + 0.5f * distance;
+	//return 1.0f;
+	//return 3*distance*distance - 2*distance*distance*distance;
+}
+
+float Line::motor_weight(float line_pos) {
+	//return std::pow(2, -10.0f * line_pos * line_pos);
+	return 1.0f;
+}
+
+float Line::pixel_weight(float distance) {
+	return 0.2f + 0.8f * std::pow(2, -std::pow(distance * 8, 2));
+}
+
+float Line::average_black(cv::Mat in, uint32_t& num_pixels) {
+	float v = 0.0f;
+	num_pixels = 0;
+
+	float average_pixel_weight = 1.0f;
+
+	int rows = in.rows;
+	int cols = in.cols;
+
+	cv::Vec3b* p;
+	int i, j;
+	for(i = 0; i < rows; ++i) {
+		p = in.ptr<cv::Vec3b>(i);
+		for(j = 0; j < cols; ++j) {
+			if(is_black(p[j][0], p[j][1], p[j][2])) {
+				++num_pixels;
+				float dist_to_center = (float)j / in.cols * 2.0f - 1.0f;
+				float dist_to_last = dist_to_center - last_line_pos;
+				float p_weight = pixel_weight(dist_to_last);
+				v += p_weight * dist_to_center;
+				average_pixel_weight += p_weight;
+			}
+		}
+	}
+	average_pixel_weight /= (float)num_pixels;
+	v /= (float)num_pixels;
+	v /= average_pixel_weight;
+	return v;
+}
+
+cv::Mat Line::in_range_black(cv::Mat& in) {
+	CV_Assert(in.channels() == 3);
+	CV_Assert(in.depth() == CV_8U);
+
+	int rows = in.rows;
+	int cols = in.cols;
+
+	cv::Vec3b* p;
+	uint8_t* p_out;
+	cv::Mat out(rows, cols, CV_8UC1);
+
+	int i, j;
+	for(i = 0; i < rows; ++i) {
+		p = in.ptr<cv::Vec3b>(i);
+		p_out = out.ptr<uint8_t>(i);
+		for(j = 0; j < cols; j++) {
+			p_out[j] = ((float)p[j][0] + p[j][1] + p[j][2]) / 3 < 100 ? 0xFF : 0x00;
+		}
+	}
+	return out;
 }
 
 void Line::follow(cv::Mat& frame) {
+	auto start_time = std::chrono::high_resolution_clock::now();
 	cv::Mat debug = frame.clone();
-	std::cout << "Follow" << std::endl;
-	const int8_t check_y = 40;
-	const int8_t padding = 10;
-	const int8_t width = frame.cols - padding * 2;
-	
-	const uint8_t max_line_width = 8;
+	//std::cout << "Follow" << std::endl;
 
-	uint8_t line_x = last_line_x;
-	uint8_t line_check_left = last_line_x - 1;
-	uint8_t line_check_right = last_line_x + 1;
+	int16_t line_angle = 0;
 
-	// 0 -> No line yet
-	// 1 -> On line
-	// 2 -> No line again
-	bool flag_left = 0;
-	bool flag_right = 0;
+	float line_pos = 0.0f;
+	float line_pos_weighted = 0.0f;
 
-	uint8_t line_left = 200;
-	uint8_t line_right = 200;
+	uint8_t line_search_offset = 0;
 
-	uint8_t line_width = 0;
+	bool line_found = false;
 
-	bool line_not_centered = false;
+	while(!line_found && (line_search_offset + BLACK_Y_BOTTOM_OFFSET < frame.size[0])) {
+		cv::Mat black_cut = frame(
+			cv::Range(BLACK_Y_TOP_OFFSET + line_search_offset, BLACK_Y_BOTTOM_OFFSET + line_search_offset),
+			cv::Range(0, frame.cols)
+			);
 
-	bool first = true;
-	while(true) {
-		if(flag_left == 0 && is_black(frame, line_check_left, check_y)) {
-			flag_left = 1;
-			// If we haven't started on the line (line_not_centered),
-			// both edges of the line will be found in the same direction.
-			if(line_not_centered) line_right = line_check_left;
-		}
-		if(flag_right == 0 && is_black(frame, line_check_right, check_y)) {
-			flag_right = 1;
-			if(line_not_centered) line_left = line_check_right;
+		uint32_t num_pixels = 0;
+		line_pos = average_black(black_cut, num_pixels);
+
+		if(num_pixels > 30) {
+			line_found = true;
+
+			cv::line(debug, cv::Point((line_pos + 1.0f) * frame.size[1] / 2, line_search_offset + BLACK_Y_TOP_OFFSET),
+				cv::Point((line_pos + 1.0f) * frame.size[1] / 2, line_search_offset + BLACK_Y_BOTTOM_OFFSET),
+				cv::Scalar(0, 0, 255),
+				2);
+
+			line_pos_weighted = line_weight(line_pos) * line_pos;
+			last_line_pos = line_pos;
+			std::cout << std::to_string(line_pos_weighted) << "\t";
+			std::cout << std::to_string(line_pos) << std::endl;
 		}
 
-		if(first && (flag_left == 0 || flag_right == 0)) line_not_centered = true;
+		/*cv::Mat black_out = in_range_black(black_cut);
+		cv::imshow("Black out", black_out);
+		
+		std::vector<std::vector<cv::Point>> contours;
+		std::vector<cv::Vec4i> hierarchy;
+		cv::findContours(black_out, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
 
-		if(flag_left == 1) {
-			++line_width;
-			if(!is_black(frame, line_check_left, check_y)) {
-				flag_left = 2;
-				line_left = line_check_left;
+		if(contours.size() > 0) {
+			int distance = 128;
+			cv::RotatedRect rect;
+			int index = -1;
+			for(int i = 0; i < contours.size(); i++) {
+				cv::RotatedRect r = cv::minAreaRect(contours[i]);
+				int d = last_line_pos + frame.size[1] - r.center.x;
+				float size = r.size.width * r.size.height;
+				if(d < distance && size > 20.0f) {
+					index = i;
+					rect = r;
+					distance = d;
+				}
 			}
-		}
-		if(flag_right == 1 && !is_black(frame, line_check_right, check_y)) {
-			++line_width;
-			if(!is_black(frame, line_check_right, check_y)) {
-				flag_right = 2;
-				line_right = line_check_right;
-			}
-		}
 
-		if(line_width >= max_line_width) {
-			// Maximum line width is reached, abort
-			if(line_left == 200) {
-				line_left = line_right - max_line_width;
-			}
-			if(line_right == 200) {
-				line_right = line_left + max_line_width;
-			}
-			break;
-		}
+			if(index != -1) {
+				line_found = true;
+				// rect is now the minarearect of the contour with the largest area
+				draw_rotated_rect(debug, rect, cv::Scalar(255, 0, 0), 2);
 
-		// Check if both line edges have been found (flag 2)
-		if(line_not_centered) {
-			if((flag_right == 2 || flag_left == 2)) {
-				break;
+				line_angle = (int16_t)rect.angle;
+
+				// Normalize angle between -90° and 90°
+				while(line_angle > 45) {
+					line_angle -= 90;
+				}
+
+				while(line_angle < -45) {
+					line_angle += 90;
+				}
+
+				line_pos = (int8_t)(rect.center.x - frame.size[1] / 2);
+				last_line_pos = line_pos;
 			}
-		} else {
-			if(flag_right == 2 && flag_left == 2) {
-				break;
-			}
-		}
-
-		// Check if we have reached the border
-		if(line_check_left == padding || line_check_right == padding + width) {
-			// We have reached the border. One of the line edges is not set, set it to the border.
-			if(line_left == 200) line_left = padding;
-			if(line_right == 200) line_right = frame.cols - padding;
-			break;
-		}
-
-		// Advance the pointers outwards
-		--line_check_left;
-		++line_check_right;
-
-		first = false;
+		}*/
+		line_search_offset += 2;
 	}
 
-	line_x = (uint8_t)((uint16_t)line_left + (uint16_t)line_right) >> 1;
+	//std::cout << "Pos:\t" << std::to_string(line_pos) << "\tAngle:\t" << std::to_string(line_angle) << "\r" << std::endl;
 
-	last_line_x = line_x;
+	cv::imshow("Debug", debug);
+	cv::waitKey(1);
 
-	float angle = 0.0f;
+	//int16_t error = line_pos * FOLLOW_HORIZONTAL_SENSITIVITY + line_angle * FOLLOW_ANGLE_SENSITIVITY;
 
-	const float line_x_f = (float)line_x;
-	const float radius = 15.0f; // in pixels
-	const uint8_t res = 15;
-	const float step = deg_to_rad(090.f / res);
-	// We have the horizontal position of the line, now get the angle
-	float angle_offset = 0.0f;
-	float sin, cos, cx_l, cx_r, cy;
-	for(uint8_t i = 0; i <= res; ++i) {
-		sin = std::sin(angle_offset);
-		cos = std::cos(angle_offset);
+	int16_t error = line_pos_weighted * FOLLOW_HORIZONTAL_SENSITIVITY;
+	float mw = motor_weight(line_pos_weighted);
 
-		cx_l = line_x_f - sin * radius;
-		cx_r = line_x_f + sin * radius;
-
-		cy = check_y - cos * radius;
-
-		if(is_black(frame, (uint8_t)cx_l, (uint8_t)cy)) {
-			angle = -angle_offset;
-			break;
-		} else if(is_black(frame, (uint8_t)cx_r, (uint8_t)cy)) {
-			angle = angle_offset;
-			break;
-		}
-
-		angle_offset = step * i;
-	}
-
-	// Now we have the line x-position at the bottom and the angle of the line
-	float error = (line_x_f - frame.cols / 2.0f) * FOLLOW_HORIZONTAL_SENSITIVITY;
-	error += angle * FOLLOW_ANGLE_SENSITIVITY;
+	robot->m(FOLLOW_MOTOR_SPEED * mw + error, FOLLOW_MOTOR_SPEED * mw - error);
 
 	std::cout << std::to_string(error) << std::endl;
 
-	cv::imshow("Debug", debug);
-	cv::waitKey(10);
-
-	// Finally set motor speed to follow line
-	robot->m_asc(FOLLOW_MOTOR_SPEED + error, FOLLOW_MOTOR_SPEED - error);
+	auto end_time = std::chrono::high_resolution_clock::now();
+	uint16_t us = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+	//std::cout << "Took: " << std::to_string(us) << "μs" << std::endl;
 }
 
 // TODO: Find better values
 uint8_t Line::green(cv::Mat& frame) {
-	uint8_t green_points = 0;
+	return 0;
+	/*uint8_t green_points = 0;
 
 	cv::Mat green = in_range_primary_color(frame, 1, 0.85f, 40);
 
@@ -314,5 +355,5 @@ uint8_t Line::green(cv::Mat& frame) {
 	// If both left and right green is there, return value is 3
 	// If only left or right, return value is 1 or 2
 	// If no contours were at the bottom, return value is 0
-	return green_points;
+	return green_points;*/
 }

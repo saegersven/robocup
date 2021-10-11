@@ -32,3 +32,5 @@ bool pixel_count_over_threshold_hue(cv::Mat& in, uint8_t lower, uint8_t upper, u
 bool pixel_count_over_threshold_primary_color(cv::Mat& in, uint8_t channel, float min_ratio, uint8_t min_value, uint32_t num_pixels);
 
 float map(float s, float a1, float a2, float b1, float b2);
+
+void draw_rotated_rect(cv::Mat out, cv::RotatedRect r, cv::Scalar color, int thickness);

@@ -11,14 +11,17 @@
 #define GREEN_RESULT_RIGHT 2
 #define GREEN_RESULT_DEAD_END 3
 
-#define FOLLOW_HORIZONTAL_SENSITIVITY 10.0f
-#define FOLLOW_ANGLE_SENSITIVITY 10.0f
+#define FOLLOW_HORIZONTAL_SENSITIVITY 75.0f
+#define FOLLOW_ANGLE_SENSITIVITY 0.6f
 
-#define FOLLOW_MOTOR_SPEED 30.0f
+#define FOLLOW_MOTOR_SPEED 15
 
 #define RUNTIME_AVERAGE_SILVER_PATH "../runtime_data/average_silver.png"
 #define SILVER_X 27, 54
 #define SILVER_Y 30, 36
+
+#define BLACK_Y_TOP_OFFSET 22
+#define BLACK_Y_BOTTOM_OFFSET 38
 
 class Line {
 private:
@@ -29,11 +32,18 @@ private:
 
 	bool running = false;
 
-	int8_t last_line_x;
+	float last_line_pos;
 	int8_t last_line_angle;
 	
-	bool is_black(cv::Mat& in, uint8_t x, uint8_t y);
+	bool is_black(uint8_t b, uint8_t g, uint8_t r);
 	uint8_t green(cv::Mat& frame);
+
+	float motor_weight(float line_pos);
+	float line_weight(float distance);
+	float pixel_weight(float distance);
+	float average_black(cv::Mat in, uint32_t& num_pixels);
+
+	cv::Mat in_range_black(cv::Mat& in);
 
 	void follow(cv::Mat& frame);
 

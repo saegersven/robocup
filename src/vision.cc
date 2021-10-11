@@ -75,7 +75,7 @@ cv::Mat Camera::retrieve_video_frame(bool undist) {
 
 	//frame = quarter_image(frame);
 
-	cv::resize(frame, frame, cv::Size(), 0.25, 0.25);
+	cv::resize(frame, frame, this->image_size);
 
 	if(undist && this->calibrated) {
 		frame = undistort(frame);

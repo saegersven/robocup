@@ -32,12 +32,12 @@
 #define BTN_RESTART 19
 #define BTN_DEBUG 16
 
-#define DIST_1_ECHO 12
-#define DIST_1_TRIG 13
-#define DIST_1 12, 13
-#define DIST_2_ECHO 5
-#define DIST_2_TRIG 6
-#define DIST_2 5, 6
+#define DIST_1_ECHO 5
+#define DIST_1_TRIG 6
+#define DIST_1 5, 6
+#define DIST_2_ECHO 12
+#define DIST_2_TRIG 13
+#define DIST_2 12, 13
 
 #define SERVO_1 26
 #define SERVO_2 21
@@ -107,7 +107,7 @@ public:
 	void turn(int8_t degrees);
 
 	// Directly set motor speed
-	void m(int8_t left, int8_t right, uint16_t duration = 0);
+	void m(int8_t left, int8_t right, uint16_t duration = 0, uint8_t brake_duty_cycle = 100);
 	// Set motor speed with async speed control
 	void m_asc(int8_t left, int8_t right, uint16_t duration = 0, bool wait = false);
 

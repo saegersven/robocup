@@ -214,3 +214,11 @@ bool pixel_count_over_threshold_primary_color(cv::Mat& in, uint8_t channel, floa
 float map(float s, float a1, float a2, float b1, float b2) {
 	return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
 }
+
+void draw_rotated_rect(cv::Mat out, cv::RotatedRect r, cv::Scalar color, int thickness) {
+	cv::Point2f vertices[4];
+	r.points(vertices);
+	for(int i = 0; i < 4; i++) {
+		cv::line(out, vertices[i], vertices[(i + 1) % 4], color, thickness);
+	}
+}

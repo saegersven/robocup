@@ -35,7 +35,7 @@ int main() {
 	const auto start_time = std::chrono::system_clock::now();
 
 	// CAMERA SETUP
-	const int FRONT_CAM = robot->init_camera(0, false, 160, 96, 60);	// Front camera
+	const int FRONT_CAM = robot->init_camera(0, false, 80, 48, 60);	// Front camera
 	//const int BACK_LEFT_CAM = robot->init_camera(1, true);			// Back left camera
 	//const int BACK_RIGHT_CAM = robot->init_camera(2, true);			// Back right camera
 
