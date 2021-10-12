@@ -12,6 +12,14 @@
 #include "utils.h"
 //#include "neural_networks.h"
 
+bool is_black(uint8_t b, uint8_t g, uint8_t r) {
+	return (uint16_t)b + (uint16_t)g + (uint16_t)r < 300;
+}
+
+bool is_green(uint8_t b, uint8_t g, uint8_t r) {
+	return false; // TODO
+}
+
 Line::Line(int front_cam_id, std::shared_ptr<Robot> robot) : obstacle_active(0), running(false) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
@@ -88,7 +96,7 @@ bool Line::abort_obstacle(cv::Mat frame) {
 
 	cv::Mat cut = frame(cv::Range(OBSTACLE_Y_LOWER, OBSTACLE_Y_UPPER),
 		cv::Range(OBSTACLE_X_LOWER, OBSTACLE_X_UPPER));
-	cv::Mat black = in_range_black(cut);
+	cv::Mat black = in_range(cut, &is_black);
 	uint32_t non_zero = cv::countNonZero(black);
 	std::cout << non_zero << std::endl;
 	return non_zero > 200;
@@ -144,9 +152,12 @@ void Line::line(cv::Mat& frame) {
 		}
 	} else {
 		//std::async(std::launch::async, [this]{ obstacle(); });
-		cv::Mat black = in_range_black(frame);
+		cv::Mat black = in_range(frame, &is_black);
 
 		follow(frame, black);
+
+		green(frame, black);
+
 		if(check_silver(frame)) {
 			robot->stop();
 			std::cout << "DETECTED SILVER" << std::endl;
@@ -186,13 +197,7 @@ void Line::line(cv::Mat& frame) {
 	}*/
 }
 
-bool Line::is_black(uint8_t b, uint8_t g, uint8_t r) {
-	float lightness = ((float)b + g + r) / 3.0f;
-	//float saturation = std::max(b, std::max(g, r)) - std::min(b, std::min(g, r));
-	return lightness < 100.0f;
-}
-
-cv::Mat Line::in_range_black(cv::Mat& in) {
+/*cv::Mat Line::in_range_black(cv::Mat& in) {
 	CV_Assert(in.channels() == 3);
 	CV_Assert(in.depth() == CV_8U);
 
@@ -212,7 +217,7 @@ cv::Mat Line::in_range_black(cv::Mat& in) {
 		}
 	}
 	return out;
-}
+}*/
 
 float Line::difference_weight(float x) {
 	return 0.25f + 0.75f * std::pow(2, -std::pow(x * 5, 2));
@@ -222,7 +227,7 @@ float Line::distance_weight(float x) {
 	return std::pow(2, -std::pow(((x - 0.65) * 4), 2));
 }
 
-float Line::circular_line(cv::Mat& in, std::vector<std::pair<) {
+float Line::circular_line(cv::Mat& in) {
 	float average_line_angle;
 	std::vector<std::pair<float, float>> line_angles; // Map of angle and distance
 
@@ -312,14 +317,10 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 	//std::cout << "Took: " << std::to_string(us) << "μs" << std::endl;
 }
 
-bool Line::is_green(uint8_t b, uint8_t g, uint8_t r) {
-	return false; // TODO
-}
-
-std::vector<cv::Point> Line::find_green_group_centers(cv::Mat frame) {
+std::vector<cv::Point> Line::find_green_group_centers(cv::Mat frame, cv::Mat& green) {
 	std::vector<cv::Point> groups;
 
-	cv::Mat green = in_range_green(frame);
+	green = in_range(frame, &is_green);
 
 	std::vector<std::vector<cv::Point>> contours;
 	std::vector<cv::Vec4i> hierarchy;
@@ -333,78 +334,66 @@ std::vector<cv::Point> Line::find_green_group_centers(cv::Mat frame) {
 			groups.push_back(bounding_rect.center);
 		}
 	}
+
+	return groups;
 }
 
-// TODO: Find better values
-uint8_t Line::green(cv::Mat& frame) {
-	return 0;
-	/*uint8_t green_points = 0;
+uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
+	uint8_t green_mask = 0;
 
-	cv::Mat green = in_range_primary_color(frame, 1, 0.85f, 40);
+	cv::Mat green;
+	std::vector<cv::Point> groups = find_green_group_centers(frame, green);
 
-	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(green, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+	const int cut_width = 15;
+	const int cut_height = 15;
 
-	for(int i = 0; i < contours.size(); ++i) {
-		cv::RotatedRect r = cv::minAreaRect(contours[i]);
-		// Only consider contour if it is big enough
-		if(r.size.width * r.size.height < 40.0f) continue;
+	// Cut out part of the black matrix around the group centers
+	for(int i = 0; i < groups.size(); ++i) {
+		cv::Range x_range = cv::Range(groups[i].x - cut_width / 2, groups[i].x + cut_width / 2);
+		if(x_range.start < 0) x_range.start = 0;
+		if(x_range.end > black.size[0]) x_range.end = black.cols;
 
-		float initial_angle = deg_to_rad(r.angle);
-		if(initial_angle > deg_to_rad(45.0f)) initial_angle -= deg_to_rad(360.0f);
-		float angle = initial_angle;
+		cv::Range y_range = cv::Range(groups[i].y - cut_height / 2, groups[i].y + cut_height / 2);
+		if(y_range.start < 0) y_range.start = 0;
+		if(y_range.end > black.size[1]) y_range.end = black.rows;
 
-		std::vector<cv::Point2f> black_points;
-		black_points.reserve(30);
+		cv::Mat cut = black(y_range, x_range);
+		cv::Mat green_cut = green(y_range, x_range); // TODO
 
-		const int res = 30;
-		const float step = deg_to_rad(360.0f / res);
+		// Calculate average black pixel in the cut
+		float average_x = 0.0f;
+		float average_y = 0.0f;
 
-		float sin, cos, cx, cy, step_out_x, step_out_y;
-		for(int i = 0; i < res; ++i) {
-			angle = deg_to_rad(step * i);
+		uint32_t num_pixels = 0;
 
-			sin = std::sin(angle);
-			cos = std::cos(angle);
-
-			cx = r.center.x + sin * (r.size.width * 0.75f);
-			cy = r.center.y - cos * (r.size.height * 0.75f);
-
-			step_out_x = sin * 0.5f;
-			step_out_y = cos * 0.5f;
-
-			for(int y = 0; y < 4; ++y) {
-				cx += step_out_x;
-				cy -= step_out_y;
-
-				if(is_black(frame, (uint8_t)cx, (uint8_t)cy)) {
-					black_points.push_back(cv::Point2f(cx, cy));
-					break;
+		uint8_t* p;
+		uint8_t* p_grn;
+		int y, x;
+		for(y = 0; y < cut.rows; ++y) {
+			p = cut.ptr<uint8_t>(y);
+			p_grn = green_cut.ptr<uint8_t>(y);
+			for(x = 0; x < cut.cols; ++x) {
+				if(p[x] && !p_grn[x]) {
+					average_x += (float)x;
+					average_y += (float)y;
+					++num_pixels;
 				}
 			}
 		}
+		average_x /= num_pixels;
+		average_y /= num_pixels;
 
-		if(black_points.size() > 8) {
-			float mean_x, mean_y;
-			for(cv::Point2f p : black_points) {
-				mean_x += p.x;
-				mean_y += p.y;
-			}
-
-			mean_x /= black_points.size();
-			mean_y /= black_points.size();
-
-			float relative_black_angle = std::atan2(r.center.y - mean_y, r.center.x - mean_x);
-			relative_black_angle -= initial_angle;
-
-			if(relative_black_angle > 90.0f && relative_black_angle < 90.0f) {
-				// If angle is positive, green is left
-				green_points |= relative_black_angle > 0.0f ? 0x01 : 0x02;
-			}
+		// Check quadrant of the average pixel to determine location of green point relative to line
+		if(average_y < cut.rows / 2) {
+			// Only consider point if average is above
+			green_mask |= average_x < cut.cols / 2 ? 0x01 : 0x02;
 		}
 	}
-	// If both left and right green is there, return value is 3
-	// If only left or right, return value is 1 or 2
-	// If no contours were at the bottom, return value is 0
-	return green_points;*/
+	// If a green point was to the bottom left of the corner/black line,
+	// the first bit will be set. If a green point was to the bottom right of the
+	// corner/black line, the second bit will be set.
+	// left -> 1
+	// right -> 2
+	// both -> 3
+	return green_mask;
 }

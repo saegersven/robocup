@@ -34,6 +34,10 @@
 
 #define DEBUG
 
+bool is_black(uint8_t b, uint8_t g, uint8_t r);
+
+bool is_green(uint8_t b, uint8_t g, uint8_t r);
+
 class Line {
 private:
 	int front_cam_id;
@@ -51,19 +55,17 @@ private:
 	bool abort_obstacle(cv::Mat frame);
 	void obstacle();
 
-	bool is_black(uint8_t b, uint8_t g, uint8_t r);
-	uint8_t green(cv::Mat& frame);
-
-	cv::Mat in_range_black(cv::Mat& in);
-
 	float difference_weight(float x);
 	float distance_weight(float x);
 
 	float circular_line(cv::Mat& in);
 
-	void follow(cv::Mat& frame);
-
 	bool check_silver(cv::Mat& frame);
+
+	std::vector<cv::Point> find_green_group_centers(cv::Mat frame, cv::Mat& green);
+	uint8_t green(cv::Mat& frame, cv::Mat& black);
+
+	void follow(cv::Mat& frame, cv::Mat black);
 
 public:
 	Line(int front_cam_id, std::shared_ptr<Robot> robot);

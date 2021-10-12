@@ -36,3 +36,5 @@ bool pixel_count_over_threshold_primary_color(cv::Mat& in, uint8_t channel, floa
 float map(float s, float a1, float a2, float b1, float b2);
 
 void draw_rotated_rect(cv::Mat out, cv::RotatedRect r, cv::Scalar color, int thickness);
+
+cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f);

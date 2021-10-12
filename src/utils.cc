@@ -222,3 +222,25 @@ void draw_rotated_rect(cv::Mat out, cv::RotatedRect r, cv::Scalar color, int thi
 		cv::line(out, vertices[i], vertices[(i + 1) % 4], color, thickness);
 	}
 }
+
+cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {
+	CV_Assert(in.channels() == 3);
+	CV_Assert(in.depth() == CV_8U);
+
+	int rows = in.rows;
+	int cols = in.cols;
+
+	cv::Vec3b* p;
+	uint8_t* p_out;
+	cv::Mat out(rows, cols, CV_8UC1);
+
+	int i, j;
+	for(i = 0; i < rows; ++i) {
+		p = in.ptr<cv::Vec3b>(i);
+		p_out = out.ptr<uint8_t>(i);
+		for(j = 0; j < cols; j++) {
+			p_out[j] = f(p[j][0], p[j][1], p[j][2]) ? 0xFF : 0x00;
+		}
+	}
+	return out;
+}
