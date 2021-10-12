@@ -70,6 +70,8 @@ class Robot {
 private:
 	// Main IO lock
 	std::mutex io_mutex;
+
+	std::mutex dist_mutex;
 	// List of all initialized cameras
 	std::vector<Camera> cams;
 

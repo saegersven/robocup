@@ -4,6 +4,7 @@
 #include <vector>
 #include <limits>
 #include <cmath>
+#include <future>
 
 #include <opencv2/opencv.hpp>
 
@@ -11,7 +12,7 @@
 #include "utils.h"
 //#include "neural_networks.h"
 
-Line::Line(int front_cam_id, std::shared_ptr<Robot> robot) {
+Line::Line(int front_cam_id, std::shared_ptr<Robot> robot) : obstacle_active(0), running(false) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
 	//this->neural_networks = neural_networks;
@@ -24,13 +25,20 @@ void Line::start() {
 	robot->start_video(front_cam_id);
 
 	running = true;
+
+	std::cout << "Begin line" << std::endl;
+	std::thread obstacle_thread([this]{obstacle();});
+	obstacle_thread.detach();
+	std::cout << "Obstacle thread started" << std::endl;
 }
 
 void Line::stop() {
-	// Stop video if running
+	// Reset if running
 	if(!running) return;
 
 	robot->stop_video(front_cam_id);
+	obstacle_active = 0;
+	// Setting running to false should notify obstacle thread
 	running = false;
 }
 
@@ -66,21 +74,89 @@ bool Line::check_silver(cv::Mat& frame) {
 
 	//std::cout << std::to_string(total_difference) << std::endl;
 
-	return total_difference < 20'000;
+	return total_difference < 25'000;
+}
+
+bool Line::abort_obstacle(cv::Mat frame) {
+#ifdef DEBUG
+	cv::Mat debug = frame.clone();
+	cv::rectangle(debug, cv::Point(OBSTACLE_X_LOWER, OBSTACLE_Y_LOWER),
+		cv::Point(OBSTACLE_X_UPPER, OBSTACLE_Y_UPPER), cv::Scalar(0, 255, 0), 2);
+	cv::imshow("Debug", debug);
+	cv::waitKey(1);
+#endif
+
+	cv::Mat cut = frame(cv::Range(OBSTACLE_Y_LOWER, OBSTACLE_Y_UPPER),
+		cv::Range(OBSTACLE_X_LOWER, OBSTACLE_X_UPPER));
+	cv::Mat black = in_range_black(cut);
+	uint32_t non_zero = cv::countNonZero(black);
+	std::cout << non_zero << std::endl;
+	return non_zero > 200;
+}
+
+// ASYNC
+void Line::obstacle() {
+	while(running) {
+		if(robot->distance(DIST_1, 1) < 7.0f) {
+			if(robot->distance(DIST_1, 20) < 9.0f) {
+				std::cout << "Obstacle" << std::endl;
+				obstacle_active = 1;
+				/*robot->beep(300, LED_1);
+				
+				robot->m(-80, -80, 150);
+
+				robot->m(-80, 80, 270);
+				robot->m(80, 80, 200);
+
+				obstacle_active = true;
+				robot->stop_video(front_cam_id);
+				robot->start_video(front_cam_id);
+				delay(500);*/
+			}
+		}
+	}
 }
 
 void Line::line(cv::Mat& frame) {
-	if(check_silver(frame)) {
-		robot->stop();
-		std::cout << "DETECTED SILVER" << std::endl;
-		robot->m(60, -60, 600);
-		delay(500);
-		robot->m(20, 20, 300);
+	// Check if obstacle thread has notified main thread
+	if(obstacle_active == 1) {
+		robot->beep(300, LED_1);
+			
+		robot->m(-80, -80, 150);
+
+		robot->m(-80, 80, 270);
+		robot->m(80, 80, 200);
+
+		obstacle_active = 2;
 		robot->stop_video(front_cam_id);
 		robot->start_video(front_cam_id);
 		delay(500);
+	} else if(obstacle_active == 2) {
+		if(!abort_obstacle(frame)) {
+			robot->m(40, 15, 30);
+			robot->m(50, -20, 30);
+			delay(50);
+		} else {
+			robot->stop();
+			robot->m(20, 20, 450);
+			robot->m(-20, 20, 500);
+			obstacle_active = 0;
+		}
 	} else {
-		follow(frame);
+		//std::async(std::launch::async, [this]{ obstacle(); });
+		cv::Mat black = in_range_black(frame);
+
+		follow(frame, black);
+		if(check_silver(frame)) {
+			robot->stop();
+			std::cout << "DETECTED SILVER" << std::endl;
+			robot->m(60, -60, 600);
+			delay(200);
+			robot->m(20, 20, 300);
+			robot->stop_video(front_cam_id);
+			robot->start_video(front_cam_id);
+			delay(200);
+		}
 	}
 
 	cv::imshow("Frame", frame);
@@ -116,48 +192,6 @@ bool Line::is_black(uint8_t b, uint8_t g, uint8_t r) {
 	return lightness < 100.0f;
 }
 
-float Line::line_weight(float distance) {
-	distance = std::abs(distance);
-	return 0.85f * std::pow(50, -std::pow((distance - 0.6f), 2)) + 0.25f * distance;
-	//return 0.7f * std::pow(50, -std::pow((distance - 0.6f), 2)) + 0.5f * distance;
-	//return 1.0f;
-	//return 3*distance*distance - 2*distance*distance*distance;
-}
-
-float Line::pixel_weight(float distance) {
-	return 0.2f + 0.8f * std::pow(2, -std::pow(distance * 8, 2));
-}
-
-float Line::average_black(cv::Mat in, uint32_t& num_pixels, bool weigh_pixels) {
-	float v = 0.0f;
-	num_pixels = 0;
-
-	float average_pixel_weight = 0.0f;
-
-	int rows = in.rows;
-	int cols = in.cols;
-
-	cv::Vec3b* p;
-	int i, j;
-	for(i = 0; i < rows; ++i) {
-		p = in.ptr<cv::Vec3b>(i);
-		for(j = 0; j < cols; ++j) {
-			if(is_black(p[j][0], p[j][1], p[j][2])) {
-				++num_pixels;
-				float dist_to_center = (float)j / in.cols * 2.0f - 1.0f;
-				float dist_to_last = dist_to_center - last_line_pos;
-				float p_weight = pixel_weight(dist_to_last);
-				v += (weigh_pixels ? p_weight : 1.0f) * dist_to_center;
-				average_pixel_weight += p_weight;
-			}
-		}
-	}
-	average_pixel_weight /= (float)num_pixels;
-	v /= (float)num_pixels;
-	if(weigh_pixels) v /= average_pixel_weight;
-	return v;
-}
-
 cv::Mat Line::in_range_black(cv::Mat& in) {
 	CV_Assert(in.channels() == 3);
 	CV_Assert(in.depth() == CV_8U);
@@ -180,23 +214,19 @@ cv::Mat Line::in_range_black(cv::Mat& in) {
 	return out;
 }
 
-float Line::angle_weight(float x) {
-	return 0.85f * std::pow(50, -std::pow((x - 0.6f), 2)) + 0.25f * x;
-}
-
 float Line::difference_weight(float x) {
-	return 0.25f + 0.75f * std::pow(2, -std::pow(x * 10, 2));
+	return 0.25f + 0.75f * std::pow(2, -std::pow(x * 5, 2));
 }
 
 float Line::distance_weight(float x) {
-	return std::pow(2, -std::pow(((x - 0.5) * 4), 2));
+	return std::pow(2, -std::pow(((x - 0.65) * 4), 2));
 }
 
-float Line::circular_line(cv::Mat& in) {
+float Line::circular_line(cv::Mat& in, std::vector<std::pair<) {
 	float average_line_angle;
 	std::vector<std::pair<float, float>> line_angles; // Map of angle and distance
 
-	cv::Vec3b* p;
+	uint8_t* p;
 
 	cv::Point2f center(in.cols / 2, in.rows); // Bottom center
 	float center_x = in.cols / 2.0f;
@@ -204,9 +234,9 @@ float Line::circular_line(cv::Mat& in) {
 
 	int i, j;
 	for(i = 0; i < in.rows; ++i) {
-		p = in.ptr<cv::Vec3b>(i);
+		p = in.ptr<uint8_t>(i);
 		for(j = 0; j < in.cols; ++j) {
-			if(is_black(p[j][0], p[j][1], p[j][2])) {
+			if(p[j] != 0) {
 				// Put point into array based on distance to center
 				float x = (float)j;
 				float y = (float)i;
@@ -218,6 +248,8 @@ float Line::circular_line(cv::Mat& in) {
 			}
 		}
 	}
+
+	if(line_angles.size() < 40) return 0.0f;
 
 	float average_difference_weight = 0.0f;
 	for(std::pair<float, float> angle : line_angles) {
@@ -234,25 +266,20 @@ float Line::circular_line(cv::Mat& in) {
 	return average_line_angle;
 }
 
-void Line::follow(cv::Mat& frame) {
+void Line::follow(cv::Mat& frame, cv::Mat black) {
 	auto start_time = std::chrono::high_resolution_clock::now();
 #ifdef DEBUG
 	cv::Mat debug = frame.clone();
 #endif
 	//std::cout << "Follow" << std::endl;
 
-	float line_pos = 0.0f;
-	float line_pos_weighted = 0.0f;
+	//cv::Mat black = in_range_black(frame);
 
-	uint8_t line_search_offset = 0;
-	
-	float line_angle = circular_line(frame);
-
-	last_line_angle = line_angle;
+	float line_angle = circular_line(black);
 
 	if(std::isnan(line_angle)) line_angle = 0.0f;
 
-	std::cout << line_angle << std::endl;
+	last_line_angle = line_angle;
 
 #ifdef DEBUG
 	cv::Point center(debug.cols / 2, debug.rows);
@@ -274,7 +301,7 @@ void Line::follow(cv::Mat& frame) {
 
 	//int16_t error = line_pos * FOLLOW_HORIZONTAL_SENSITIVITY + line_angle * FOLLOW_ANGLE_SENSITIVITY;
 
-	int16_t error = angle_weight(line_angle) * line_angle * FOLLOW_HORIZONTAL_SENSITIVITY;
+	int16_t error = line_angle * FOLLOW_HORIZONTAL_SENSITIVITY;
 
 	robot->m(FOLLOW_MOTOR_SPEED + error, FOLLOW_MOTOR_SPEED - error);
 
@@ -282,7 +309,30 @@ void Line::follow(cv::Mat& frame) {
 
 	auto end_time = std::chrono::high_resolution_clock::now();
 	uint16_t us = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
-	std::cout << "Took: " << std::to_string(us) << "μs" << std::endl;
+	//std::cout << "Took: " << std::to_string(us) << "μs" << std::endl;
+}
+
+bool Line::is_green(uint8_t b, uint8_t g, uint8_t r) {
+	return false; // TODO
+}
+
+std::vector<cv::Point> Line::find_green_group_centers(cv::Mat frame) {
+	std::vector<cv::Point> groups;
+
+	cv::Mat green = in_range_green(frame);
+
+	std::vector<std::vector<cv::Point>> contours;
+	std::vector<cv::Vec4i> hierarchy;
+	cv::findContours(green, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+	for(int i = 0; i < contours.size(); i++) {
+		cv::RotatedRect bounding_rect = cv::minAreaRect(contours[i]);
+
+		float size = bounding_rect.size.width * bounding_rect.size.height;
+		if(size > 100.0f) {
+			groups.push_back(bounding_rect.center);
+		}
+	}
 }
 
 // TODO: Find better values

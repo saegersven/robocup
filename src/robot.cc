@@ -125,12 +125,13 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration, uint8_t brake_duty_c
 	softPwmWrite(M1_E, std::abs(left));
 	softPwmWrite(M2_E, std::abs(right));
 
-	io_mutex.unlock();
-
 	// Wait for duration and stop
 	if(duration != 0) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+		io_mutex.unlock();
 		stop(brake_duty_cycle);
+	} else {
+		io_mutex.unlock();
 	}
 }
 
@@ -296,13 +297,14 @@ void Robot::button_wait(uint8_t pin, bool state, uint32_t timeout) {
 
 float Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t timeout) {
 	float timeElapsed = 0.0f;
-	io_mutex.lock();
+	dist_mutex.lock();
 	for(uint16_t i = 0; i < iterations; i++) {
 		digitalWrite(trig, HIGH);
 		std::this_thread::sleep_for(std::chrono::microseconds(100));
 		digitalWrite(trig, LOW);
 
-		std::chrono::time_point<std::chrono::high_resolution_clock> start_time, signal_start, signal_stop;
+		std::chrono::time_point<std::chrono::high_resolution_clock> signal_start, signal_stop;
+		auto start_time = std::chrono::high_resolution_clock::now();
 
 		while (digitalRead(echo) == LOW) {
 			signal_start = std::chrono::high_resolution_clock::now();
@@ -310,7 +312,7 @@ float Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t 
 			if(std::chrono::duration_cast<std::chrono::milliseconds>(
 				std::chrono::high_resolution_clock::now() - start_time).count() > timeout) {
 				// Timeout
-				continue;
+				goto cnt;
 			}
 		}
 
@@ -320,14 +322,15 @@ float Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t 
 			if(std::chrono::duration_cast<std::chrono::milliseconds>(
 				std::chrono::high_resolution_clock::now() - start_time).count() > timeout) {
 				// Timeout
-				continue;
+				goto cnt;
 			}
 		}
 
 		timeElapsed += std::chrono::duration_cast<std::chrono::microseconds>(signal_stop - signal_start).count();
-		delay(5);
+		if(i + 1 != iterations) delay(5);
+		cnt:;
 	}
-	io_mutex.unlock();
+	dist_mutex.unlock();
 	// Multiply with speed of sound (0,0343 cm/us) and divide by 2 to get one-way distance
 	return timeElapsed / (float)iterations * 0.0343f * 0.5f;
 }
