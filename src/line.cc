@@ -17,7 +17,7 @@ bool is_black(uint8_t b, uint8_t g, uint8_t r) {
 }
 
 bool is_green(uint8_t b, uint8_t g, uint8_t r) {
-	return false; // TODO
+	return (float)g / ((float)b + (float)r) > 0.5f; // TODO
 }
 
 Line::Line(int front_cam_id, std::shared_ptr<Robot> robot) : obstacle_active(0), running(false) {
@@ -109,17 +109,6 @@ void Line::obstacle() {
 			if(robot->distance(DIST_1, 20) < 9.0f) {
 				std::cout << "Obstacle" << std::endl;
 				obstacle_active = 1;
-				/*robot->beep(300, LED_1);
-				
-				robot->m(-80, -80, 150);
-
-				robot->m(-80, 80, 270);
-				robot->m(80, 80, 200);
-
-				obstacle_active = true;
-				robot->stop_video(front_cam_id);
-				robot->start_video(front_cam_id);
-				delay(500);*/
 			}
 		}
 	}
@@ -156,9 +145,41 @@ void Line::line(cv::Mat& frame) {
 
 		follow(frame, black);
 
-		green(frame, black);
+		switch(green(frame, black)) {
+			default:
+				break;
+			case 1:
+				std::cout << "LEFT" << std::endl;
+#ifndef MOVEMENT_OFF
+				robot->stop_video(front_cam_id);
+				robot->m(50, 50, 150);
+				robot->m(-50, 50, 300);
+				robot->start_video(front_cam_id);
+#endif
+				break;
+			case 2:
+				std::cout << "RIGHT" << std::endl;
+#ifndef MOVEMENT_OFF
+				robot->stop_video(front_cam_id);
+				robot->m(50, 50, 150);
+				robot->m(50, -50, 300);
+				robot->m(50, 50, 150);
+				robot->start_video(front_cam_id);
+#endif
+				break;
+			case 3:
+				std::cout << "DEAD-END" << std::endl;
+#ifndef MOVEMENT_OFF
+				robot->stop_video(front_cam_id);
+				robot->m(50, 50, 150);
+				robot->m(50, -50, 600);
+				robot->m(50, 50, 150);
+				robot->start_video(front_cam_id);
+#endif
+				break;
+		}
 
-		if(check_silver(frame)) {
+		/*if(check_silver(frame)) {
 			robot->stop();
 			std::cout << "DETECTED SILVER" << std::endl;
 			robot->m(60, -60, 600);
@@ -167,34 +188,11 @@ void Line::line(cv::Mat& frame) {
 			robot->stop_video(front_cam_id);
 			robot->start_video(front_cam_id);
 			delay(200);
-		}
+		}*/
 	}
 
 	cv::imshow("Frame", frame);
 	cv::waitKey(1);
-
-	//cv::Mat frame = robot->capture(front_cam_id); // Retrieve video frame
-	/*cv::Mat green_cut = frame(cv::Range(10, 70), cv::Range(8, 40));
-
-	// TODO: Green color values and threshold
-	if(pixel_count_over_threshold_primary_color(green_cut, 1, 0.85f, 40, 1000)) {
-		//float confidence = 0.0f;
-		//switch(neural_networks.infere(GREEN_NN_ID, frame, confidence)) {
-		switch(green(frame)) {
-			case GREEN_RESULT_LEFT:
-				// TODO: Go left
-				std::cout << "Left" << std::endl;
-				break;
-			case GREEN_RESULT_RIGHT:
-				// TODO: Go right
-				std::cout << "Right" << std::endl;
-				break;
-			case GREEN_RESULT_DEAD_END:
-				// TODO: Turn around
-				std::cout << "Dead End" << std::endl;
-				break;
-		}
-	}*/
 }
 
 /*cv::Mat Line::in_range_black(cv::Mat& in) {
@@ -228,12 +226,15 @@ float Line::distance_weight(float x) {
 }
 
 float Line::circular_line(cv::Mat& in) {
-	float average_line_angle;
-	std::vector<std::pair<float, float>> line_angles; // Map of angle and distance
+	float average_line_angle = 0.0f;
+	float average_difference_weight = 0.0f;
+	uint32_t num_angles = 0;
+
+	//std::vector<std::pair<float, float>> line_angles; // Map of angle and distance
 
 	uint8_t* p;
 
-	cv::Point2f center(in.cols / 2, in.rows); // Bottom center
+	//cv::Point2f center(in.cols / 2, in.rows); // Bottom center
 	float center_x = in.cols / 2.0f;
 	float center_y = in.rows;
 
@@ -247,26 +248,34 @@ float Line::circular_line(cv::Mat& in) {
 				float y = (float)i;
 				float distance = std::sqrt(std::pow(y - center_y, 2) + std::pow(x - center_x, 2));
 				if(distance > MINIMUM_DISTANCE && distance < MAXIMUM_DISTANCE) {
+					++num_angles;
+
 					float angle = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
-					line_angles.push_back(std::pair<float, float>(angle, distance));
+
+					float angle_difference_weight = difference_weight((angle - last_line_angle) / PI * 2.0f);
+					float angle_distance_weight = distance_weight(map(distance, MINIMUM_DISTANCE, MAXIMUM_DISTANCE, 0.0f, 1.0f));
+
+					average_line_angle += angle_difference_weight * angle_distance_weight * angle;
+					average_difference_weight += angle_difference_weight;
+
+					//line_angles.push_back(std::pair<float, float>(angle, distance));
 				}
 			}
 		}
 	}
 
-	if(line_angles.size() < 40) return 0.0f;
-
-	float average_difference_weight = 0.0f;
-	for(std::pair<float, float> angle : line_angles) {
+	if(num_angles < 40) return 0.0f;
+	/*for(std::pair<float, float> angle : line_angles) {
 		float angle_difference_weight = difference_weight((angle.first - last_line_angle) / PI * 2.0f);
 		float angle_distance_weight = distance_weight(map(angle.second, MINIMUM_DISTANCE, MAXIMUM_DISTANCE, 0.0f, 1.0f));
 
 		average_line_angle += angle_difference_weight * angle_distance_weight * angle.first;
 		average_difference_weight += angle_difference_weight;
-	}
+	}*/
 
-	average_line_angle /= (float)line_angles.size();
-	average_line_angle /= average_difference_weight / (float)line_angles.size();
+	average_line_angle /= num_angles;
+	average_difference_weight /= num_angles;
+	average_line_angle /= average_difference_weight;
 
 	return average_line_angle;
 }
@@ -308,7 +317,9 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 
 	int16_t error = line_angle * FOLLOW_HORIZONTAL_SENSITIVITY;
 
+#ifndef MOVEMENT_OFF
 	robot->m(FOLLOW_MOTOR_SPEED + error, FOLLOW_MOTOR_SPEED - error);
+#endif
 
 	//std::cout << std::to_string(error) << std::endl;
 
@@ -320,7 +331,13 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 std::vector<cv::Point> Line::find_green_group_centers(cv::Mat frame, cv::Mat& green) {
 	std::vector<cv::Point> groups;
 
-	green = in_range(frame, &is_green);
+	uint32_t num_pixels = 0;
+	green = in_range(frame, &is_green, &num_pixels);
+#ifdef DEBUG
+	cv::imshow("Green", green);
+#endif
+
+	if(num_pixels < 50) return groups; // Save some time by not calculating contours
 
 	std::vector<std::vector<cv::Point>> contours;
 	std::vector<cv::Vec4i> hierarchy;
@@ -331,6 +348,7 @@ std::vector<cv::Point> Line::find_green_group_centers(cv::Mat frame, cv::Mat& gr
 
 		float size = bounding_rect.size.width * bounding_rect.size.height;
 		if(size > 100.0f) {
+			//std::cout << "Found green contour" << std::endl;
 			groups.push_back(bounding_rect.center);
 		}
 	}
@@ -344,21 +362,31 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 	cv::Mat green;
 	std::vector<cv::Point> groups = find_green_group_centers(frame, green);
 
-	const int cut_width = 15;
-	const int cut_height = 15;
+	const int cut_width = 30;
+	const int cut_height = 30;
+
+	// Check if all of the groups are between certain y values to prevent premature evaluation
+	// of a dead-end or late evaluation of green points behind a line, when the lower line is
+	// already out of the frame
+	for(int i = 0; i < groups.size(); ++i) {
+		if(groups[i].y < 20) return 0;
+		if(groups[i].y > 35) return 0; 
+	}
 
 	// Cut out part of the black matrix around the group centers
 	for(int i = 0; i < groups.size(); ++i) {
 		cv::Range x_range = cv::Range(groups[i].x - cut_width / 2, groups[i].x + cut_width / 2);
 		if(x_range.start < 0) x_range.start = 0;
-		if(x_range.end > black.size[0]) x_range.end = black.cols;
+		if(x_range.end > black.size[1]) x_range.end = black.cols;
 
 		cv::Range y_range = cv::Range(groups[i].y - cut_height / 2, groups[i].y + cut_height / 2);
 		if(y_range.start < 0) y_range.start = 0;
-		if(y_range.end > black.size[1]) y_range.end = black.rows;
+		if(y_range.end > black.size[0]) y_range.end = black.rows;
 
 		cv::Mat cut = black(y_range, x_range);
 		cv::Mat green_cut = green(y_range, x_range); // TODO
+
+		//cv::imshow("Black cut", cut);
 
 		// Calculate average black pixel in the cut
 		float average_x = 0.0f;
@@ -386,7 +414,7 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 		// Check quadrant of the average pixel to determine location of green point relative to line
 		if(average_y < cut.rows / 2) {
 			// Only consider point if average is above
-			green_mask |= average_x < cut.cols / 2 ? 0x01 : 0x02;
+			green_mask |= average_x < cut.cols / 2 ? 0x02 : 0x01;
 		}
 	}
 	// If a green point was to the bottom left of the corner/black line,
@@ -395,5 +423,6 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 	// left -> 1
 	// right -> 2
 	// both -> 3
+	//std::cout << std::to_string(green_mask) << std::endl;
 	return green_mask;
 }

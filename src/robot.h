@@ -99,7 +99,7 @@ public:
 
 	// CAMERA
 	int init_camera(int id, bool calibrated = false,
-		int width = 320, int height = 192, int fps = 60);
+		int width = 320, int height = 192, int fps = 60, const std::string& subtractive_mask_path = "");
 	cv::Mat capture(int cam_id, bool undistort = false);
 	void start_video(int cam_id);
 	void stop_video(int cam_id);

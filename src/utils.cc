@@ -223,9 +223,11 @@ void draw_rotated_rect(cv::Mat out, cv::RotatedRect r, cv::Scalar color, int thi
 	}
 }
 
-cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {
+cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f, uint32_t* num_pixels) {
 	CV_Assert(in.channels() == 3);
 	CV_Assert(in.depth() == CV_8U);
+
+	uint32_t num_p = 0;
 
 	int rows = in.rows;
 	int cols = in.cols;
@@ -239,8 +241,39 @@ cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f)
 		p = in.ptr<cv::Vec3b>(i);
 		p_out = out.ptr<uint8_t>(i);
 		for(j = 0; j < cols; j++) {
-			p_out[j] = f(p[j][0], p[j][1], p[j][2]) ? 0xFF : 0x00;
+			if(f(p[j][0], p[j][1], p[j][2])) {
+				p_out[j] = 0xFF;
+				++num_p;
+			} else {
+				p_out[j] = 0x00;
+			}
 		}
 	}
+	if(num_pixels != nullptr) {
+		*num_pixels = num_p;
+	}
 	return out;
+}
+
+void clipped_difference(cv::Mat a, cv::Mat b, cv::Mat out) {
+	CV_Assert(a.depth() == CV_8U);
+	CV_Assert(b.depth() == CV_8U);
+	CV_Assert(a.cols == b.cols);
+	CV_Assert(a.rows == b.rows);
+
+	uint8_t* a_ptr;
+	uint8_t* b_ptr;
+	uint8_t* out_ptr;
+
+	int i, j;
+	for(i = 0; i < a.rows; ++i) {
+		a_ptr = a.ptr<uint8_t>(i);
+		b_ptr = b.ptr<uint8_t>(i);
+		out_ptr = out.ptr<uint8_t>(i);
+		for(j = 0; j < a.cols * a.channels(); j++) {
+			int16_t diff = a_ptr[j] - b_ptr[j];
+			if(diff < 0) diff = 0;
+			out_ptr[j] = (uint8_t)diff;
+		}
+	}
 }

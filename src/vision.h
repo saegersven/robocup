@@ -19,9 +19,13 @@ public:
 	cv::Mat new_camera_matrix;
 	cv::Mat distortion_matrix;
 
+	bool has_subtractive_mask = false;
+	cv::Mat subtractive_mask;
+
 	Camera(int hardware_id, bool calibrated, int width, int height, int fps);
 
 	void calibration_from_file(const std::string& file_name);
+	void load_subtractive_mask(const std::string& file_name);
 	void open_video();
 	void stop_video();
 	cv::Mat retrieve_video_frame(bool undistort = false);

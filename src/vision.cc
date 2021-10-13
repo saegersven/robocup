@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "errcodes.h"
+#include "utils.h"
 
 Camera::Camera(int hardware_id, bool calibrated, int width, int height, int fps) {
 	this->hardware_id = hardware_id;
@@ -45,6 +46,11 @@ void Camera::calibration_from_file(const std::string& file_name) {
 	fclose(file);
 }
 
+void Camera::load_subtractive_mask(const std::string& file_name) {
+	this->subtractive_mask = cv::imread(file_name);
+	has_subtractive_mask = true;
+}
+
 void Camera::open_video() {
 	this->cap.open(hardware_id);
 	this->cap.set(cv::CAP_PROP_FRAME_WIDTH, std::max(320, this->image_size.width));
@@ -76,6 +82,10 @@ cv::Mat Camera::retrieve_video_frame(bool undist) {
 	//frame = quarter_image(frame);
 
 	cv::resize(frame, frame, this->image_size);
+
+	if(has_subtractive_mask) {
+		clipped_difference(frame, subtractive_mask, frame);
+	}
 
 	if(undist && this->calibrated) {
 		frame = undistort(frame);

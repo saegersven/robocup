@@ -82,8 +82,12 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	motor_update_thread.detach();
 }
 
-int Robot::init_camera(int id, bool calibrated, int width, int height, int fps) {
+int Robot::init_camera(int id, bool calibrated, int width, int height, int fps, const std::string& subtractive_mask_path) {
 	Camera cam(id, calibrated, width, height, fps);
+
+	if(strcmp(subtractive_mask_path.c_str(), "")) {
+		cam.load_subtractive_mask(subtractive_mask_path);
+	}
 
 	cams.push_back(cam);
 	return cams.size() - 1;

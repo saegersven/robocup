@@ -37,4 +37,6 @@ float map(float s, float a1, float a2, float b1, float b2);
 
 void draw_rotated_rect(cv::Mat out, cv::RotatedRect r, cv::Scalar color, int thickness);
 
-cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f);
+cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f, uint32_t* num_pixels = nullptr);
+
+void clipped_difference(cv::Mat a, cv::Mat b, cv::Mat out);
