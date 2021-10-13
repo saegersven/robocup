@@ -33,7 +33,7 @@
 #define OBSTACLE_X_LOWER 20
 
 #define DEBUG
-#define MOVEMENT_OFF
+//#define MOVEMENT_OFF
 
 bool is_black(uint8_t b, uint8_t g, uint8_t r);
 
