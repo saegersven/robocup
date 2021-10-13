@@ -242,43 +242,6 @@ void Robot::beep(uint16_t ms, uint8_t pin) {
 	digitalWrite(pin, LOW);
 
 }
-/*// Go in a straight line
-void Robot::drive_distance(float distance, int8_t speed) {
-	int8_t sign = distance < 0 ? -1 : 1;
-
-	float distance_travelled = 0.0f;
-
-	int16_t total_error = 0;
-
-	io_mutex.lock();
-	uint8_t last_encoder_a = encoder_value_a();
-	uint8_t last_encoder_b = encoder_value_b();
-
-	while(distance_travelled < distance) {
-		uint8_t encoder_a = encoder_value_a();
-		uint8_t encoder_b = encoder_value_b();
-
-		// Difference in pulses
-		// No need to account for counter overflow, as deltas will overflow too
-		uint8_t d_encoder_a = encoder_a - last_encoder_a;
-		uint8_t d_encoder_b = encoder_b - last_encoder_b;
-		
-		// Average encoder deltas to calculate distance travelled
-		distance_travelled += (d_encoder_a + d_encoder_b) / 2.0f *
-			PULSES_PER_REVOLUTION * GEAR_RATIO * WHEEL_CIRCUMFERENCE
-
-		total_error += d_encoder_b - d_encoder_a;
-
-		m(sign * (speed + total_error * FORWARD_CORRECTION_FACTOR),
-			sign * (speed - total_error * FORWARD_CORRECTION_FACTOR), 0);
-
-		last_encoder_a = encoder_a;
-		last_encoder_b = encoder_b;
-	}
-	io_mutex.unlock();
-
-	stop();
-}*/
 
 bool Robot::button(uint8_t pin) {
 	io_mutex.lock();

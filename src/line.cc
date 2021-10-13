@@ -10,20 +10,18 @@
 
 #include "robot.h"
 #include "utils.h"
-//#include "neural_networks.h"
 
 bool is_black(uint8_t b, uint8_t g, uint8_t r) {
 	return (uint16_t)b + (uint16_t)g + (uint16_t)r < 300;
 }
 
 bool is_green(uint8_t b, uint8_t g, uint8_t r) {
-	return (float)g / ((float)b + (float)r) > 0.5f; // TODO
+	return (float)g / ((float)b + (float)r) > 0.5f;
 }
 
 Line::Line(int front_cam_id, std::shared_ptr<Robot> robot) : obstacle_active(0), running(false) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
-	//this->neural_networks = neural_networks;
 
 	this->average_silver = cv::imread(RUNTIME_AVERAGE_SILVER_PATH);
 }
@@ -34,10 +32,8 @@ void Line::start() {
 
 	running = true;
 
-	std::cout << "Begin line" << std::endl;
 	std::thread obstacle_thread([this]{obstacle();});
 	obstacle_thread.detach();
-	std::cout << "Obstacle thread started" << std::endl;
 }
 
 void Line::stop() {
@@ -46,19 +42,12 @@ void Line::stop() {
 
 	robot->stop_video(front_cam_id);
 	obstacle_active = 0;
-	// Setting running to false should notify obstacle thread
+	// Setting running to false will notify obstacle thread to stop
 	running = false;
 }
 
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat a = frame(cv::Range(SILVER_Y), cv::Range(SILVER_X));
-
-	//cv::rectangle(frame, cv::Rect(30, 36, 27, 54), cv::Scalar(0, 255, 0), 2);
-
-	//cv::Mat a_resized;
-	//cv::resize(a, a_resized, cv::Size(),10.0, 10.0);
-	//cv::imshow("Silver Cut", a_resized);
-	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, a);
 
 	// Calculate difference between frame cutout
 	int rows = a.rows;
@@ -76,11 +65,9 @@ bool Line::check_silver(cv::Mat& frame) {
 		for(j = 0; j < cols; ++j) {
 			total_difference += std::abs((int16_t)p[j + 0] - p_b[j + 0])
 				+ std::abs((int16_t)p[j + 1] - p_b[j + 2])
-				+ std::abs((int16_t)p[j + 1] - p_b[j + 2]) * 2;
+				+ std::abs((int16_t)p[j + 1] - p_b[j + 2]);
 		}
 	}
-
-	//std::cout << std::to_string(total_difference) << std::endl;
 
 	return total_difference < 25'000;
 }
@@ -105,16 +92,14 @@ bool Line::abort_obstacle(cv::Mat frame) {
 // ASYNC
 void Line::obstacle() {
 	while(running) {
-		if(robot->distance(DIST_1, 1) < 7.0f) {
-			if(robot->distance(DIST_1, 20) < 9.0f) {
-				std::cout << "Obstacle" << std::endl;
-				obstacle_active = 1;
-			}
+		if(robot->distance(DIST_1, 1) < 7.0f && robot->distance(DIST_1, 20) < 9.0f) {
+			std::cout << "Obstacle" << std::endl;
+			obstacle_active = 1;
 		}
 	}
 }
 
-void Line::line(cv::Mat& frame) {
+bool Line::line(cv::Mat& frame) {
 	// Check if obstacle thread has notified main thread
 	if(obstacle_active == 1) {
 		robot->beep(300, LED_1);
@@ -140,17 +125,19 @@ void Line::line(cv::Mat& frame) {
 			obstacle_active = 0;
 		}
 	} else {
-		//std::async(std::launch::async, [this]{ obstacle(); });
 		cv::Mat black = in_range(frame, &is_black);
 
 		follow(frame, black);
 
-		switch(green(frame, black)) {
+		uint8_t green_result = green(frame, black);
+
+		switch(green_result) {
 			default:
 				break;
 			case 1:
 				std::cout << "LEFT" << std::endl;
 #ifndef MOVEMENT_OFF
+				// Stop video before doing anything that causes a delay in frame retreival
 				robot->stop_video(front_cam_id);
 				robot->m(50, 50, 150);
 				robot->m(-50, 50, 300);
@@ -179,43 +166,23 @@ void Line::line(cv::Mat& frame) {
 				break;
 		}
 
-		/*if(check_silver(frame)) {
+		if(check_silver(frame)) {
 			robot->stop();
-			std::cout << "DETECTED SILVER" << std::endl;
+			std::cout << "SILVER" << std::endl;
+			robot->stop_video(front_cam_id);
 			robot->m(60, -60, 600);
 			delay(200);
 			robot->m(20, 20, 300);
-			robot->stop_video(front_cam_id);
 			robot->start_video(front_cam_id);
 			delay(200);
-		}*/
+			return true; // Return true when silver is detected
+		}
+		return false;
 	}
 
 	cv::imshow("Frame", frame);
 	cv::waitKey(1);
 }
-
-/*cv::Mat Line::in_range_black(cv::Mat& in) {
-	CV_Assert(in.channels() == 3);
-	CV_Assert(in.depth() == CV_8U);
-
-	int rows = in.rows;
-	int cols = in.cols;
-
-	cv::Vec3b* p;
-	uint8_t* p_out;
-	cv::Mat out(rows, cols, CV_8UC1);
-
-	int i, j;
-	for(i = 0; i < rows; ++i) {
-		p = in.ptr<cv::Vec3b>(i);
-		p_out = out.ptr<uint8_t>(i);
-		for(j = 0; j < cols; j++) {
-			p_out[j] = is_black(p[j][0], p[j][1], p[j][2]) ? 0xFF : 0x00;
-		}
-	}
-	return out;
-}*/
 
 float Line::difference_weight(float x) {
 	return 0.25f + 0.75f * std::pow(2, -std::pow(x * 5, 2));
@@ -265,13 +232,6 @@ float Line::circular_line(cv::Mat& in) {
 	}
 
 	if(num_angles < 40) return 0.0f;
-	/*for(std::pair<float, float> angle : line_angles) {
-		float angle_difference_weight = difference_weight((angle.first - last_line_angle) / PI * 2.0f);
-		float angle_distance_weight = distance_weight(map(angle.second, MINIMUM_DISTANCE, MAXIMUM_DISTANCE, 0.0f, 1.0f));
-
-		average_line_angle += angle_difference_weight * angle_distance_weight * angle.first;
-		average_difference_weight += angle_difference_weight;
-	}*/
 
 	average_line_angle /= num_angles;
 	average_difference_weight /= num_angles;
@@ -281,7 +241,6 @@ float Line::circular_line(cv::Mat& in) {
 }
 
 void Line::follow(cv::Mat& frame, cv::Mat black) {
-	auto start_time = std::chrono::high_resolution_clock::now();
 #ifdef DEBUG
 	cv::Mat debug = frame.clone();
 #endif
@@ -307,25 +266,15 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 		cv::Scalar(0, 255, 0), 2
 		);
 
-	//std::cout << "Pos:\t" << std::to_string(line_pos) << "\tAngle:\t" << std::to_string(line_angle) << "\r" << std::endl;
-
 	cv::imshow("Debug", debug);
 	cv::waitKey(1);
 #endif
-
-	//int16_t error = line_pos * FOLLOW_HORIZONTAL_SENSITIVITY + line_angle * FOLLOW_ANGLE_SENSITIVITY;
 
 	int16_t error = line_angle * FOLLOW_HORIZONTAL_SENSITIVITY;
 
 #ifndef MOVEMENT_OFF
 	robot->m(FOLLOW_MOTOR_SPEED + error, FOLLOW_MOTOR_SPEED - error);
 #endif
-
-	//std::cout << std::to_string(error) << std::endl;
-
-	auto end_time = std::chrono::high_resolution_clock::now();
-	uint16_t us = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
-	//std::cout << "Took: " << std::to_string(us) << "μs" << std::endl;
 }
 
 std::vector<cv::Point> Line::find_green_group_centers(cv::Mat frame, cv::Mat& green) {
@@ -348,7 +297,6 @@ std::vector<cv::Point> Line::find_green_group_centers(cv::Mat frame, cv::Mat& gr
 
 		float size = bounding_rect.size.width * bounding_rect.size.height;
 		if(size > 100.0f) {
-			//std::cout << "Found green contour" << std::endl;
 			groups.push_back(bounding_rect.center);
 		}
 	}
@@ -385,8 +333,6 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 
 		cv::Mat cut = black(y_range, x_range);
 		cv::Mat green_cut = green(y_range, x_range); // TODO
-
-		//cv::imshow("Black cut", cut);
 
 		// Calculate average black pixel in the cut
 		float average_x = 0.0f;

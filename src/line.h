@@ -72,5 +72,5 @@ public:
 	Line(int front_cam_id, std::shared_ptr<Robot> robot);
 	void start();
 	void stop();
-	void line(cv::Mat& frame);
+	bool line(cv::Mat& frame);
 };
