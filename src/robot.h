@@ -97,6 +97,9 @@ private:
 public:
 	Robot();
 
+	// Delay grabbing frames from the camera to keep it from freezing
+	void delay_c(uint32_t ms, int id);
+
 	// CAMERA
 	int init_camera(int id, bool calibrated = false,
 		int width = 320, int height = 192, int fps = 60, const std::string& subtractive_mask_path = "");

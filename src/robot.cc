@@ -82,6 +82,17 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	motor_update_thread.detach();
 }
 
+void Robot::delay_c(uint32_t ms, int id) {
+	if(!cams[id].cap.isOpened()) {
+		delay(ms);
+		return;
+	}
+	std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
+	while(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start) < ms) {
+		cams[cam_id].cap.grab();
+	}
+}
+
 int Robot::init_camera(int id, bool calibrated, int width, int height, int fps, const std::string& subtractive_mask_path) {
 	Camera cam(id, calibrated, width, height, fps);
 
@@ -131,12 +142,13 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration, uint8_t brake_duty_c
 
 	// Wait for duration and stop
 	if(duration != 0) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+		delay_c(duration, this->front_cam_id);
 		io_mutex.unlock();
 		stop(brake_duty_cycle);
-	} else {
-		io_mutex.unlock();
+		return;
 	}
+	io_mutex.unlock();
 }
 
 void Robot::stop(uint8_t brake_duty_cycle) {
