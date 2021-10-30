@@ -24,6 +24,7 @@ Line::Line(int front_cam_id, std::shared_ptr<Robot> robot) : obstacle_active(0),
 	this->robot = robot;
 
 	this->average_silver = cv::imread(RUNTIME_AVERAGE_SILVER_PATH);
+	this->distance_weight_map = cv::imread(RUNTIME_DISTANCE_WEIGHT_MAP_PATH, cv::IMREAD_GRAYSCALE);
 }
 
 void Line::start() {
@@ -134,7 +135,7 @@ bool Line::line(cv::Mat& frame) {
 		switch(green_result) {
 			default:
 				break;
-			case 1:
+			case GREEN_RESULT_LEFT:
 				std::cout << "LEFT" << std::endl;
 #ifndef MOVEMENT_OFF
 				// Stop video before doing anything that causes a delay in frame retreival
@@ -144,7 +145,7 @@ bool Line::line(cv::Mat& frame) {
 				robot->start_video(front_cam_id);
 #endif
 				break;
-			case 2:
+			case GREEN_RESULT_RIGHT:
 				std::cout << "RIGHT" << std::endl;
 #ifndef MOVEMENT_OFF
 				robot->stop_video(front_cam_id);
@@ -154,7 +155,7 @@ bool Line::line(cv::Mat& frame) {
 				robot->start_video(front_cam_id);
 #endif
 				break;
-			case 3:
+			case GREEN_RESULT_DEAD_END:
 				std::cout << "DEAD-END" << std::endl;
 #ifndef MOVEMENT_OFF
 				robot->stop_video(front_cam_id);
@@ -166,7 +167,7 @@ bool Line::line(cv::Mat& frame) {
 				break;
 		}
 
-		if(check_silver(frame)) {
+		/*if(check_silver(frame)) {
 			robot->stop();
 			std::cout << "SILVER" << std::endl;
 			robot->stop_video(front_cam_id);
@@ -176,12 +177,12 @@ bool Line::line(cv::Mat& frame) {
 			robot->start_video(front_cam_id);
 			delay(200);
 			return true; // Return true when silver is detected
-		}
-		return false;
+		}*/
 	}
 
 	cv::imshow("Frame", frame);
 	cv::waitKey(1);
+	return false;
 }
 
 float Line::difference_weight(float x) {
@@ -193,13 +194,15 @@ float Line::distance_weight(float x) {
 }
 
 float Line::circular_line(cv::Mat& in) {
-	float average_line_angle = 0.0f;
-	float average_difference_weight = 0.0f;
+	float weighted_line_angle = 0.0f;
+	float total_weight = 0.0f;
+
 	uint32_t num_angles = 0;
 
 	//std::vector<std::pair<float, float>> line_angles; // Map of angle and distance
 
 	uint8_t* p;
+	uint8_t* p_dw;
 
 	//cv::Point2f center(in.cols / 2, in.rows); // Bottom center
 	float center_x = in.cols / 2.0f;
@@ -208,24 +211,23 @@ float Line::circular_line(cv::Mat& in) {
 	int i, j;
 	for(i = 0; i < in.rows; ++i) {
 		p = in.ptr<uint8_t>(i);
+		p_dw = distance_weight_map.ptr<uint8_t>(i);
 		for(j = 0; j < in.cols; ++j) {
-			if(p[j] != 0) {
+			if(p[j]) {
 				// Put point into array based on distance to center
 				float x = (float)j;
 				float y = (float)i;
-				float distance = std::sqrt(std::pow(y - center_y, 2) + std::pow(x - center_x, 2));
-				if(distance > MINIMUM_DISTANCE && distance < MAXIMUM_DISTANCE) {
+
+				uint8_t dw = p_dw[j];
+				if(dw) {
 					++num_angles;
 
+					float pixel_distance_weight = dw / 255.0f;
 					float angle = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
-
 					float angle_difference_weight = difference_weight((angle - last_line_angle) / PI * 2.0f);
-					float angle_distance_weight = distance_weight(map(distance, MINIMUM_DISTANCE, MAXIMUM_DISTANCE, 0.0f, 1.0f));
-
-					average_line_angle += angle_difference_weight * angle_distance_weight * angle;
-					average_difference_weight += angle_difference_weight;
-
-					//line_angles.push_back(std::pair<float, float>(angle, distance));
+					
+					weighted_line_angle += angle_difference_weight * pixel_distance_weight * angle;
+					total_weight += angle_difference_weight * pixel_distance_weight;
 				}
 			}
 		}
@@ -233,11 +235,11 @@ float Line::circular_line(cv::Mat& in) {
 
 	if(num_angles < 40) return 0.0f;
 
-	average_line_angle /= num_angles;
-	average_difference_weight /= num_angles;
-	average_line_angle /= average_difference_weight;
+	weighted_line_angle /= total_weight;
+	//average_difference_weight /= num_angles;
+	//average_line_angle /= average_difference_weight;
 
-	return average_line_angle;
+	return weighted_line_angle;
 }
 
 void Line::follow(cv::Mat& frame, cv::Mat black) {
