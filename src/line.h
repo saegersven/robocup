@@ -29,12 +29,25 @@
 #define OBSTACLE_X_UPPER 60
 #define OBSTACLE_X_LOWER 20
 
+#define TURN_100_90 330
+
 #define DEBUG
 //#define MOVEMENT_OFF
 
 bool is_black(uint8_t b, uint8_t g, uint8_t r);
 
 bool is_green(uint8_t b, uint8_t g, uint8_t r);
+
+bool is_blue(uint8_t b, uint8_t g, uint8_t r);
+
+// A group of pixels,
+// x and y are the average coordinates
+// num_pixels is the number of pixels making up this group
+// Returned by find_groups
+struct Group {
+	float x, y;
+	uint32_t num_pixels;
+};
 
 class Line {
 private:
@@ -47,6 +60,8 @@ private:
 	std::atomic<bool> running;
 
 	std::atomic<int> obstacle_active;
+
+	cv::Mat debug_frame;
 
 	float last_line_pos;
 	float last_line_angle;
@@ -61,10 +76,16 @@ private:
 
 	bool check_silver(cv::Mat& frame);
 
-	std::vector<cv::Point> find_green_group_centers(cv::Mat frame, cv::Mat& green);
+	//std::vector<cv::Point> find_green_group_centers_old(cv::Mat frame, cv::Mat& green);
+
+	std::vector<Group> find_groups(cv::Mat frame, cv::Mat& ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f);
+	void add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y);
+
 	uint8_t green(cv::Mat& frame, cv::Mat& black);
 
 	void follow(cv::Mat& frame, cv::Mat black);
+
+	void rescue_kit(cv::Mat& frame);
 
 public:
 	Line(int front_cam_id, std::shared_ptr<Robot> robot);

@@ -11,7 +11,11 @@ float clip(float n, float lower, float upper);
 float point_distance(cv::Point a, cv::Point b);
 
 inline float deg_to_rad(float deg) {
-	return deg * 0.01745329251f;
+	return deg * PI / 180.0f;
+}
+
+inline float rad_to_deg(float rad) {
+	return rad / PI * 180.0f;
 }
 
 float map(float s, float a1, float a2, float b1, float b2);

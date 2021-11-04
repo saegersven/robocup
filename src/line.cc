@@ -10,13 +10,26 @@
 
 #include "robot.h"
 #include "utils.h"
+#include "rescue.h"
+
+#define BLACK_MIN_SUM 300
 
 bool is_black(uint8_t b, uint8_t g, uint8_t r) {
-	return (uint16_t)b + (uint16_t)g + (uint16_t)r < 300;
+	return (uint16_t)b + (uint16_t)g + (uint16_t)r < BLACK_MIN_SUM;
 }
 
+#define GREEN_RATIO_THRESHOLD 0.6f
+#define GREEN_MIN_VALUE 20
+
 bool is_green(uint8_t b, uint8_t g, uint8_t r) {
-	return (float)g / ((float)b + (float)r) > 0.5f;
+	return 1.0f / GREEN_RATIO_THRESHOLD * g > b + r && g > GREEN_MIN_VALUE;
+}
+
+#define BLUE_RATIO_THRESHOLD 1.7f
+#define BLUE_MIN_VALUE 50
+
+bool is_blue(uint8_t b, uint8_t g, uint8_t r) {
+	return 1.0f / BLUE_RATIO_THRESHOLD * b > g + r && b > BLUE_MIN_VALUE;
 }
 
 Line::Line(int front_cam_id, std::shared_ptr<Robot> robot) : obstacle_active(0), running(false) {
@@ -126,9 +139,15 @@ bool Line::line(cv::Mat& frame) {
 			obstacle_active = 0;
 		}
 	} else {
+#ifdef DEBUG
+		debug_frame = frame.clone();
+#endif
+
 		cv::Mat black = in_range(frame, &is_black);
 
 		follow(frame, black);
+
+		rescue_kit(frame);
 
 		uint8_t green_result = green(frame, black);
 
@@ -179,6 +198,10 @@ bool Line::line(cv::Mat& frame) {
 			return true; // Return true when silver is detected
 		}*/
 	}
+#ifdef DEBUG
+	cv::imshow("Debug", debug_frame);
+	cv::waitKey(1);
+#endif
 
 	cv::imshow("Frame", frame);
 	cv::waitKey(1);
@@ -243,9 +266,6 @@ float Line::circular_line(cv::Mat& in) {
 }
 
 void Line::follow(cv::Mat& frame, cv::Mat black) {
-#ifdef DEBUG
-	cv::Mat debug = frame.clone();
-#endif
 	//std::cout << "Follow" << std::endl;
 
 	//cv::Mat black = in_range_black(frame);
@@ -257,19 +277,16 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 	last_line_angle = line_angle;
 
 #ifdef DEBUG
-	cv::Point center(debug.cols / 2, debug.rows);
+	cv::Point center(debug_frame.cols / 2, debug_frame.rows);
 
-	cv::circle(debug, center, MINIMUM_DISTANCE, cv::Scalar(0, 255, 0), 2);
-	cv::circle(debug, center, MAXIMUM_DISTANCE, cv::Scalar(0, 255, 0), 2);
+	cv::circle(debug_frame, center, MINIMUM_DISTANCE, cv::Scalar(0, 255, 0), 2);
+	cv::circle(debug_frame, center, MAXIMUM_DISTANCE, cv::Scalar(0, 255, 0), 2);
 
-	cv::line(debug,
+	cv::line(debug_frame,
 		cv::Point(std::sin(line_angle) * MINIMUM_DISTANCE, -std::cos(line_angle) * MINIMUM_DISTANCE) + center,
 		cv::Point(std::sin(line_angle) * MAXIMUM_DISTANCE, -std::cos(line_angle) * MAXIMUM_DISTANCE) + center,
 		cv::Scalar(0, 255, 0), 2
 		);
-
-	cv::imshow("Debug", debug);
-	cv::waitKey(1);
 #endif
 
 	int16_t error = line_angle * FOLLOW_HORIZONTAL_SENSITIVITY;
@@ -279,27 +296,87 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 #endif
 }
 
-std::vector<cv::Point> Line::find_green_group_centers(cv::Mat frame, cv::Mat& green) {
-	std::vector<cv::Point> groups;
+// std::vector<cv::Point> Line::find_green_group_centers_old(cv::Mat frame, cv::Mat& green) {
+// 	std::vector<cv::Point> groups;
+
+// 	uint32_t num_pixels = 0;
+// 	green = in_range(frame, &is_green, &num_pixels);
+// #ifdef DEBUG
+// 	cv::imshow("Green", green);
+// #endif
+
+// 	if(num_pixels < 50) return groups; // Save some time by not calculating contours
+
+// 	std::vector<std::vector<cv::Point>> contours;
+// 	std::vector<cv::Vec4i> hierarchy;
+// 	cv::findContours(green, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+// 	for(int i = 0; i < contours.size(); i++) {
+// 		cv::RotatedRect bounding_rect = cv::minAreaRect(contours[i]);
+
+// 		float size = bounding_rect.size.width * bounding_rect.size.height;
+// 		if(size > 100.0f) {
+// 			groups.push_back(bounding_rect.center);
+// 		}
+// 	}
+
+// 	return groups;
+// }
+
+void Line::add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y) {
+	int col_limit = ir.cols - 1;
+	int row_limit = ir.rows - 1;
+
+	for(int y = -1; y <= 1; ++y) {
+		int y_index = y_pos + y;
+
+		uint8_t* p = ir.ptr<uint8_t>(y_index);
+
+		for(int x = -1; x <= 1; ++x) {
+			if(y == 0 && x == 0) continue;
+
+			int x_index = x_pos + x;
+
+			if(p[x_index] == 0xFF) {
+				p[x_index] = 0x7F;
+				center_x += (float)x_index;
+				center_y += (float)y_index;
+				++num_pixels;
+
+				if(x_index > 0 && x_index < col_limit && y_index > 0 && y_index < row_limit)
+					add_to_group_center(x_index, y_index, ir, num_pixels, center_x, center_y);
+			}
+		}
+	}
+}
+
+std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {
+	std::vector<Group> groups;
 
 	uint32_t num_pixels = 0;
-	green = in_range(frame, &is_green, &num_pixels);
-#ifdef DEBUG
-	cv::imshow("Green", green);
-#endif
+	ir = in_range(frame, f, &num_pixels);
 
-	if(num_pixels < 50) return groups; // Save some time by not calculating contours
+	if(num_pixels < 50) return groups;
 
-	std::vector<std::vector<cv::Point>> contours;
-	std::vector<cv::Vec4i> hierarchy;
-	cv::findContours(green, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+	for(int y = 0; y < ir.rows; ++y) {
+		uint8_t* p = ir.ptr<uint8_t>(y);
+		for(int x = 0; x < ir.cols; ++x) {
+			// Don't check for non-zero, as found pixels are set to 0xFE instead
+			// so information does not get lost, when using matrix later,
+			// check for non-zero pixels
+			if(p[x] == 0xFF) {
+				//std::cout << "Creating group at " << x << ", " << y << std::endl;
+				uint32_t num_group_pixels = 0;
+				float group_center_x = 0.0f;
+				float group_center_y = 0.0f;
+				add_to_group_center(x, y, ir, num_group_pixels, group_center_x, group_center_y);
 
-	for(int i = 0; i < contours.size(); i++) {
-		cv::RotatedRect bounding_rect = cv::minAreaRect(contours[i]);
-
-		float size = bounding_rect.size.width * bounding_rect.size.height;
-		if(size > 100.0f) {
-			groups.push_back(bounding_rect.center);
+				if(num_group_pixels > 100) {
+					group_center_x /= num_group_pixels;
+					group_center_y /= num_group_pixels;
+					groups.push_back({group_center_x, group_center_y, num_group_pixels});
+				}
+			}
 		}
 	}
 
@@ -310,7 +387,7 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 	uint8_t green_mask = 0;
 
 	cv::Mat green;
-	std::vector<cv::Point> groups = find_green_group_centers(frame, green);
+	std::vector<Group> groups = find_groups(frame, green, &is_green);
 
 	const int cut_width = 30;
 	const int cut_height = 30;
@@ -373,4 +450,76 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 	// both -> 3
 	//std::cout << std::to_string(green_mask) << std::endl;
 	return green_mask;
+}
+
+void Line::rescue_kit(cv::Mat& frame) {
+	cv::Mat blue;
+	std::vector<Group> groups = find_groups(frame, blue, &is_blue);
+
+#ifdef DEBUG
+	cv::imshow("Blue", blue);
+#endif
+
+	if(groups.size() > 0) {
+		Group group = groups[0];
+		// If there is more than one group, select the one with most pixels,
+		// as the smaller ones are likely noise
+		if(groups.size() > 1) {
+			for(int i = 1; i < groups.size(); ++i) {
+				if(groups[i].num_pixels > group.num_pixels) {
+					group = groups[i];
+				}
+			}
+		}
+		// Position robot
+		float center_x = frame.cols / 2.0f;
+		float center_y = frame.rows + 20;
+		float angle = std::atan2(group.y - center_y, group.x - center_x) + (PI / 2.0f);
+		float distance = std::sqrt(std::pow(group.y - center_y, 2) + std::pow(group.x - center_x, 2));
+
+		robot->stop_video(front_cam_id);
+		if(angle < 0) {
+			robot->m(-60, 60, 300 * -angle);
+		} else {
+			robot->m(60, -60, 300 * angle);
+		}
+		std::cout << "Angle:    " << rad_to_deg(angle) << std::endl;
+		std::cout << "Distance: " << distance << std::endl;
+		stop();
+		delay(500);
+
+		if(distance < 24) {
+			robot->m(-60, -60, 1.5f * (distance - 24));
+		} else {
+			robot->m(60, 60, 1.5f * (distance - 24));
+		}
+
+		delay(1000);
+
+		robot->m(-60, -60, 420);
+		delay(200);
+		robot->m(100, -100, TURN_100_90 * 2);
+
+		//delay(1000);
+		robot->servo(SERVO_2, GRAB_OPEN, 750);
+		robot->servo(SERVO_1, ARM_DOWN, 750);
+
+		robot->attach_servo(SERVO_2);
+		robot->write_servo(SERVO_2, GRAB_CLOSED);
+		delay(500);
+		robot->servo(SERVO_1, ARM_UP, 750);
+		robot->write_servo(SERVO_2, GRAB_OPEN);
+		delay(200);
+		robot->write_servo(SERVO_2, GRAB_CLOSED);
+		delay(200);
+		robot->release_servo(SERVO_2);
+
+		delay(200);
+		// Reposition to continue
+		robot->m(-100, 100, TURN_100_90 * 2);
+		delay(200);
+		robot->m(60, 60, 200);
+		delay(1000);
+		robot->start_video(front_cam_id);
+	}
 }

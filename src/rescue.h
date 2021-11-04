@@ -1,5 +1,12 @@
 #pragma once
 
+#define ARM_UP 80
+#define ARM_DOWN -95
+#define ARM_DROP -50
+
+#define GRAB_OPEN -20
+#define GRAB_CLOSED -100
+
 class Rescue {
 private:
 	std::mutex rescue_mutex;

@@ -63,14 +63,14 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 
 	// Setup Servo motor pins
 	// 50Hz has a period of 20ms, so multiply value by 100 to get period in microseconds
-	if(softPwmCreate(SERVO_1, 0, 200)) {
-		std::cout << "Error setting up PWM for Servo 1" << std::endl;
-		exit(ERRCODE_BOT_SETUP_PWM);
-	}
-	if(softPwmCreate(SERVO_2, 0, 200)) {
-		std::cout << "Error setting up PWM for Servo 2" << std::endl;
-		exit(ERRCODE_BOT_SETUP_PWM);
-	}
+	// if(softPwmCreate(SERVO_1, 0, 200)) {
+	// 	std::cout << "Error setting up PWM for Servo 1" << std::endl;
+	// 	exit(ERRCODE_BOT_SETUP_PWM);
+	// }
+	// if(softPwmCreate(SERVO_2, 0, 200)) {
+	// 	std::cout << "Error setting up PWM for Servo 2" << std::endl;
+	// 	exit(ERRCODE_BOT_SETUP_PWM);
+	// }
 
 	io_mutex.unlock();
 
@@ -82,16 +82,16 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	motor_update_thread.detach();
 }
 
-void Robot::delay_c(uint32_t ms, int id) {
-	if(!cams[id].cap.isOpened()) {
-		delay(ms);
-		return;
-	}
-	std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
-	while(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start) < ms) {
-		cams[cam_id].cap.grab();
-	}
-}
+// void Robot::delay_c(uint32_t ms, int id) {
+// 	if(!cams[id].cap.isOpened()) {
+// 		delay(ms);
+// 		return;
+// 	}
+// 	std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
+// 	while(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start) < ms) {
+// 		cams[cam_id].cap.grab();
+// 	}
+// }
 
 int Robot::init_camera(int id, bool calibrated, int width, int height, int fps, const std::string& subtractive_mask_path) {
 	Camera cam(id, calibrated, width, height, fps);
@@ -143,7 +143,8 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration, uint8_t brake_duty_c
 	// Wait for duration and stop
 	if(duration != 0) {
 		//std::this_thread::sleep_for(std::chrono::milliseconds(duration));
-		delay_c(duration, this->front_cam_id);
+		//delay_c(duration, this->front_cam_id);
+		delay(duration);
 		io_mutex.unlock();
 		stop(brake_duty_cycle);
 		return;
@@ -161,6 +162,11 @@ void Robot::stop(uint8_t brake_duty_cycle) {
 	softPwmWrite(M1_E, brake_duty_cycle);
 	softPwmWrite(M2_E, brake_duty_cycle);
 	io_mutex.unlock();
+}
+
+void Robot::turn(float deg) {
+	float dist = TURN_DIAMETER / 360.0f * deg;
+	m(100, -100, dist * TURN_DURATION_FACTOR);
 }
 
 uint8_t Robot::encoder_value_a() {
@@ -240,12 +246,31 @@ void Robot::asc() {
 	}
 }
 
-void Robot::servo(uint8_t pin, int8_t angle, bool wait) {
+void Robot::servo(uint8_t pin, float angle, uint16_t d) {
 	io_mutex.lock();
+	attach_servo(pin);
+	
+	write_servo(pin, angle);
+
+	if(d != 0) delay(d);
+	release_servo(pin);
+	io_mutex.unlock();
+}
+
+void Robot::attach_servo(uint8_t pin) {
+	if(softPwmCreate(pin, 0, 200)) {
+		std::cout << "Error setting up PWM for pin " << pin << std::endl;
+		exit(ERRCODE_BOT_SETUP_PWM);
+	}
+}
+
+void Robot::write_servo(uint8_t pin, float angle) {
 	softPwmWrite(pin, map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE,
 		SERVO_MIN_PULSE, SERVO_MAX_PULSE) / 100.0f);
-	io_mutex.unlock();
-	if(wait) std::this_thread::sleep_for(std::chrono::milliseconds(10 * angle));
+}
+
+void Robot::release_servo(uint8_t pin) {
+	softPwmStop(pin);
 }
 
 void Robot::beep(uint16_t ms, uint8_t pin) {

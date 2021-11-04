@@ -39,8 +39,8 @@
 #define DIST_2_TRIG 13
 #define DIST_2 12, 13
 
-#define SERVO_1 26
-#define SERVO_2 21
+#define SERVO_1 21
+#define SERVO_2 26
 
 // Servo parameters
 #define SERVO_MIN_PULSE 1000
@@ -51,8 +51,11 @@
 // Encoder movement parameters
 #define FORWARD_CORRECTION_FACTOR 0.1f
 // Unit: mm
-#define WHEEL_CIRCUMFERENCE 50.0f
+#define WHEEL_CIRCUMFERENCE 196.0f
 #define GEAR_RATIO 100.0f
+#define WHEEL_SPAN 155.0f
+#define TURN_DIAMETER 486.0f
+#define TURN_DURATION_FACTOR 2.68f
 // Encoder pulses per revolution of encoder shaft
 #define PULSES_PER_REVOLUTION 20.0f
 
@@ -98,7 +101,7 @@ public:
 	Robot();
 
 	// Delay grabbing frames from the camera to keep it from freezing
-	void delay_c(uint32_t ms, int id);
+	// void delay_c(uint32_t ms, int id);
 
 	// CAMERA
 	int init_camera(int id, bool calibrated = false,
@@ -109,14 +112,17 @@ public:
 
 	// MOVEMENT
 	void stop(uint8_t brake_duty_cycle = 100);
-	void turn(int8_t degrees);
+	void turn(float degrees);
 
 	// Directly set motor speed
 	void m(int8_t left, int8_t right, uint16_t duration = 0, uint8_t brake_duty_cycle = 100);
 	// Set motor speed with async speed control
 	void m_asc(int8_t left, int8_t right, uint16_t duration = 0, bool wait = false);
 
-	void servo(uint8_t pin, int8_t angle, bool wait = false);
+	void servo(uint8_t pin, float angle, uint16_t d = 0);
+	void attach_servo(uint8_t pin);
+	void write_servo(uint8_t pin, float angle);
+	void release_servo(uint8_t pin);
 
 	void beep(uint16_t ms, uint8_t pin = BUZZER);
 	

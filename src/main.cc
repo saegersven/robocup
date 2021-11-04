@@ -28,6 +28,24 @@ int main() {
 	State state = State::line;
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
+	robot->servo(SERVO_1, ARM_UP, 1000);
+	delay(600);
+
+	/*robot->servo(SERVO_2, GRAB_OPEN, 750);
+	robot->servo(SERVO_1, ARM_DOWN, 750);
+
+	robot->attach_servo(SERVO_2);
+	robot->write_servo(SERVO_2, GRAB_CLOSED);
+	delay(500);
+	robot->servo(SERVO_1, ARM_UP, 750);
+	robot->write_servo(SERVO_2, GRAB_OPEN);
+	delay(200);
+	robot->write_servo(SERVO_2, GRAB_CLOSED);
+	delay(500);
+	robot->release_servo(SERVO_2);
+
+	exit(0);*/
+
 	const auto start_time = std::chrono::system_clock::now();
 
 	const std::string SUB_MASK_PATH = "../runtime_data/front_sub_mask.png";
@@ -41,6 +59,9 @@ int main() {
 	while(!robot->button(BTN_DEBUG));
 	while(robot->button(BTN_DEBUG));
 	delay(50);
+
+	// robot->servo(SERVO_2, ARM_UP_ANGLE);
+	// delay(500);
 
 	//Rescue rescue();
 
