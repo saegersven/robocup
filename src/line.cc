@@ -161,6 +161,8 @@ bool Line::line(cv::Mat& frame) {
 				robot->stop_video(front_cam_id);
 				robot->m(50, 50, 150);
 				robot->m(-50, 50, 300);
+				delay(210);
+				robot->m(50, 50, 100);
 				robot->start_video(front_cam_id);
 #endif
 				break;
@@ -170,7 +172,8 @@ bool Line::line(cv::Mat& frame) {
 				robot->stop_video(front_cam_id);
 				robot->m(50, 50, 150);
 				robot->m(50, -50, 300);
-				robot->m(50, 50, 150);
+				delay(210);
+				robot->m(50, 50, 100);
 				robot->start_video(front_cam_id);
 #endif
 				break;
@@ -180,6 +183,7 @@ bool Line::line(cv::Mat& frame) {
 				robot->stop_video(front_cam_id);
 				robot->m(50, 50, 150);
 				robot->m(50, -50, 600);
+				delay(200);
 				robot->m(50, 50, 150);
 				robot->start_video(front_cam_id);
 #endif
@@ -199,6 +203,9 @@ bool Line::line(cv::Mat& frame) {
 		}*/
 	}
 #ifdef DEBUG
+#ifdef DEBUG_RESIZE
+	cv::resize(debug_frame, debug_frame, cv::Size(), 4.00, 4.00);
+#endif
 	cv::imshow("Debug", debug_frame);
 	cv::waitKey(1);
 #endif
@@ -396,8 +403,10 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 	// of a dead-end or late evaluation of green points behind a line, when the lower line is
 	// already out of the frame
 	for(int i = 0; i < groups.size(); ++i) {
-		if(groups[i].y < 20) return 0;
-		if(groups[i].y > 35) return 0; 
+		if(groups[i].y < 10) return 0;
+		if(groups[i].y > 35) return 0;
+		if(groups[i].x < 8) return 0;
+		if(groups[i].x > 80-8) return 0;
 	}
 
 	// Cut out part of the black matrix around the group centers
