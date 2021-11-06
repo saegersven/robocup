@@ -149,42 +149,7 @@ bool Line::line(cv::Mat& frame) {
 
 		rescue_kit(frame);
 
-		uint8_t green_result = green(frame, black);
-
-		switch(green_result) {
-			default:
-				break;
-			case GREEN_RESULT_LEFT:
-				std::cout << "LEFT" << std::endl;
-#ifndef MOVEMENT_OFF
-				// Stop video before doing anything that causes a delay in frame retreival
-				robot->stop_video(front_cam_id);
-				robot->m(50, 50, 150);
-				robot->m(-50, 50, 300);
-				robot->start_video(front_cam_id);
-#endif
-				break;
-			case GREEN_RESULT_RIGHT:
-				std::cout << "RIGHT" << std::endl;
-#ifndef MOVEMENT_OFF
-				robot->stop_video(front_cam_id);
-				robot->m(50, 50, 150);
-				robot->m(50, -50, 300);
-				robot->m(50, 50, 150);
-				robot->start_video(front_cam_id);
-#endif
-				break;
-			case GREEN_RESULT_DEAD_END:
-				std::cout << "DEAD-END" << std::endl;
-#ifndef MOVEMENT_OFF
-				robot->stop_video(front_cam_id);
-				robot->m(50, 50, 150);
-				robot->m(50, -50, 600);
-				robot->m(50, 50, 150);
-				robot->start_video(front_cam_id);
-#endif
-				break;
-		}
+		green(frame, black);
 
 		/*if(check_silver(frame)) {
 			robot->stop();
@@ -383,7 +348,7 @@ std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<b
 	return groups;
 }
 
-uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
+uint8_t Line::green_direction(cv::Mat& frame, cv::Mat& black, float& global_average_x, float& global_average_y) {
 	uint8_t green_mask = 0;
 
 	cv::Mat green;
@@ -399,6 +364,10 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 		if(groups[i].y < 20) return 0;
 		if(groups[i].y > 35) return 0; 
 	}
+
+	global_average_x = 0.0f;
+	global_average_y = 0.0f;
+	uint8_t num_green_points = 0; // Amount of green points below the line
 
 	// Cut out part of the black matrix around the group centers
 	for(int i = 0; i < groups.size(); ++i) {
@@ -439,17 +408,74 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 		// Check quadrant of the average pixel to determine location of green point relative to line
 		if(average_y < cut.rows / 2) {
 			// Only consider point if average is above
+
+			// Convert local average point and add to global average
+			global_average_x += average_x + x_range.start;
+			global_average_y += average_y + y_range.start;
+			++num_green_points;
+
 			green_mask |= average_x < cut.cols / 2 ? 0x02 : 0x01;
 		}
 	}
-	// If a green point was to the bottom left of the corner/black line,
-	// the first bit will be set. If a green point was to the bottom right of the
-	// corner/black line, the second bit will be set.
-	// left -> 1
-	// right -> 2
-	// both -> 3
-	//std::cout << std::to_string(green_mask) << std::endl;
+	global_average_x /= num_green_points;
+	global_average_y /= num_green_points;
+
 	return green_mask;
+}
+
+void Line::green(cv::Mat& frame, cv::Mat& black) {
+	float global_average_x, global_average_y;
+	uint8_t green_result = green_direction(frame, black, global_average_x, global_average_y);
+
+#ifndef MOVEMENT_OFF
+	if(green_result != 0) {
+		// The global average point roughly represents the center of the intersection
+		// When traversing, move to that point first, then rotate
+
+		float center_x = frame.cols / 2.0f;
+		float center_y = frame.rows + 20.0f;
+		float angle = std::atan2(global_average_y - center_y, global_average_x - center_x) + (PI / 2.0f);
+		float distance = std::sqrt(std::pow(global_average_y + center_y, 2) + std::pow(global_average_x + center_x, 2));
+
+		// Stop video to keep camera from freezing
+		robot->stop_video(front_cam_id);
+
+		robot->turn(angle);
+		delay(200);
+		robot->m(100, 100, DISTANCE_FACTOR * distance);
+		delay(200);
+		robot->m(-60, -60, 150);
+		delay(200);
+
+		// Take another picture
+		frame = robot->capture(front_cam_id);
+		black = in_range(frame, &is_black);
+
+		// Re-determine green result
+		green_result = green_direction(frame, black, global_average_x, global_average_y);
+
+		robot->m(60, 60, 150);
+
+		switch(green_result) {
+			default:
+				break;
+			case GREEN_RESULT_LEFT:
+				std::cout << "LEFT" << std::endl;
+				robot->turn(deg_to_rad(-80.0f));
+				break;
+			case GREEN_RESULT_RIGHT:
+				std::cout << "RIGHT" << std::endl;
+				robot->turn(deg_to_rad(80.0f));
+				break;
+			case GREEN_RESULT_DEAD_END:
+				std::cout << "DEAD-END" << std::endl;
+				robot->turn(deg_to_rad(180.0f));
+				break;
+		}
+		robot->m(60, 60, 200);
+		robot->start_video(front_cam_id);
+	}
+#endif
 }
 
 void Line::rescue_kit(cv::Mat& frame) {
@@ -477,28 +503,28 @@ void Line::rescue_kit(cv::Mat& frame) {
 		float angle = std::atan2(group.y - center_y, group.x - center_x) + (PI / 2.0f);
 		float distance = std::sqrt(std::pow(group.y - center_y, 2) + std::pow(group.x - center_x, 2));
 
+		// Stop video so camera doesn't freeze
 		robot->stop_video(front_cam_id);
-		if(angle < 0) {
-			robot->m(-60, 60, 300 * -angle);
-		} else {
-			robot->m(60, -60, 300 * angle);
-		}
-		std::cout << "Angle:    " << rad_to_deg(angle) << std::endl;
-		std::cout << "Distance: " << distance << std::endl;
+
+		// m() can handle negative durations
+		//robot->m(60, -60, 300 * angle);
+		robot->turn(angle);
+
 		stop();
 		delay(500);
 
-		if(distance < 24) {
-			robot->m(-60, -60, 1.5f * (distance - 24));
+		// Maximum distance is 68, so 44 seems like a good value
+		if(distance < 44) {
+			robot->m(-60, -60, 1.5f * (distance - 44));
 		} else {
-			robot->m(60, 60, 1.5f * (distance - 24));
+			robot->m(60, 60, 1.5f * (distance - 44));
 		}
 
 		delay(1000);
 
 		robot->m(-60, -60, 420);
 		delay(200);
-		robot->m(100, -100, TURN_100_90 * 2);
+		robot->turn(deg_to_rad(180.0f));
 
 		//delay(1000);
 		robot->servo(SERVO_2, GRAB_OPEN, 750);
@@ -516,10 +542,12 @@ void Line::rescue_kit(cv::Mat& frame) {
 
 		delay(200);
 		// Reposition to continue
-		robot->m(-100, 100, TURN_100_90 * 2);
+		robot->turn(deg_to_rad(180.0f));
 		delay(200);
 		robot->m(60, 60, 200);
 		delay(1000);
+
+		// Restart video to continue
 		robot->start_video(front_cam_id);
 	}
 }

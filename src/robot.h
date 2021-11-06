@@ -56,6 +56,7 @@
 #define WHEEL_SPAN 155.0f
 #define TURN_DIAMETER 486.0f
 #define TURN_DURATION_FACTOR 2.68f
+#define DISTANCE_FACTOR 10.0f
 // Encoder pulses per revolution of encoder shaft
 #define PULSES_PER_REVOLUTION 20.0f
 
@@ -115,7 +116,7 @@ public:
 	void turn(float degrees);
 
 	// Directly set motor speed
-	void m(int8_t left, int8_t right, uint16_t duration = 0, uint8_t brake_duty_cycle = 100);
+	void m(int8_t left, int8_t right, int32_t duration = 0, uint8_t brake_duty_cycle = 100);
 	// Set motor speed with async speed control
 	void m_asc(int8_t left, int8_t right, uint16_t duration = 0, bool wait = false);
 

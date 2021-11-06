@@ -120,9 +120,16 @@ void Robot::stop_video(int cam_id) {
 	cams[cam_id].stop_video();
 }
 
-void Robot::m(int8_t left, int8_t right, uint16_t duration, uint8_t brake_duty_cycle) {
+void Robot::m(int8_t left, int8_t right, int32_t duration, uint8_t brake_duty_cycle) {
 	left = clip(left, -100, 100);
 	right = clip(right, -100, 100);
+
+	// If duration is less than zero, flip motor pins
+	if(duration < 0) {
+		duration *= -1;
+		left *= -1;
+		right *= -1;
+	}
 
 	io_mutex.lock();
 
@@ -165,8 +172,7 @@ void Robot::stop(uint8_t brake_duty_cycle) {
 }
 
 void Robot::turn(float deg) {
-	float dist = TURN_DIAMETER / 360.0f * deg;
-	m(100, -100, dist * TURN_DURATION_FACTOR);
+	m(100, -100, deg * TURN_DURATION_FACTOR);
 }
 
 uint8_t Robot::encoder_value_a() {

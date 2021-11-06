@@ -81,7 +81,7 @@ private:
 	std::vector<Group> find_groups(cv::Mat frame, cv::Mat& ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f);
 	void add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y);
 
-	uint8_t green(cv::Mat& frame, cv::Mat& black);
+	void green(cv::Mat& frame, cv::Mat& black);
 
 	void follow(cv::Mat& frame, cv::Mat black);
 
