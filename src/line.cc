@@ -12,21 +12,13 @@
 #include "utils.h"
 #include "rescue.h"
 
-#define BLACK_MIN_SUM 300
-
 bool is_black(uint8_t b, uint8_t g, uint8_t r) {
 	return (uint16_t)b + (uint16_t)g + (uint16_t)r < BLACK_MIN_SUM;
 }
 
-#define GREEN_RATIO_THRESHOLD 0.6f
-#define GREEN_MIN_VALUE 20
-
 bool is_green(uint8_t b, uint8_t g, uint8_t r) {
 	return 1.0f / GREEN_RATIO_THRESHOLD * g > b + r && g > GREEN_MIN_VALUE;
 }
-
-#define BLUE_RATIO_THRESHOLD 1.7f
-#define BLUE_MIN_VALUE 50
 
 bool is_blue(uint8_t b, uint8_t g, uint8_t r) {
 	return 1.0f / BLUE_RATIO_THRESHOLD * b > g + r && b > BLUE_MIN_VALUE;
@@ -149,50 +141,7 @@ bool Line::line(cv::Mat& frame) {
 
 		rescue_kit(frame);
 
-<<<<<<< HEAD
 		green(frame, black);
-=======
-		uint8_t green_result = green(frame, black);
-
-		switch(green_result) {
-			default:
-				break;
-			case GREEN_RESULT_LEFT:
-				std::cout << "LEFT" << std::endl;
-#ifndef MOVEMENT_OFF
-				// Stop video before doing anything that causes a delay in frame retreival
-				robot->stop_video(front_cam_id);
-				robot->m(50, 50, 150);
-				robot->m(-50, 50, 300);
-				delay(210);
-				robot->m(50, 50, 100);
-				robot->start_video(front_cam_id);
-#endif
-				break;
-			case GREEN_RESULT_RIGHT:
-				std::cout << "RIGHT" << std::endl;
-#ifndef MOVEMENT_OFF
-				robot->stop_video(front_cam_id);
-				robot->m(50, 50, 150);
-				robot->m(50, -50, 300);
-				delay(210);
-				robot->m(50, 50, 100);
-				robot->start_video(front_cam_id);
-#endif
-				break;
-			case GREEN_RESULT_DEAD_END:
-				std::cout << "DEAD-END" << std::endl;
-#ifndef MOVEMENT_OFF
-				robot->stop_video(front_cam_id);
-				robot->m(50, 50, 150);
-				robot->m(50, -50, 600);
-				delay(200);
-				robot->m(50, 50, 150);
-				robot->start_video(front_cam_id);
-#endif
-				break;
-		}
->>>>>>> b9c441ace71d5782d5a30863375fd53dd425d7d9
 
 		/*if(check_silver(frame)) {
 			robot->stop();
@@ -307,33 +256,6 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 #endif
 }
 
-// std::vector<cv::Point> Line::find_green_group_centers_old(cv::Mat frame, cv::Mat& green) {
-// 	std::vector<cv::Point> groups;
-
-// 	uint32_t num_pixels = 0;
-// 	green = in_range(frame, &is_green, &num_pixels);
-// #ifdef DEBUG
-// 	cv::imshow("Green", green);
-// #endif
-
-// 	if(num_pixels < 50) return groups; // Save some time by not calculating contours
-
-// 	std::vector<std::vector<cv::Point>> contours;
-// 	std::vector<cv::Vec4i> hierarchy;
-// 	cv::findContours(green, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
-
-// 	for(int i = 0; i < contours.size(); i++) {
-// 		cv::RotatedRect bounding_rect = cv::minAreaRect(contours[i]);
-
-// 		float size = bounding_rect.size.width * bounding_rect.size.height;
-// 		if(size > 100.0f) {
-// 			groups.push_back(bounding_rect.center);
-// 		}
-// 	}
-
-// 	return groups;
-// }
-
 void Line::add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y) {
 	int col_limit = ir.cols - 1;
 	int row_limit = ir.rows - 1;
@@ -410,7 +332,7 @@ uint8_t Line::green_direction(cv::Mat& frame, cv::Mat& black, float& global_aver
 		if(groups[i].y < 10) return 0;
 		if(groups[i].y > 35) return 0;
 		if(groups[i].x < 8) return 0;
-		if(groups[i].x > 80-8) return 0;
+		if(groups[i].x > frame.cols - 8) return 0;
 	}
 
 	global_average_x = 0.0f;
@@ -419,16 +341,17 @@ uint8_t Line::green_direction(cv::Mat& frame, cv::Mat& black, float& global_aver
 
 	// Cut out part of the black matrix around the group centers
 	for(int i = 0; i < groups.size(); ++i) {
-		cv::Range x_range = cv::Range(groups[i].x - cut_width / 2, groups[i].x + cut_width / 2);
-		if(x_range.start < 0) x_range.start = 0;
-		if(x_range.end > black.size[1]) x_range.end = black.cols;
+		// Horizontal range
+		int x_start = groups[i].x - cut_width / 2;
+		int x_end = groups[i].x + cut_width / 2;
+		if(x_start < 0) x_start = 0;
+		if(x_end > black.cols) x_end = black.cols;
 
-		cv::Range y_range = cv::Range(groups[i].y - cut_height / 2, groups[i].y + cut_height / 2);
-		if(y_range.start < 0) y_range.start = 0;
-		if(y_range.end > black.size[0]) y_range.end = black.rows;
-
-		cv::Mat cut = black(y_range, x_range);
-		cv::Mat green_cut = green(y_range, x_range); // TODO
+		// Vertical range
+		int y_start = groups[i].y - cut_height / 2;
+		int y_end = groups[i].y + cut_height / 2;
+		if(y_start < 0) y_start = 0;
+		if(y_end > black.rows) y_end = black.rows;
 
 		// Calculate average black pixel in the cut
 		float average_x = 0.0f;
@@ -439,10 +362,10 @@ uint8_t Line::green_direction(cv::Mat& frame, cv::Mat& black, float& global_aver
 		uint8_t* p;
 		uint8_t* p_grn;
 		int y, x;
-		for(y = 0; y < cut.rows; ++y) {
-			p = cut.ptr<uint8_t>(y);
-			p_grn = green_cut.ptr<uint8_t>(y);
-			for(x = 0; x < cut.cols; ++x) {
+		for(y = y_start; y < y_end; ++y) {
+			p = black.ptr<uint8_t>(y);
+			p_grn = green.ptr<uint8_t>(y);
+			for(x = x_start; x < x_end; ++x) {
 				if(p[x] && !p_grn[x]) {
 					average_x += (float)x;
 					average_y += (float)y;
@@ -454,15 +377,15 @@ uint8_t Line::green_direction(cv::Mat& frame, cv::Mat& black, float& global_aver
 		average_y /= num_pixels;
 
 		// Check quadrant of the average pixel to determine location of green point relative to line
-		if(average_y < cut.rows / 2) {
+		if(average_y < groups[i].y) {
 			// Only consider point if average is above
 
 			// Convert local average point and add to global average
-			global_average_x += average_x + x_range.start;
-			global_average_y += average_y + y_range.start;
+			global_average_x += average_x;
+			global_average_y += average_y;
 			++num_green_points;
 
-			green_mask |= average_x < cut.cols / 2 ? 0x02 : 0x01;
+			green_mask |= average_x < groups[i].x ? 0x02 : 0x01;
 		}
 	}
 	global_average_x /= num_green_points;

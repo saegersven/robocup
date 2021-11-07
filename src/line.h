@@ -3,6 +3,15 @@
 
 #include "robot.h"
 
+
+#define BLACK_MIN_SUM 300
+
+#define GREEN_RATIO_THRESHOLD 0.6f
+#define GREEN_MIN_VALUE 20
+
+#define BLUE_RATIO_THRESHOLD 1.7f
+#define BLUE_MIN_VALUE 50
+
 #define GREEN_RESULT_NO_INTERSECTION 0
 #define GREEN_RESULT_LEFT 1
 #define GREEN_RESULT_RIGHT 2
