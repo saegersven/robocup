@@ -329,10 +329,10 @@ uint8_t Line::green_direction(cv::Mat& frame, cv::Mat& black, float& global_aver
 	// of a dead-end or late evaluation of green points behind a line, when the lower line is
 	// already out of the frame
 	for(int i = 0; i < groups.size(); ++i) {
-		if(groups[i].y < 10) return 0;
+		//if(groups[i].y < 10) return 0;
 		if(groups[i].y > 35) return 0;
-		if(groups[i].x < 8) return 0;
-		if(groups[i].x > frame.cols - 8) return 0;
+		//if(groups[i].x < 8) return 0;
+		//if(groups[i].x > frame.cols - 8) return 0;
 	}
 
 	global_average_x = 0.0f;
@@ -398,51 +398,56 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 	float global_average_x, global_average_y;
 	uint8_t green_result = green_direction(frame, black, global_average_x, global_average_y);
 
+
 #ifndef MOVEMENT_OFF
 	if(green_result != 0) {
+		cv::circle(debug_frame, cv::Point(global_average_x, global_average_y), 2, cv::Scalar(0, 255, 255), 2);
+
+		cv::imshow("Green_debug", debug_frame);
+		cv::waitKey(1);
 		// The global average point roughly represents the center of the intersection
 		// When traversing, move to that point first, then rotate
 
 		float center_x = frame.cols / 2.0f;
 		float center_y = frame.rows + 20.0f;
 		float angle = std::atan2(global_average_y - center_y, global_average_x - center_x) + (PI / 2.0f);
-		float distance = std::sqrt(std::pow(global_average_y + center_y, 2) + std::pow(global_average_x + center_x, 2));
+		float distance = std::sqrt(std::pow(global_average_y - center_y, 2) + std::pow(global_average_x - center_x, 2));
+
+		std::cout << angle << std::endl;
+		std::cout << distance << std::endl;
 
 		// Stop video to keep camera from freezing
 		robot->stop_video(front_cam_id);
 
 		robot->turn(angle);
 		delay(200);
-		robot->m(100, 100, DISTANCE_FACTOR * distance);
-		delay(200);
-		robot->m(-60, -60, 150);
-		delay(200);
+		robot->m(100, 100, DISTANCE_FACTOR * (distance - 45));
+		delay(500);
 
 		// Take another picture
 		frame = robot->capture(front_cam_id);
 		black = in_range(frame, &is_black);
 
+		cv::imshow("Green frame", frame);
+		cv::waitKey(300);
+
 		// Re-determine green result
-		green_result = green_direction(frame, black, global_average_x, global_average_y);
+		uint8_t new_green_result = green_direction(frame, black, global_average_x, global_average_y);
 
 		robot->m(60, 60, 150);
 
-		switch(green_result) {
-			default:
-				break;
-			case GREEN_RESULT_LEFT:
-				std::cout << "LEFT" << std::endl;
-				robot->turn(deg_to_rad(-80.0f));
-				break;
-			case GREEN_RESULT_RIGHT:
-				std::cout << "RIGHT" << std::endl;
-				robot->turn(deg_to_rad(80.0f));
-				break;
-			case GREEN_RESULT_DEAD_END:
-				std::cout << "DEAD-END" << std::endl;
-				robot->turn(deg_to_rad(180.0f));
-				break;
+		if(new_green_result == GREEN_RESULT_DEAD_END ||
+			green_result == GREEN_RESULT_DEAD_END) {
+			std::cout << "DEAD-END" << std::endl;
+			robot->turn(deg_to_rad(180.0f));
+		} else if(green_result == GREEN_RESULT_LEFT) {
+			std::cout << "LEFT" << std::endl;
+			robot->turn(deg_to_rad(-80.0f));
+		} else if(green_result == GREEN_RESULT_RIGHT) {
+			std::cout << "RIGHT" << std::endl;
+			robot->turn(deg_to_rad(80.0f));
 		}
+
 		robot->m(60, 60, 200);
 		robot->start_video(front_cam_id);
 	}

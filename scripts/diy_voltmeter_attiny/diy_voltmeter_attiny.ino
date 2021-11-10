@@ -3,21 +3,22 @@ int led_pin = 4;
 void setup() {
   pinMode(led_pin, OUTPUT);
 }
+//67,567
 
-void loop() {
-  if (analogRead(A3) < 541) { //6,5V
+//473 für 7V
+
+void loop() {  
+  if (analogRead(A3) < 405) { // Voltage < 6V
     digitalWrite(led_pin, HIGH);
   }
-  else if (analogRead(A3) < 583) { //7V
+  else if (analogRead(A3) < 439) { // Voltage < 6.5V
     blink(100);
   }
-  else if (analogRead(A3) < 625) { // 7,5V
+  else if (analogRead(A3) < 473) { // Voltage < 7V
     blink(500);
-  }
-  else {
+  } else { // Voltage > 7V
     digitalWrite(led_pin, LOW);
-  }
-  
+  }  
 }
 
 void blink(int delay_ms) {
