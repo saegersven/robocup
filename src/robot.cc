@@ -283,7 +283,10 @@ void Robot::beep(uint16_t ms, uint8_t pin) {
 	digitalWrite(pin, HIGH);
 	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 	digitalWrite(pin, LOW);
+}
 
+void Robot::set(uint8_t pin, bool value) {
+	digitalWrite(pin, value ? HIGH : LOW);
 }
 
 bool Robot::button(uint8_t pin) {

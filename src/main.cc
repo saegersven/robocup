@@ -64,7 +64,7 @@ int main() {
 
 	// robot->stop_video(FRONT_CAM);
 
-	// robot->m(100, 100, 40 * DISTANCE_FACTOR);
+	// robot->m(100, 100, 48 * DISTANCE_FACTOR);
 
 	// robot->start_video(FRONT_CAM);
 
