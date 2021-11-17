@@ -2,7 +2,10 @@
 
 #include <opencv2/opencv.hpp>
 
-#define PI 3.141592653f
+#define PI (double)3.141592653
+#define RAD_360 2.0 * PI
+#define RAD_180 PI
+#define RAD_90 0.5 * PI
 
 #define delay(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms))
 

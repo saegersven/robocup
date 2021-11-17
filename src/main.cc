@@ -28,6 +28,12 @@ int main() {
 	State state = State::line;
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
+	while(robot->get_heading() == 0) {
+		delay(10);
+	}
+
+	std::cout << "Non zero" << std::endl;
+
 	robot->servo(SERVO_1, ARM_UP, 1000);
 	delay(600);
 
@@ -59,6 +65,21 @@ int main() {
 	while(!robot->button(BTN_DEBUG));
 	while(robot->button(BTN_DEBUG));
 	delay(50);
+
+	robot->beep(100, LED_2);
+	delay(500);
+
+	robot->turn(180.0);
+	delay(500);
+
+	robot->turn(-90.0f);
+	delay(500);
+	robot->turn(90.0f);
+	delay(500);
+	robot->turn(-180.0f);
+	delay(500);
+
+	exit(0);
 
 	// robot->servo(SERVO_2, ARM_UP_ANGLE);
 	// delay(500);

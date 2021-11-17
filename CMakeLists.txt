@@ -15,7 +15,7 @@ find_package(Threads REQUIRED)
 # include_directories("libs/tensorflow")
 # include_directories("libs/tflite_build/flatbuffers/include")
 
-add_executable(robocup src/main.cc src/robot.cc src/utils.cc src/vision.cc src/line.cc)
+add_executable(robocup src/main.cc src/robot.cc src/utils.cc src/vision.cc src/line.cc src/BNO055_driver/bno055.c)
 
 target_link_libraries(robocup atomic)
 
@@ -24,3 +24,4 @@ target_link_libraries(robocup ${OpenCV_LIBS})
 
 target_link_libraries(robocup ${WIRINGPI_LIBRARIES})
 target_link_libraries(robocup ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(robocup i2c)

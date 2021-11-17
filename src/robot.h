@@ -12,6 +12,11 @@
 #include <wiringPiI2C.h>
 #include <opencv2/opencv.hpp>
 
+#define BNO055_API
+extern "C" {
+#include "BNO055_driver/bno055.h"
+}
+
 #include "utils.h"
 #include "errcodes.h"
 #include "vision.h"
@@ -56,6 +61,10 @@
 #define WHEEL_SPAN 155.0f
 #define TURN_DIAMETER 486.0f
 #define TURN_DURATION_FACTOR 2.68f
+
+#define TURN_MAX_DURATION_FACTOR 8.5f
+#define TURN_MIN_DURATION_FACTOR 6.0f
+
 #define DISTANCE_FACTOR 10.0f
 // Encoder pulses per revolution of encoder shaft
 #define PULSES_PER_REVOLUTION 20.0f
@@ -69,6 +78,13 @@
 #define MOTOR_SPEED_CONVERSION_FACTOR 0.01f
 // Factor for proportional control of motor speed
 #define MOTOR_SPEED_CORRECTION_FACTOR 10.0f
+
+// I2C API
+int8_t API_I2C_bus_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
+int8_t API_I2C_bus_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
+void API_delay_msek(uint32_t msek);
+#define API_I2C_ADDR1 0x28
+#define _BNO055_I2C_ADDR 0x28
 
 class Robot {
 private:
@@ -91,12 +107,19 @@ private:
 	// WiringPI id of Encoder GPIO Expander
 	int mcp_fd;
 
+	// BNO055 Sensor (C struct)
+	bno055_t bno055;
+	int32_t bno_comres;
+	int bno_fd;
+
 	// Get encoder value via I2C
 	uint8_t encoder_value_a();
 	uint8_t encoder_value_b();
 
 	// Main Async speed control function, runs in its own thread
 	void asc();
+
+	void init_bno055();
 
 public:
 	Robot();
@@ -113,7 +136,7 @@ public:
 
 	// MOVEMENT
 	void stop(uint8_t brake_duty_cycle = 100);
-	void turn(float degrees);
+	void turn(double degrees);
 
 	// Directly set motor speed
 	void m(int8_t left, int8_t right, int32_t duration = 0, uint8_t brake_duty_cycle = 100);
@@ -131,4 +154,6 @@ public:
 	bool button(uint8_t pin);
 	void button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
 	float distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t timeout = 1000);
+
+	double get_heading();
 };

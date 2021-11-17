@@ -8,10 +8,19 @@
 #include <thread>
 #include <cmath>
 
+#include <unistd.h>
+#include <iomanip>
+
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <softPwm.h>
 #include <opencv2/opencv.hpp>
+
+extern "C" {
+#include "BNO055_driver/bno055.h"
+#include <linux/i2c-dev.h>
+#include <i2c/smbus.h>
+}
 
 #include "utils.h"
 #include "errcodes.h"
@@ -25,6 +34,8 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	// Initialize the robot
 	// Setup GPIO
 	wiringPiSetupGpio();
+
+	init_bno055();
 
 	// Setup I2C
 	/*mcp_fd = wiringPiI2CSetup(0x20); // TODO: Check if this is the actual ID of MCP23017
@@ -80,6 +91,187 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 
 	std::thread motor_update_thread(&Robot::asc, this); // Create async motor control thread
 	motor_update_thread.detach();
+}
+
+int8_t API_I2C_bus_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
+	//std::cout << "W\t" << std::to_string(reg_addr) << "\t" << std::to_string(reg_data[0]) << std::endl;
+
+	uint8_t write_buf[1 + len];
+	write_buf[0] = reg_addr;
+	for(int i = 0; i < len; ++i) {
+		write_buf[i + 1] = reg_data[i];
+	}
+
+	if(write(dev_addr, write_buf, 1) != 1) {
+		return 1;
+	}
+	// if(write(dev_addr, reg_data, len) != len) {
+	// 	return 1;
+	// }
+	// if(len == 1) {
+	// 	i2c_smbus_write_byte_data(dev_addr, reg_addr, reg_data[0]);
+	// 	return 0;
+	// }
+
+	// i2c_smbus_write_block_data(dev_addr, reg_addr, len, reg_data);
+	return 0;
+}
+
+int8_t API_I2C_bus_write8(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data) {
+	//uint8_t write_buf[1] = {reg_data};
+	//return API_I2C_bus_write(dev_addr, reg_addr, write_buf, 1);
+	wiringPiI2CWriteReg8(dev_addr, reg_addr, reg_data);
+}
+
+int8_t API_I2C_bus_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
+	//std::cout << "R\t" << std::to_string(reg_addr) << std::endl;
+	uint8_t write_buf[1] = {reg_addr};
+	if(write(dev_addr, write_buf, 1) != 1) {
+		return 1;
+	}
+	if(read(dev_addr, reg_data, len) != len) {
+		return 1;
+	}
+	// if(len == 1) {
+	// 	reg_data = new uint8_t();
+	// 	reg_data[0] = i2c_smbus_read_byte_data(dev_addr, reg_addr);
+	// 	return 0;
+	// }
+
+	// i2c_smbus_read_block_data(dev_addr, reg_addr, reg_data);
+	return 0;
+}
+
+void API_delay_msek(uint32_t msek) {
+	delay(msek);
+}
+
+void Robot::init_bno055() {
+	// Init I2C device
+	bno_fd = wiringPiI2CSetup(_BNO055_I2C_ADDR);
+	if(bno_fd == -1) {
+		std::cout << "I2C Error setting up BNO055" << std::endl;
+		exit(ERRCODE_BOT_SETUP_I2C);
+	}
+
+	bno055.bus_write = &API_I2C_bus_write;
+	bno055.bus_read = &API_I2C_bus_read;
+    bno055.delay_msec = &API_delay_msek;
+    bno055.dev_addr = bno_fd;
+
+	// bno_comres = bno055_init(&this->bno055);
+
+	// bno_comres += bno055_set_sys_rst(0x01);
+	// delay(700);
+
+	// bno_comres += bno055_set_power_mode(BNO055_POWER_MODE_NORMAL);
+
+	// bno_comres += bno055_write_page_id(0x00);
+
+	// uint8_t write_buf[1] = {0x00};
+	// bno_comres += bno055_write_register(BNO055_SYS_TRIGGER_ADDR, write_buf, 1);
+
+	// // Set accelerometer range
+	// bno_comres += bno055_set_accel_range(BNO055_ACCEL_RANGE_2G);
+	// bno_comres += bno055_set_gyro_range(BNO055_GYRO_RANGE_2000DPS);
+	// bno_comres += bno055_set_mag_data_output_rate(0x05);
+
+	// delay(10);
+
+	// // write_buf[0] = BNO055_OPERATION_MODE_NDOF;
+	// // bno_comres += bno055_write_register(BNO055_OPERATION_MODE_REG, write_buf, 1);
+
+	// bno_comres += bno055_set_operation_mode(BNO055_OPERATION_MODE_NDOF);
+
+	// delay(10);
+
+	// R       0
+	// W       61      0
+	// W       63      32
+	// W       62      0
+	// W       7       0
+	// W       63      0
+	// W       7       1
+	// R       8
+	// W       8       13
+	// W       7       0
+	// R       61
+	// W       7       1
+	// R       10
+	// W       10      56
+	// W       7       0
+	// R       61
+	// W       7       1
+	// R       9
+	// W       9       13
+	// W       7       0
+	// W       61      0
+	// W       61      12
+
+
+    uint8_t chip_id[1] = {0};
+    API_I2C_bus_read(bno_fd, 0, chip_id, 1);
+
+    std::cout << "ID: " << std::to_string(chip_id[0]) << std::endl;
+
+	API_I2C_bus_write8(bno_fd, 61, 0);
+	delay(30);
+	API_I2C_bus_write8(bno_fd, 63, 32); // SYS_TRIGGER bit 5: Reset
+	delay(700);
+	API_I2C_bus_write8(bno_fd, 62, 0); // PWR_MODE: Set power mode to 0 (Normal)
+	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
+	API_I2C_bus_write8(bno_fd, 63, 0); // Reset system triggers to 0
+	API_I2C_bus_write8(bno_fd, 7, 1); // Set page id to 1
+	API_I2C_bus_write8(bno_fd, 8, 13); // Set accel range 4G and bandwidth 62_5HZ
+	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
+	API_I2C_bus_write8(bno_fd, 7, 1); // Set page id to 1
+	API_I2C_bus_write8(bno_fd, 10, 56); // Gyro config
+	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
+	API_I2C_bus_write8(bno_fd, 7, 1); // Set page id to 1
+	API_I2C_bus_write8(bno_fd, 9, 13); // Mag config
+	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
+	delay(10);
+	API_I2C_bus_write8(bno_fd, 61, 0); // Enter config mode
+	delay(20);
+	API_I2C_bus_write8(bno_fd, 61, 12); // Enter NDOF operation mode
+	delay(10);
+
+	std::cout << "Init complete" << std::endl;
+}
+
+double Robot::get_heading() {
+	int16_t euler_data_h, euler_data_r, euler_data_p;
+	euler_data_h = euler_data_r = euler_data_p = 0;
+
+	double f_euler_data_h;
+	float fl_euler_data_h;
+
+	// bno_comres += bno055_read_euler_h(&euler_data_h);
+	// bno_comres += bno055_read_euler_r(&euler_data_r);
+	// bno_comres += bno055_read_euler_p(&euler_data_p);
+
+	//bno_comres = 0;
+	//auto start_time = std::chrono::high_resolution_clock::now();
+
+	//bno_comres += bno055_convert_double_euler_h_rad(&f_euler_data_h);
+	int16_t temp = 0;
+	API_I2C_bus_read(bno_fd, BNO055_EULER_H_LSB_ADDR, (uint8_t*)&temp, 2);
+
+	fl_euler_data_h = (float)temp / 16.0f * PI / 180.0f;
+
+	//std::cout << fl_euler_data_h << std::endl;
+
+	//auto end_time = std::chrono::high_resolution_clock::now();
+
+	//std::cout << "Reading took " <<
+	//	std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms" << std::endl;
+
+	// bno_comres += bno055_convert_float_euler_r_rad(&f_euler_data_r);
+	// bno_comres += bno055_convert_float_euler_p_rad(&f_euler_data_p);
+
+	//std::cout << "X: " << std::to_string(rad_to_deg(f_euler_data_h)) << std::endl;
+
+	return fl_euler_data_h;
 }
 
 // void Robot::delay_c(uint32_t ms, int id) {
@@ -171,8 +363,43 @@ void Robot::stop(uint8_t brake_duty_cycle) {
 	io_mutex.unlock();
 }
 
-void Robot::turn(float deg) {
-	m(100, -100, deg * TURN_DURATION_FACTOR);
+void Robot::turn(double deg) {
+	//m(100, -100, deg * TURN_DURATION_FACTOR);
+	double start_heading = get_heading();
+	//std::cout << "Start heading: " << rad_to_deg(start_heading) << std::endl;
+	double to_turn = std::abs(deg_to_rad(deg));
+
+	bool clockwise = deg > 0.0;
+
+	auto start_time = std::chrono::high_resolution_clock::now();
+	uint32_t min_time = TURN_MIN_DURATION_FACTOR * std::abs(deg);
+	uint32_t max_time = TURN_MAX_DURATION_FACTOR * std::abs(deg);
+
+	std::cout << to_turn << " " << min_time << " " << max_time << std::endl;
+
+	m(clockwise ? -40 : 40, clockwise ? 40 : -40);
+	while(1) {
+		double new_heading;
+		do {
+			new_heading = get_heading();
+		} while(new_heading > RAD_360 || new_heading < 0.0);
+		//std::cout << "New heading " << rad_to_deg(new_heading) << std::endl;
+
+		if(clockwise) {
+			if(new_heading < start_heading) start_heading -= RAD_360;
+		} else {
+			if(new_heading > start_heading) start_heading += RAD_360;
+		}
+		double d_heading = new_heading - start_heading;
+		//std::cout << rad_to_deg(new_heading) << " - " << rad_to_deg(start_heading) << " = " << rad_to_deg(std::abs(d_heading)) << std::endl;
+
+		uint32_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
+
+		if((ms > min_time && std::abs(d_heading) >= to_turn) || ms > max_time) break;
+	}
+	stop();
+
+	std::cout << "Accuracy: " << rad_to_deg(std::abs(get_heading() - start_heading)) << "°" << std::endl;
 }
 
 uint8_t Robot::encoder_value_a() {
