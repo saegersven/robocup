@@ -22,11 +22,11 @@ extern "C" {
 #include "vision.h"
 
 // PINS
-#define M1_1 18
-#define M1_2 17
+#define M1_1 17
+#define M1_2 18
 #define M1_E 4
-#define M2_1 23
-#define M2_2 24
+#define M2_1 24
+#define M2_2 23
 #define M2_E 22
 
 #define BUZZER 25
@@ -60,12 +60,13 @@ extern "C" {
 #define GEAR_RATIO 100.0f
 #define WHEEL_SPAN 155.0f
 #define TURN_DIAMETER 486.0f
+<<<<<<< HEAD
 #define TURN_DURATION_FACTOR 2.68f
 
 #define TURN_MAX_DURATION_FACTOR 8.5f
 #define TURN_MIN_DURATION_FACTOR 6.0f
 
-#define DISTANCE_FACTOR 10.0f
+#define DISTANCE_FACTOR (4.2f + 3 * 0.42f)
 // Encoder pulses per revolution of encoder shaft
 #define PULSES_PER_REVOLUTION 20.0f
 
@@ -149,6 +150,7 @@ public:
 	void release_servo(uint8_t pin);
 
 	void beep(uint16_t ms, uint8_t pin = BUZZER);
+	void set(uint8_t pin, bool value);
 	
 	// SENSORS
 	bool button(uint8_t pin);

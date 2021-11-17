@@ -66,20 +66,21 @@ int main() {
 	while(robot->button(BTN_DEBUG));
 	delay(50);
 
-	robot->beep(100, LED_2);
-	delay(500);
+	// cv::Mat f1 = robot->capture(FRONT_CAM);
 
-	robot->turn(180.0);
-	delay(500);
+	// robot->stop_video(FRONT_CAM);
 
-	robot->turn(-90.0f);
-	delay(500);
-	robot->turn(90.0f);
-	delay(500);
-	robot->turn(-180.0f);
-	delay(500);
+	// robot->m(100, 100, 48 * DISTANCE_FACTOR);
 
-	exit(0);
+	// robot->start_video(FRONT_CAM);
+
+	// cv::Mat f2 = robot->capture(FRONT_CAM);
+
+	// cv::imshow("F1", f1);
+	// cv::imshow("F2", f2);
+	// cv::waitKey(10000);
+
+	// exit(0);
 
 	// robot->servo(SERVO_2, ARM_UP_ANGLE);
 	// delay(500);
