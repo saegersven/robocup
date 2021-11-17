@@ -17,7 +17,6 @@
 #include <opencv2/opencv.hpp>
 
 extern "C" {
-#include "BNO055_driver/bno055.h"
 #include <linux/i2c-dev.h>
 #include <i2c/smbus.h>
 }
@@ -154,10 +153,10 @@ void Robot::init_bno055() {
 		exit(ERRCODE_BOT_SETUP_I2C);
 	}
 
-	bno055.bus_write = &API_I2C_bus_write;
-	bno055.bus_read = &API_I2C_bus_read;
-    bno055.delay_msec = &API_delay_msek;
-    bno055.dev_addr = bno_fd;
+	// bno055.bus_write = &API_I2C_bus_write;
+	// bno055.bus_read = &API_I2C_bus_read;
+	// bno055.delay_msec = &API_delay_msek;
+	// bno055.dev_addr = bno_fd;
 
 	// bno_comres = bno055_init(&this->bno055);
 
@@ -212,8 +211,6 @@ void Robot::init_bno055() {
     uint8_t chip_id[1] = {0};
     API_I2C_bus_read(bno_fd, 0, chip_id, 1);
 
-    std::cout << "ID: " << std::to_string(chip_id[0]) << std::endl;
-
 	API_I2C_bus_write8(bno_fd, 61, 0);
 	delay(30);
 	API_I2C_bus_write8(bno_fd, 63, 32); // SYS_TRIGGER bit 5: Reset
@@ -255,7 +252,7 @@ double Robot::get_heading() {
 
 	//bno_comres += bno055_convert_double_euler_h_rad(&f_euler_data_h);
 	int16_t temp = 0;
-	API_I2C_bus_read(bno_fd, BNO055_EULER_H_LSB_ADDR, (uint8_t*)&temp, 2);
+	API_I2C_bus_read(bno_fd, 26, (uint8_t*)&temp, 2);
 
 	fl_euler_data_h = (float)temp / 16.0f * PI / 180.0f;
 

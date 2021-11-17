@@ -12,11 +12,6 @@
 #include <wiringPiI2C.h>
 #include <opencv2/opencv.hpp>
 
-#define BNO055_API
-extern "C" {
-#include "BNO055_driver/bno055.h"
-}
-
 #include "utils.h"
 #include "errcodes.h"
 #include "vision.h"
@@ -60,7 +55,6 @@ extern "C" {
 #define GEAR_RATIO 100.0f
 #define WHEEL_SPAN 155.0f
 #define TURN_DIAMETER 486.0f
-<<<<<<< HEAD
 #define TURN_DURATION_FACTOR 2.68f
 
 #define TURN_MAX_DURATION_FACTOR 8.5f
@@ -108,9 +102,6 @@ private:
 	// WiringPI id of Encoder GPIO Expander
 	int mcp_fd;
 
-	// BNO055 Sensor (C struct)
-	bno055_t bno055;
-	int32_t bno_comres;
 	int bno_fd;
 
 	// Get encoder value via I2C
