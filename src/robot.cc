@@ -360,21 +360,26 @@ void Robot::stop(uint8_t brake_duty_cycle) {
 	io_mutex.unlock();
 }
 
-void Robot::turn(double deg) {
+void Robot::turn(double rad) {
 	//m(100, -100, deg * TURN_DURATION_FACTOR);
 	double start_heading = get_heading();
 	//std::cout << "Start heading: " << rad_to_deg(start_heading) << std::endl;
-	double to_turn = std::abs(deg_to_rad(deg));
+	double to_turn = std::abs(rad);
 
-	bool clockwise = deg > 0.0;
+	bool clockwise = rad > 0.0;
+
+	if(to_turn < deg_to_rad(42.0f)) {
+		m(clockwise ? 30 : -30, clockwise ? -30 : 30, TURN_DURATION_FACTOR * std::abs(rad_to_deg(rad)));
+		return;
+	}
 
 	auto start_time = std::chrono::high_resolution_clock::now();
-	uint32_t min_time = TURN_MIN_DURATION_FACTOR * std::abs(deg);
-	uint32_t max_time = TURN_MAX_DURATION_FACTOR * std::abs(deg);
+	uint32_t min_time = TURN_MIN_DURATION_FACTOR * std::abs(rad_to_deg(rad));
+	uint32_t max_time = TURN_MAX_DURATION_FACTOR * std::abs(rad_to_deg(rad));
 
-	std::cout << to_turn << " " << min_time << " " << max_time << std::endl;
+	//std::cout << to_turn << " " << min_time << " " << max_time << std::endl;
 
-	m(clockwise ? -40 : 40, clockwise ? 40 : -40);
+	m(clockwise ? 30 : -30, clockwise ? -30 : 30);
 	while(1) {
 		double new_heading;
 		do {
@@ -383,20 +388,21 @@ void Robot::turn(double deg) {
 		//std::cout << "New heading " << rad_to_deg(new_heading) << std::endl;
 
 		if(clockwise) {
-			if(new_heading < start_heading) start_heading -= RAD_360;
+			if(new_heading < start_heading - RAD_90) start_heading -= RAD_360;
 		} else {
-			if(new_heading > start_heading) start_heading += RAD_360;
+			if(new_heading > start_heading + RAD_90) start_heading += RAD_360;
 		}
 		double d_heading = new_heading - start_heading;
+		//std::cout << rad_to_deg(new_heading) << " " << rad_to_deg(d_heading) << std::endl;
 		//std::cout << rad_to_deg(new_heading) << " - " << rad_to_deg(start_heading) << " = " << rad_to_deg(std::abs(d_heading)) << std::endl;
 
 		uint32_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
 
-		if((ms > min_time && std::abs(d_heading) >= to_turn) || ms > max_time) break;
+		if((ms > min_time && std::abs(d_heading) >= to_turn - deg_to_rad(10.0f))) break;
 	}
 	stop();
 
-	std::cout << "Accuracy: " << rad_to_deg(std::abs(get_heading() - start_heading)) << "°" << std::endl;
+	//std::cout << "Accuracy: " << rad_to_deg(std::abs(get_heading() - start_heading)) << "°" << std::endl;
 }
 
 uint8_t Robot::encoder_value_a() {

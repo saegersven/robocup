@@ -55,10 +55,10 @@
 #define GEAR_RATIO 100.0f
 #define WHEEL_SPAN 155.0f
 #define TURN_DIAMETER 486.0f
-#define TURN_DURATION_FACTOR 2.68f
 
-#define TURN_MAX_DURATION_FACTOR 8.5f
+#define TURN_MAX_DURATION_FACTOR 10.0f
 #define TURN_MIN_DURATION_FACTOR 6.0f
+#define TURN_DURATION_FACTOR 6.5f
 
 #define DISTANCE_FACTOR (4.2f + 3 * 0.42f)
 // Encoder pulses per revolution of encoder shaft
