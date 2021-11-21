@@ -18,7 +18,9 @@
 #define GREEN_RESULT_DEAD_END 3
 
 // LINE FOLLOWING
-#define FOLLOW_HORIZONTAL_SENSITIVITY 75.0f
+#define FOLLOW_P_FACTOR 70.0f
+#define FOLLOW_I_FACTOR 10.0f
+#define FOLLOW_LAST_I_FACTOR 0.75f
 
 #define MINIMUM_DISTANCE 10.0f
 #define MAXIMUM_DISTANCE 40.0f
@@ -75,6 +77,9 @@ private:
 
 	float last_line_pos;
 	float last_line_angle;
+
+	float line_angle_integral;
+	std::chrono::time_point<std::chrono::high_resolution_clock> last_update;
 	
 	bool abort_obstacle(cv::Mat frame);
 	void obstacle();

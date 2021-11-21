@@ -39,6 +39,8 @@ sftp-config.json
 # Machine Learning datasets
 ml/**/data
 ml/**/original_data
+ml/**/model
+ml
 
 # CMake junk
 **/CMakeFiles

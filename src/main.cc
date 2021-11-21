@@ -8,6 +8,7 @@
 #include "robot.h"
 #include "rescue.h"
 #include "utils.h"
+#include "neural_networks.h"
 
 #define SILVER_NN_ID 1
 #define SILVER_RESULT_NEGATIVE 0
@@ -23,7 +24,7 @@ int main() {
 
 	// ../ to get out of build directory
 	const std::string GREEN_MODEL_PATH = "../ml/green/model.tflite";
-	const std::string SILVER_MODEL_PATH = "../ml/silver/model.tflite";
+
 
 	State state = State::line;
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
@@ -33,9 +34,12 @@ int main() {
 	}
 
 	std::cout << "Non zero" << std::endl;
+	
+	// NeuralNetworks neural_nets;
+	// neural_nets.load_model(GREEN_MODEL_PATH);
 
-	robot->servo(SERVO_1, ARM_UP, 1000);
-	delay(600);
+	// robot->servo(SERVO_1, ARM_UP, 1000);
+	// delay(600);
 
 	/*robot->servo(SERVO_2, GRAB_OPEN, 750);
 	robot->servo(SERVO_1, ARM_DOWN, 750);
@@ -59,12 +63,32 @@ int main() {
 	// CAMERA SETUP
 	const int FRONT_CAM = robot->init_camera(0, false, 80, 48, 60, SUB_MASK_PATH);	// Front camera
 
+	// robot->start_video(FRONT_CAM);
+	// while(1) {
+	// 	cv::Mat frame = robot->capture(FRONT_CAM);
+	// 	cv::imshow("Frame", frame);
+
+	// 	cv::waitKey(1);
+
+	// 	float confidence = 0.0f;
+	// 	int res = neural_nets.infere(0, frame, confidence);
+
+	// 	std::cout << "NN:\t" << res << " (" << confidence << ")" << std::endl;
+	// }
+
 	Line line(FRONT_CAM, robot);
 	line.start();
 
 	while(!robot->button(BTN_DEBUG));
 	while(robot->button(BTN_DEBUG));
 	delay(50);
+
+	robot->straight(50, 6000);
+	delay(100);
+	robot->straight(-50, 6000);
+	delay(100);
+
+	exit(0);
 
 	// cv::Mat f1 = robot->capture(FRONT_CAM);
 

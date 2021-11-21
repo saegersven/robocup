@@ -10,14 +10,14 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 
-data_dir = pathlib.Path("data")
+data_dir = pathlib.Path("data_new")
 
 image_count = len(list(data_dir.glob("*/*.jpg")))
 print(f"Image count = {image_count}")
 
-left = list(data_dir.glob("data/left/*"))
-
-right = list(data_dir.glob("data/right/*"))
+left = list(data_dir.glob("data_new/left/*"))
+right = list(data_dir.glob("data_new/right/*"))
+dead_end = list(data_dir.glob("data_new/deadend/*"))
 
 batch_size = 32
 img_height = 48
@@ -66,7 +66,7 @@ model = Sequential([
 	#layers.Conv2D(64, 3, padding="same", activation="relu"),
 	#layers.MaxPooling2D(),
 	layers.Flatten(),
-	layers.Dense(128, activation="relu"), # 128
+	layers.Dense(64, activation="relu"), # 128
 	layers.Dense(num_classes, activation="softmax")
 ])
 
@@ -76,7 +76,7 @@ model.compile(optimizer="adam",
 
 model.summary()
 
-epochs = 10
+epochs = 11
 history = model.fit(
 	train_ds,
 	validation_data=val_ds,

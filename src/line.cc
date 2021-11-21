@@ -38,6 +38,9 @@ void Line::start() {
 
 	running = true;
 
+	line_angle_integral = 0.0f;
+	last_update = std::chrono::high_resolution_clock::now();
+
 	std::thread obstacle_thread([this]{obstacle();});
 	obstacle_thread.detach();
 }
@@ -75,7 +78,7 @@ bool Line::check_silver(cv::Mat& frame) {
 		}
 	}
 
-	return total_difference < 25'000;
+	return total_difference < 25000;
 }
 
 bool Line::abort_obstacle(cv::Mat frame) {
@@ -249,7 +252,14 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 		);
 #endif
 
-	int16_t error = line_angle * FOLLOW_HORIZONTAL_SENSITIVITY;
+	// auto now = std::chrono::high_resolution_clock::now();
+	// float dt = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update).count() / 1000000.0f;
+	// last_update = now;
+
+	// this->line_angle_integral = line_angle_integral * FOLLOW_LAST_I_FACTOR + line_angle * dt;
+
+	int16_t error = line_angle * FOLLOW_P_FACTOR;
+	/* + line_angle_integral * FOLLOW_I_FACTOR; */
 
 #ifndef MOVEMENT_OFF
 	robot->m(FOLLOW_MOTOR_SPEED + error, FOLLOW_MOTOR_SPEED - error);

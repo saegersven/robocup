@@ -11,13 +11,13 @@ import numpy as np
 
 
 
-leftPath = r"C:\Users\info\Desktop\test\data\left" # path to mimeograph images
-rightPath = r"C:\Users\info\Desktop\test\data\right" # path to mimeograph images
+leftPath = r"E:\Robocup\robocup\ml\green\data\left" # path to mimeograph images
+rightPath = r"E:\Robocup\robocup\ml\green\data\right" # path to mimeograph images
 
-tempPath = r"C:\Users\info\Desktop\test\data\temp" # path to mimeograph images
+tempPath = r"E:\Robocup\robocup\ml\green\temp" # path to mimeograph images
 
-newLeftPath = r"C:\Users\info\Desktop\test\data\newLeft" # path were ALL images are saved (both original, flipped and those with changed contrast)
-newRightPath = r"C:\Users\info\Desktop\test\data\newRight" # path were ALL images are saved (both original, flipped and those with changed contrast)
+newLeftPath = r"E:\Robocup\robocup\ml\green\data_new\left" # path were ALL images are saved (both original, flipped and those with changed contrast)
+newRightPath = r"E:\Robocup\robocup\ml\green\data_new\right" # path were ALL images are saved (both original, flipped and those with changed contrast)
 
 
 # flip left images to temp folder:

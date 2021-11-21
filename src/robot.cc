@@ -236,7 +236,7 @@ void Robot::init_bno055() {
 	std::cout << "Init complete" << std::endl;
 }
 
-double Robot::get_heading() {
+float Robot::get_heading() {
 	int16_t euler_data_h, euler_data_r, euler_data_p;
 	euler_data_h = euler_data_r = euler_data_p = 0;
 
@@ -360,11 +360,11 @@ void Robot::stop(uint8_t brake_duty_cycle) {
 	io_mutex.unlock();
 }
 
-void Robot::turn(double deg) {
+void Robot::turn(float deg) {
 	//m(100, -100, deg * TURN_DURATION_FACTOR);
-	double start_heading = get_heading();
+	float start_heading = get_heading();
 	//std::cout << "Start heading: " << rad_to_deg(start_heading) << std::endl;
-	double to_turn = std::abs(deg_to_rad(deg));
+	float to_turn = std::abs(deg_to_rad(deg));
 
 	bool clockwise = deg > 0.0;
 
@@ -376,7 +376,7 @@ void Robot::turn(double deg) {
 
 	m(clockwise ? -40 : 40, clockwise ? 40 : -40);
 	while(1) {
-		double new_heading;
+		float new_heading;
 		do {
 			new_heading = get_heading();
 		} while(new_heading > RAD_360 || new_heading < 0.0);
@@ -387,7 +387,7 @@ void Robot::turn(double deg) {
 		} else {
 			if(new_heading > start_heading) start_heading += RAD_360;
 		}
-		double d_heading = new_heading - start_heading;
+		float d_heading = new_heading - start_heading;
 		//std::cout << rad_to_deg(new_heading) << " - " << rad_to_deg(start_heading) << " = " << rad_to_deg(std::abs(d_heading)) << std::endl;
 
 		uint32_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
@@ -397,6 +397,59 @@ void Robot::turn(double deg) {
 	stop();
 
 	std::cout << "Accuracy: " << rad_to_deg(std::abs(get_heading() - start_heading)) << "°" << std::endl;
+}
+
+void Robot::straight(int8_t speed, uint32_t duration) {
+	auto start_time = std::chrono::high_resolution_clock::now();
+	auto last_update = std::chrono::high_resolution_clock::now();
+
+	float start_heading;
+	do {
+		start_heading = get_heading();
+	} while(start_heading > RAD_360 || start_heading < 0.0f);
+
+	std::cout << rad_to_deg(start_heading) << std::endl;
+
+	float integral = 0.0f;
+
+	const float I_FACTOR = 0.1f;
+	const float I_DAMPEN_FACTOR = 0.75f;
+	const float P_FACTOR = 200.0f;
+
+	float last_error = 0.0f;
+
+	while(1) {
+		auto now = std::chrono::high_resolution_clock::now();
+		uint32_t t = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
+
+		float dt = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update).count() / 1000000.0f;
+
+		if(duration != 0 && t >= duration) {
+			break;
+		}
+
+		float error = get_heading() - start_heading;
+		if(error > RAD_180) error -= RAD_360;
+		if(error < -RAD_180) error += RAD_360;
+
+		std::cout << "E\t" << rad_to_deg(error) << "\r";
+
+		if((error < 0 && last_error > 0) || (error > 0 && last_error < 0)) {
+			// Sign change, reset integral to prevent overshooting
+			integral = 0.0f;
+		}
+		last_error = error;
+
+		//std::cout << "E\t" << error << std::endl;
+
+		integral = integral * I_DAMPEN_FACTOR + error * dt;
+		float correction = P_FACTOR * error + I_FACTOR * integral;
+
+		m((int8_t)clip(speed - correction, -100.0f, 100.0f), (int8_t)clip(speed + correction, -100.0f, 100.0f));
+	}
+	std::cout << std::endl;
+	stop();
+	delay(20);
 }
 
 uint8_t Robot::encoder_value_a() {

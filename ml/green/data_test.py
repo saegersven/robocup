@@ -11,7 +11,7 @@ from keras.preprocessing import image
 
 data_test_dir = pathlib.Path("data_test")
 
-class_names = ["left", "right"]
+class_names = ["deadend", "left", "right"]
 
 test_images = []
 for img in os.listdir("data_test"):

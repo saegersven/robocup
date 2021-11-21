@@ -128,7 +128,8 @@ public:
 
 	// MOVEMENT
 	void stop(uint8_t brake_duty_cycle = 100);
-	void turn(double degrees);
+	void turn(float rad);
+	void straight(int8_t speed, uint32_t duration = 0);
 
 	// Directly set motor speed
 	void m(int8_t left, int8_t right, int32_t duration = 0, uint8_t brake_duty_cycle = 100);
@@ -148,5 +149,5 @@ public:
 	void button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
 	float distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t timeout = 1000);
 
-	double get_heading();
+	float get_heading();
 };

@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <memory>
+#include <chrono>
+#include <thread>
 
 #include <opencv2/opencv.hpp>
 
@@ -39,9 +41,20 @@ void NeuralNetworks::load_model(const std::string& path) {
 }
 
 int NeuralNetworks::infere(int id, cv::Mat& in, float& confidence) {
+	tflite::StderrReporter error_reporter;
+
+	std::unique_ptr<tflite::FlatBufferModel> model =
+		tflite::FlatBufferModel::BuildFromFile("../ml/green/model.tflite", &error_reporter);
+
+	tflite::ops::builtin::BuiltinOpResolver resolver;
+	std::unique_ptr<tflite::Interpreter> interpreter;
+	tflite::InterpreterBuilder(*model, resolver)(&interpreter);
+
+	interpreter->AllocateTensors();
+
 	// Get input and output layers
-	float* input_layer = interpreters[id]->typed_input_tensor<float>(0);
-	float* output_layer = interpreters[id]->typed_output_tensor<float>(0);
+	uint8_t* input_layer = interpreter->typed_input_tensor<uint8_t>(0);
+	float* output_layer = interpreter->typed_output_tensor<float>(0);
 
 	CV_Assert(in.depth() == CV_32F || in.depth() == CV_8U);
 	//CV_Assert(in.channels() == 3);
@@ -71,9 +84,15 @@ int NeuralNetworks::infere(int id, cv::Mat& in, float& confidence) {
 		case CV_8U:
 		{
 			uint8_t* p;
-			for(int i = 0; i < rows; ++i) {
-				p = in.ptr<uint8_t>(i);
+			for(int y = 0; y < rows; ++y) {
+				std::cout << std::to_string(y) << ": ";
+				p = in.ptr<uint8_t>(y);
 				memcpy(input_layer, p, cols * sizeof(uint8_t));
+				// for(int x = 0; x < cols; ++x) {
+				// 	std::cout << ".";
+				// 	input_layer[y * rows + x] = (float)p[x];
+				// }
+				// std::cout << std::endl;
 			}
 			break;
 		}
@@ -81,8 +100,9 @@ int NeuralNetworks::infere(int id, cv::Mat& in, float& confidence) {
 			break;
 	}
 
+	std::cout << "Invoking" << std::endl;
 	// Compute model instance
-	interpreters[id]->Invoke();
+	interpreter->Invoke();
 
 	int max_index = 0;
 	confidence = std::numeric_limits<float>::lowest();
