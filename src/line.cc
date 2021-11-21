@@ -101,7 +101,7 @@ bool Line::abort_obstacle(cv::Mat frame) {
 // ASYNC
 void Line::obstacle() {
 	while(running) {
-		if(robot->distance(DIST_1, 1) < 7.0f && robot->distance(DIST_1, 20) < 9.0f) {
+		if(robot->distance(DIST_1, 1) < 7.0f && robot->distance(DIST_1, 10) < 9.0f) {
 			std::cout << "Obstacle" << std::endl;
 			obstacle_active = 1;
 		}
@@ -474,6 +474,7 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 			green_result == GREEN_RESULT_DEAD_END) {
 			std::cout << "DEAD-END" << std::endl;
 			robot->turn(deg_to_rad(180.0f));
+			robot->m(60, 60, 150);
 		} else if(green_result == GREEN_RESULT_LEFT) {
 			std::cout << "LEFT" << std::endl;
 			robot->turn(deg_to_rad(-70.0f));
@@ -481,7 +482,7 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 			std::cout << "RIGHT" << std::endl;
 			robot->turn(deg_to_rad(70.0f));
 		}
-
+		delay(100);
 		robot->m(60, 60, 130);
 		robot->start_video(front_cam_id);
 	}
