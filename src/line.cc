@@ -74,9 +74,11 @@ bool Line::check_silver(cv::Mat& frame) {
 		for(j = 0; j < cols; ++j) {
 			total_difference += std::abs((int16_t)p[j + 0] - p_b[j + 0])
 				+ std::abs((int16_t)p[j + 1] - p_b[j + 2])
-				+ std::abs((int16_t)p[j + 1] - p_b[j + 2]);
+				+ std::abs((int16_t)p[j + 1] - p_b[j + 2]) * 2;
 		}
 	}
+
+	std::cout << total_difference << std::endl;
 
 	return total_difference < 25000;
 }
@@ -146,17 +148,19 @@ bool Line::line(cv::Mat& frame) {
 
 		green(frame, black);
 
-		/*if(check_silver(frame)) {
-			robot->stop();
+		if(check_silver(frame)) {
 			std::cout << "SILVER" << std::endl;
-			robot->stop_video(front_cam_id);
-			robot->m(60, -60, 600);
-			delay(200);
-			robot->m(20, 20, 300);
-			robot->start_video(front_cam_id);
-			delay(200);
+#ifndef MOVEMENT_OFF
+			robot->stop();
+			// robot->stop_video(front_cam_id);
+			// robot->m(60, -60, 600);
+			// delay(200);
+			// robot->m(20, 20, 300);
+			// robot->start_video(front_cam_id);
+			// delay(200);
+#endif
 			return true; // Return true when silver is detected
-		}*/
+		}
 	}
 #ifdef DEBUG
 #ifdef DEBUG_RESIZE

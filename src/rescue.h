@@ -7,6 +7,8 @@
 #define GRAB_OPEN -20
 #define GRAB_CLOSED -100
 
+#define REFLETCANCE_THRESHOLD_VICTIM 1000
+
 class Rescue {
 private:
 	std::mutex rescue_mutex;

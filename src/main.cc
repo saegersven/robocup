@@ -83,13 +83,6 @@ int main() {
 	while(robot->button(BTN_DEBUG));
 	delay(50);
 
-	robot->straight(50, 6000);
-	delay(100);
-	robot->straight(-50, 6000);
-	delay(100);
-
-	exit(0);
-
 	// cv::Mat f1 = robot->capture(FRONT_CAM);
 
 	// robot->stop_video(FRONT_CAM);
