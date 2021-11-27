@@ -22,7 +22,6 @@ enum class State {
 int main() {
 	std::cout << "Init" << std::endl;
 
-	// ../ to get out of build directory
 	const std::string GREEN_MODEL_PATH = "../ml/green/model.tflite";
 
 
