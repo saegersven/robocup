@@ -17,11 +17,11 @@
 #include "vision.h"
 
 // PINS
-#define M1_1 17
-#define M1_2 18
+#define M1_1 18
+#define M1_2 17
 #define M1_E 4
-#define M2_1 24
-#define M2_2 23
+#define M2_1 23
+#define M2_2 24
 #define M2_E 22
 
 #define BUZZER 25

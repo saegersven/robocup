@@ -24,29 +24,38 @@ int main() {
 
 	const std::string GREEN_MODEL_PATH = "../ml/green/model.tflite";
 
-
 	State state = State::line;
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
 	while(robot->get_heading() == 0) {
 		delay(10);
+		robot->m(-30, 30, 20);
 	}
-
+	robot->m(30, -30, 20);
 	std::cout << "Heading not zero" << std::endl;
-
+	robot->beep(200, BUZZER);
 	const auto start_time = std::chrono::system_clock::now();
 
 	const std::string SUB_MASK_PATH = "../runtime_data/front_sub_mask.png";
 
+	robot->servo(SERVO_2, GRAB_CLOSED, 500);
+	robot->servo(SERVO_1, ARM_UP, 500);
+
+	Rescue rescue(robot);
+	rescue.start();
+	state = State::rescue;
+
+	exit(0);
+
 	// CAMERA SETUP
-	const int FRONT_CAM = robot->init_camera(0, false, 80, 48, 60, SUB_MASK_PATH);	// Front camera
+	const int FRONT_CAM = robot->init_camera(2, false, 80, 48, 60, SUB_MASK_PATH);	// Front camera
 
 	Line line(FRONT_CAM, robot);
 	line.start();
 
-	while(!robot->button(BTN_DEBUG));
-	while(robot->button(BTN_DEBUG));
-	delay(50);
+	// while(!robot->button(BTN_DEBUG));
+	// while(robot->button(BTN_DEBUG));
+	// delay(50);
 
 	// cv::Mat f1 = robot->capture(FRONT_CAM);
 
@@ -66,8 +75,6 @@ int main() {
 
 	// robot->servo(SERVO_2, ARM_UP_ANGLE);
 	// delay(500);
-
-	//Rescue rescue(robot);
 
 	// MAIN LOOP
 	while(1) {

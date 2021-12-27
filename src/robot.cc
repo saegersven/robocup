@@ -360,32 +360,30 @@ void Robot::stop(uint8_t brake_duty_cycle) {
 	io_mutex.unlock();
 }
 
-void Robot::turn(float deg) {
+void Robot::turn(float rad) {
 	//m(100, -100, deg * TURN_DURATION_FACTOR);
 	float start_heading = get_heading();
-	//std::cout << "Start heading: " << rad_to_deg(start_heading) << std::endl;
-	float to_turn = std::abs(deg_to_rad(deg));
+	float to_turn = std::abs(rad);
 
 	bool clockwise = rad > 0.0;
 
-	if(to_turn < deg_to_rad(42.0f)) {
-		m(clockwise ? 30 : -30, clockwise ? -30 : 30, TURN_DURATION_FACTOR * std::abs(rad_to_deg(rad)));
+	if(to_turn < 0.3) {
+		m(clockwise ? -30 : 30, clockwise ? 30 : -30, TURN_DURATION_FACTOR * std::abs(rad_to_deg(rad)));
 		return;
 	}
 
 	auto start_time = std::chrono::high_resolution_clock::now();
-	uint32_t min_time = TURN_MIN_DURATION_FACTOR * std::abs(rad_to_deg(rad));
-	uint32_t max_time = TURN_MAX_DURATION_FACTOR * std::abs(rad_to_deg(rad));
+	uint32_t min_time = TURN_MIN_DURATION_FACTOR * std::abs(rad);
+	uint32_t max_time = TURN_MAX_DURATION_FACTOR * std::abs(rad);
 
 	//std::cout << to_turn << " " << min_time << " " << max_time << std::endl;
-
-	m(clockwise ? 30 : -30, clockwise ? -30 : 30);
+	m(clockwise ? -30 : 30, clockwise ? 30 : -30);
 	while(1) {
 		float new_heading;
 		do {
 			new_heading = get_heading();
 		} while(new_heading > RAD_360 || new_heading < 0.0);
-		//std::cout << "New heading " << rad_to_deg(new_heading) << std::endl;
+		// std::cout << "New heading " << rad_to_deg(new_heading) << std::endl;
 
 		if(clockwise) {
 			if(new_heading < start_heading - RAD_90) start_heading -= RAD_360;

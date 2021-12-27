@@ -539,7 +539,7 @@ void Line::rescue_kit(cv::Mat& frame) {
 
 		robot->m(-60, -60, 720);
 		delay(200);
-		robot->turn(deg_to_rad(180.0f));
+		robot->turn(RAD_180);
 
 		//delay(1000);
 		robot->servo(SERVO_2, GRAB_OPEN, 750);
