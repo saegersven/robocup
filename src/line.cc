@@ -80,7 +80,7 @@ bool Line::check_silver(cv::Mat& frame) {
 
 	std::cout << total_difference << std::endl;
 
-	return total_difference < 25000;
+	return total_difference < 0;
 }
 
 bool Line::abort_obstacle(cv::Mat frame) {
@@ -266,7 +266,7 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 	/* + line_angle_integral * FOLLOW_I_FACTOR; */
 
 #ifndef MOVEMENT_OFF
-	robot->m(FOLLOW_MOTOR_SPEED + error, FOLLOW_MOTOR_SPEED - error);
+	robot->m(FOLLOW_MOTOR_SPEED - error, FOLLOW_MOTOR_SPEED + error);
 #endif
 }
 

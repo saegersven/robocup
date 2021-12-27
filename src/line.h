@@ -31,8 +31,8 @@
 
 // SILVER DETECTION
 #define RUNTIME_AVERAGE_SILVER_PATH "../runtime_data/average_silver.png"
-#define SILVER_X 27, 54
-#define SILVER_Y 30, 36
+#define SILVER_X 29, 54
+#define SILVER_Y 21, 31
 
 // OBSTACLE
 #define OBSTACLE_Y_UPPER 30

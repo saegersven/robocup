@@ -41,11 +41,9 @@ int main() {
 	robot->servo(SERVO_2, GRAB_CLOSED, 500);
 	robot->servo(SERVO_1, ARM_UP, 500);
 
-	Rescue rescue(robot);
-	rescue.start();
-	state = State::rescue;
-
-	exit(0);
+	// Rescue rescue(robot);
+	// rescue.start();
+	// state = State::rescue;
 
 	// CAMERA SETUP
 	const int FRONT_CAM = robot->init_camera(2, false, 80, 48, 60, SUB_MASK_PATH);	// Front camera
