@@ -31,15 +31,24 @@ struct Victim {
 
 class Rescue {
 private:
+	const int ROI_MIN_X = 0;
+	const int ROI_MAX_X = 639;
+	const int ROI_MIN_Y = 170;
+	const int ROI_MAX_Y = 479;
+
 	std::mutex rescue_mutex;
 
 	Robot* robot;
 	std::thread::native_handle_type native_handle;
 
+	int back_cam_id;
+
 	void rescue();
 
+	bool find_victim(bool ignore_dead);
+
 public:
-	Rescue();
+	Rescue(Robot* robot);
 	void start();
 	void stop();
 };

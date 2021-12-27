@@ -67,7 +67,7 @@ int main() {
 	// robot->servo(SERVO_2, ARM_UP_ANGLE);
 	// delay(500);
 
-	//Rescue rescue();
+	//Rescue rescue(robot);
 
 	// MAIN LOOP
 	while(1) {
