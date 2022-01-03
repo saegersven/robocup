@@ -1,0 +1,7 @@
+TODO:
+- obstacle
+- detect rescue area
+- FPS counter
+- NN for intersections
+- run main script on startup
+- fix random camera IDs after reboot
