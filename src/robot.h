@@ -74,6 +74,9 @@
 // Factor for proportional control of motor speed
 #define MOTOR_SPEED_CORRECTION_FACTOR 10.0f
 
+#define FRONT_CAM "/dev/cams/front"
+#define BACK_CAM "/dev/cams/back"
+
 // I2C API
 int8_t API_I2C_bus_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
 int8_t API_I2C_bus_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);

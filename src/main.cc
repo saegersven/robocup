@@ -17,7 +17,7 @@
 enum class State {
 	line,
 	rescue
-};
+}
 
 int main() {
 	std::cout << "Init" << std::endl;

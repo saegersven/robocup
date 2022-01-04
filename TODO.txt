@@ -3,4 +3,4 @@ TODO:
 - detect rescue area
 - FPS counter
 - NN for intersections
-- run main script on startup
+- global variable for movement on/off which is changed whenever the button on the robot is pressed
