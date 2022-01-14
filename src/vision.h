@@ -10,7 +10,7 @@ private:
 	cv::Mat undistort(cv::Mat in);
 
 public:
-	const std::string& hardware_id;
+	std::string hardware_id;
 	cv::VideoCapture cap;
 	cv::Size image_size;
 	int fps;

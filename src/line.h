@@ -43,6 +43,7 @@
 #define TURN_100_90 330
 
 #define DEBUG
+#define FPS_COUNTER
 //#define DEBUG_RESIZE
 //#define MOVEMENT_OFF
 
@@ -63,6 +64,8 @@ struct Group {
 
 class Line {
 private:
+	float fps = 0.0f;
+	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
 	int front_cam_id;
 	std::shared_ptr<Robot> robot;
 

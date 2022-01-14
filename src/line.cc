@@ -24,7 +24,8 @@ bool is_blue(uint8_t b, uint8_t g, uint8_t r) {
 	return 1.0f / BLUE_RATIO_THRESHOLD * b > g + r && b > BLUE_MIN_VALUE;
 }
 
-Line::Line(int front_cam_id, std::shared_ptr<Robot> robot) : obstacle_active(0), running(false) {
+Line::Line(int front_cam_id, std::shared_ptr<Robot> robot)
+	: obstacle_active(0), running(false), last_frame_t(std::chrono::high_resolution_clock::now()) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
 
@@ -63,8 +64,8 @@ bool Line::check_silver2() {
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	const float MINIMUM_RATIO = 0.55; // Ratio of red to sum of blue and green
-	const float MINIMUM_VALUE = 150; // Note: This is the total, not the average
+	const float MINIMUM_RATIO = 0.515; // Ratio of red to sum of blue and green
+	const float MINIMUM_VALUE = 200; // Note: This is the total, not the average
 	const float CENTER_MINIMUM_VALUE = 200;
 
 	// Left red dot
@@ -75,18 +76,24 @@ bool Line::check_silver(cv::Mat& frame) {
 
 	if(r_l < MINIMUM_RATIO || v_l < MINIMUM_VALUE) return false;
 
+	std::cout << "Right dot" << std::endl;
 	// Right red dot
 	cv::Mat roi_r = frame(cv::Range(30, 37), cv::Range(52, 59));
 	cv::Vec3b col_r = average_color(roi_r);
 	float r_r = (float)col_r[2] / (col_r[1] + col_r[0]);
 	float v_r = (float)col_r[2] + col_r[1] + col_r[0];
 
+	cv::imshow("roi_r", roi_r);
+
 	if(r_r < MINIMUM_RATIO || v_r < MINIMUM_VALUE) return false;
 
+	/*std::cout << "Distance" << std::endl;
 	// Distance
-	float dist = robot->distance(DIST_1, 3, 2);
-	if(dist < 90.0f || dist > 130.0f) return false;
+	float dist = robot->distance(DIST_1, 2, 500);
+	std::cout << dist << std::endl;
+	if(dist < 90.0f || dist > 130.0f) return false;*/
 
+	std::cout << "Center" << std::endl;
 	// Center
 	cv::Mat roi_c = frame(cv::Range(30, 37), cv::Range(25, 50));
 	cv::Vec3b col_c = average_color(roi_c);
@@ -148,6 +155,7 @@ bool Line::line(cv::Mat& frame) {
 			obstacle_active = 0;
 		}
 	} else {
+		auto start_t = std::chrono::high_resolution_clock::now();
 #ifdef DEBUG
 		debug_frame = frame.clone();
 #endif
@@ -184,6 +192,15 @@ bool Line::line(cv::Mat& frame) {
 
 	cv::imshow("Frame", frame);
 	cv::waitKey(1);
+
+#ifdef FPS_COUNTER
+	auto end_t = std::chrono::high_resolution_clock::now();
+	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(end_t - last_frame_t).count();
+	float l_fps = 1.0 / ((float)us / 1'000'000);
+	fps = fps * 0.9f + l_fps * 0.1f;
+	std::cout << fps << " fps, " << us << "us" << std::endl;
+	last_frame_t = end_t;
+#endif
 	return false;
 }
 

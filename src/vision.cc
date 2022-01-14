@@ -11,7 +11,7 @@ Camera::Camera(const std::string& hardware_id, bool calibrated, int width, int h
 	this->image_size = cv::Size(width, height);
 
 	if(calibrated) {
-		calibration_from_file("cc_" + std::to_string(hardware_id) + ".bin");
+		calibration_from_file("cc_" + hardware_id + ".bin");
 		this->new_camera_matrix = cv::getOptimalNewCameraMatrix(
 			this->camera_matrix, this->distortion_matrix, this->image_size, 1.0);
 		this->calibrated = true;

@@ -44,12 +44,14 @@ int main() {
 	robot->servo(SERVO_1, ARM_UP, 500);
 
 	// CAMERA SETUP
-	const int FRONT_CAM = robot->init_camera("/dev/cams/front", false, 80, 48, 60, SUB_MASK_PATH);
+	const int FRONT_CAM = robot->init_camera("/dev/cams/front", false, 80, 48, 120, SUB_MASK_PATH);
 
 	Line line(FRONT_CAM, robot);
 	line.start();
 
-	while(!robot->button(BTN_DEBUG));
+	while(!robot->button(BTN_DEBUG)) {
+		//std::cout << robot->distance(DIST_1, 1, 500) << std::endl;
+	}
 	while(robot->button(BTN_DEBUG));
 	robot->beep(200, BUZZER);
 
