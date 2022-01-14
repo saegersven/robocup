@@ -5,7 +5,7 @@
 #include "errcodes.h"
 #include "utils.h"
 
-Camera::Camera(int hardware_id, bool calibrated, int width, int height, int fps) {
+Camera::Camera(const std::string& hardware_id, bool calibrated, int width, int height, int fps) {
 	this->hardware_id = hardware_id;
 	this->fps = fps;
 	this->image_size = cv::Size(width, height);
@@ -52,14 +52,14 @@ void Camera::load_subtractive_mask(const std::string& file_name) {
 }
 
 void Camera::open_video() {
-	this->cap.open(hardware_id);
+	this->cap.open(hardware_id, cv::CAP_V4L2);
 	this->cap.set(cv::CAP_PROP_FRAME_WIDTH, std::max(320, this->image_size.width));
 	this->cap.set(cv::CAP_PROP_FRAME_HEIGHT, std::max(192, this->image_size.height));
 	this->cap.set(cv::CAP_PROP_FPS, this->fps);
 	this->cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 
 	if(!this->cap.isOpened()) {
-		std::cerr << "Could not open camera " << std::to_string(this->hardware_id) << std::endl;
+		std::cerr << "Could not open camera " << this->hardware_id << std::endl;
 		exit(ERRCODE_CAM_SETUP);
 	}
 }

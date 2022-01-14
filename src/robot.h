@@ -121,7 +121,7 @@ public:
 	// void delay_c(uint32_t ms, int id);
 
 	// CAMERA
-	int init_camera(int id, bool calibrated = false,
+	int init_camera(const std::string& id, bool calibrated = false,
 		int width = 320, int height = 192, int fps = 60, const std::string& subtractive_mask_path = "");
 	cv::Mat capture(int cam_id, bool undistort = false);
 	void start_video(int cam_id);

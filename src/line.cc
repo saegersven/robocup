@@ -88,7 +88,7 @@ bool Line::check_silver(cv::Mat& frame) {
 	if(dist < 90.0f || dist > 130.0f) return false;
 
 	// Center
-	cv::Mat roi_c = frame(cv::Range(30, 37, cv::Range(25, 50)));
+	cv::Mat roi_c = frame(cv::Range(30, 37), cv::Range(25, 50));
 	cv::Vec3b col_c = average_color(roi_c);
 	float v_c = (float)col_c[2] + col_c[1] + col_c[0];
 
@@ -171,7 +171,7 @@ bool Line::line(cv::Mat& frame) {
 			// robot->start_video(front_cam_id);
 			// delay(200);
 #endif
-			return true; // Return true when silver is detected
+			return true;
 		}
 	}
 #ifdef DEBUG
@@ -216,7 +216,6 @@ float Line::circular_line(cv::Mat& in) {
 		p_dw = distance_weight_map.ptr<uint8_t>(i);
 		for(j = 0; j < in.cols; ++j) {
 			if(p[j]) {
-				// Put point into array based on distance to center
 				float x = (float)j;
 				float y = (float)i;
 

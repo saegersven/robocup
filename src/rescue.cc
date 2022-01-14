@@ -90,7 +90,7 @@ void Rescue::rescue() {
 bool Rescue::find_victim(bool ignore_dead) {
 	delay(250);
 	// Capture from back camera
-	cap.open(0);
+	cap.open("/dev/cams/back", cv::CAP_V4L2);
 	cap.grab();
 	cap.retrieve(frame);
 	cap.release();
@@ -138,7 +138,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 	robot->turn(RAD_180);
 	delay(100);
 
-	cv::VideoCapture cap2(2);
+	cv::VideoCapture cap2("/dev/cams/front");
 	cap2.set(cv::CAP_PROP_FRAME_WIDTH, 160);
 	cap2.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
 	cap2.set(cv::CAP_PROP_FPS, 30);
@@ -190,7 +190,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 			while(1) {// Capture from back camera
 
 
-				cap.open(0);
+				cap.open("/dev/cams/back", cv::CAP_V4L2);
 				cap.grab();
 				cap.retrieve(frame);
 				cap.release();

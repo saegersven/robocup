@@ -282,7 +282,7 @@ float Robot::get_heading() {
 // 	}
 // }
 
-int Robot::init_camera(int id, bool calibrated, int width, int height, int fps, const std::string& subtractive_mask_path) {
+int Robot::init_camera(const std::string& id, bool calibrated, int width, int height, int fps, const std::string& subtractive_mask_path) {
 	Camera cam(id, calibrated, width, height, fps);
 
 	if(strcmp(subtractive_mask_path.c_str(), "")) {

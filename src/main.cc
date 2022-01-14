@@ -44,7 +44,7 @@ int main() {
 	robot->servo(SERVO_1, ARM_UP, 500);
 
 	// CAMERA SETUP
-	const int FRONT_CAM = robot->init_camera(2, false, 80, 48, 60, SUB_MASK_PATH);	// Front camera
+	const int FRONT_CAM = robot->init_camera("/dev/cams/front", false, 80, 48, 60, SUB_MASK_PATH);
 
 	Line line(FRONT_CAM, robot);
 	line.start();
