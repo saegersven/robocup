@@ -80,27 +80,3 @@ void clipped_difference(cv::Mat a, cv::Mat b, cv::Mat out) {
 		}
 	}
 }
-
-cv::Vec3b average_color(cv::Mat in) {
-	CV_Assert(in.depth() == CV_8U);
-	uint8_t* ptr;
-	float total_b = 0;
-	float total_g = 0;
-	float total_r = 0;
-
-	int i, j;
-	for(i = 0; i < in.rows; ++i) {
-		ptr = in.ptr<uint8_t>(i);
-		for(j = 0; j < in.cols; ++j) {
-			total_b += (float)ptr[j];
-			total_g += (float)ptr[j + 1];
-			total_r += (float)ptr[j + 2];
-		}
-	}
-	float size = in.rows * in.cols;
-	total_b /= size;
-	total_g /= size;
-	total_r /= size;
-
-	return cv::Vec3b((uint8_t)total_b, (uint8_t)total_g, (uint8_t)total_r);
-}

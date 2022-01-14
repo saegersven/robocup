@@ -89,6 +89,7 @@ private:
 
 	float circular_line(cv::Mat& in);
 
+	bool check_silver2();
 	bool check_silver(cv::Mat& frame);
 
 	//std::vector<cv::Point> find_green_group_centers_old(cv::Mat frame, cv::Mat& green);
