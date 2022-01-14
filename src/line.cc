@@ -63,68 +63,36 @@ bool Line::check_silver2() {
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	//cv::imwrite("../runtime_data/pic.png", frame);
-
-	cv::Mat roi_l = frame(cv::Range(30, 37), cv::Range(23, 30));
-	cv::Mat roi_r = frame(cv::Range(30, 37), cv::Range(52, 59));
-	cv::Mat roi_c = frame(cv::Range(30, 37, cv::Range(25, 50)));
-
-	//cv::imshow("L", roi_l);
-	//cv::imshow("R", roi_r);
-
-	cv::Vec3b col_l = average_color(roi_l);
-	cv::Vec3b col_r = average_color(roi_r);
-	cv::Vec3b col_c = average_color(roi_c);
-
-	float r_l = (float)col_l[2] / (col_l[1] + col_l[0]);
-	float r_r = (float)col_r[2] / (col_r[1] + col_r[0]);
-
-	float v_l = (float)col_l[2] + col_l[1] + col_l[0];
-	float v_r = (float)col_r[2] + col_r[1] + col_r[0];
-
-	float v_c = (float)col_c[2] + col_c[1] + col_c[0];
-
-	//std::cout << "R_l: " << r_l << std::endl;
-	//std::cout << "R_r: " << r_r << std::endl << std::endl;
-
-	const float MINIMUM_RATIO = 0.55;
+	const float MINIMUM_RATIO = 0.55; // Ratio of red to sum of blue and green
 	const float MINIMUM_VALUE = 150; // Note: This is the total, not the average
 	const float CENTER_MINIMUM_VALUE = 200;
 
-	if(r_l > MINIMUM_RATIO && r_r > MINIMUM_RATIO
-		&& v_l  > MINIMUM_VALUE && v_r > MINIMUM_VALUE
-		&& v_c > CENTER_MINIMUM_VALUE) {
-		return true;
-	}
-	return false;
+	// Left red dot
+	cv::Mat roi_l = frame(cv::Range(30, 37), cv::Range(23, 30));
+	cv::Vec3b col_l = average_color(roi_l);
+	float r_l = (float)col_l[2] / (col_l[1] + col_l[0]);
+	float v_l = (float)col_l[2] + col_l[1] + col_l[0];
 
-	/*
-	cv::Mat a = frame(cv::Range(SILVER_Y), cv::Range(SILVER_X));
+	if(r_l < MINIMUM_RATIO || v_l < MINIMUM_VALUE) return false;
 
-	// Calculate difference between frame cutout
-	int rows = a.rows;
-	int cols = a.cols;
+	// Right red dot
+	cv::Mat roi_r = frame(cv::Range(30, 37), cv::Range(52, 59));
+	cv::Vec3b col_r = average_color(roi_r);
+	float r_r = (float)col_r[2] / (col_r[1] + col_r[0]);
+	float v_r = (float)col_r[2] + col_r[1] + col_r[0];
 
-	uint32_t total_difference = 0;
+	if(r_r < MINIMUM_RATIO || v_r < MINIMUM_VALUE) return false;
 
-	uint8_t* p;
-	uint8_t* p_b;
+	// Distance
+	float dist = robot->distance(DIST_1, 3, 2);
+	if(dist < 90.0f || dist > 130.0f) return false;
 
-	int i, j;
-	for(i = 0; i < rows; ++i) {
-		p = a.ptr<uint8_t>(i);
-		p_b = average_silver.ptr<uint8_t>(i);
-		for(j = 0; j < cols; ++j) {
-			total_difference += std::abs((int16_t)p[j + 0] - p_b[j + 0])
-				+ std::abs((int16_t)p[j + 1] - p_b[j + 2])
-				+ std::abs((int16_t)p[j + 1] - p_b[j + 2]) * 2;
-		}
-	}
+	// Center
+	cv::Mat roi_c = frame(cv::Range(30, 37, cv::Range(25, 50)));
+	cv::Vec3b col_c = average_color(roi_c);
+	float v_c = (float)col_c[2] + col_c[1] + col_c[0];
 
-	std::cout << total_difference << std::endl;
-
-	return total_difference < 0;
-	*/
+	return v_c > CENTER_MINIMUM_VALUE;
 }
 
 bool Line::abort_obstacle(cv::Mat frame) {
