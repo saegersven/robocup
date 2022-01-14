@@ -67,12 +67,14 @@ bool Line::check_silver(cv::Mat& frame) {
 
 	cv::Mat roi_l = frame(cv::Range(30, 37), cv::Range(23, 30));
 	cv::Mat roi_r = frame(cv::Range(30, 37), cv::Range(52, 59));
+	cv::Mat roi_c = frame(cv::Range(30, 37, cv::Range(25, 50)));
 
 	//cv::imshow("L", roi_l);
 	//cv::imshow("R", roi_r);
 
 	cv::Vec3b col_l = average_color(roi_l);
 	cv::Vec3b col_r = average_color(roi_r);
+	cv::Vec3b col_c = average_color(roi_c);
 
 	float r_l = (float)col_l[2] / (col_l[1] + col_l[0]);
 	float r_r = (float)col_r[2] / (col_r[1] + col_r[0]);
@@ -80,14 +82,18 @@ bool Line::check_silver(cv::Mat& frame) {
 	float v_l = (float)col_l[2] + col_l[1] + col_l[0];
 	float v_r = (float)col_r[2] + col_r[1] + col_r[0];
 
-	std::cout << "R_l: " << r_l << std::endl;
-	std::cout << "R_r: " << r_r << std::endl << std::endl;
+	float v_c = (float)col_c[2] + col_c[1] + col_c[0];
+
+	//std::cout << "R_l: " << r_l << std::endl;
+	//std::cout << "R_r: " << r_r << std::endl << std::endl;
 
 	const float MINIMUM_RATIO = 0.55;
-	const float MINIMUM_VALUE = 150;
+	const float MINIMUM_VALUE = 150; // Note: This is the total, not the average
+	const float CENTER_MINIMUM_VALUE = 200;
 
 	if(r_l > MINIMUM_RATIO && r_r > MINIMUM_RATIO
-		&& v_l  > MINIMUM_VALUE && v_r > MINIMUM_VALUE) {
+		&& v_l  > MINIMUM_VALUE && v_r > MINIMUM_VALUE
+		&& v_c > CENTER_MINIMUM_VALUE) {
 		return true;
 	}
 	return false;
