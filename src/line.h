@@ -86,6 +86,7 @@ private:
 	
 	bool abort_obstacle(cv::Mat frame);
 	void obstacle();
+	bool obstacle_straight_line(uint32_t duration);
 
 	float difference_weight(float x);
 	float distance_weight(float x);
