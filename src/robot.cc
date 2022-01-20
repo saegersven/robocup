@@ -591,7 +591,6 @@ void Robot::button_wait(uint8_t pin, bool state, uint32_t timeout) {
 
 float Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t timeout) {
 	float timeElapsed = 0.0f;
-	dist_mutex.lock();
 	for(uint16_t i = 0; i < iterations; i++) {
 		digitalWrite(trig, HIGH);
 		std::this_thread::sleep_for(std::chrono::microseconds(100));
@@ -604,27 +603,26 @@ float Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t 
 		while (!timed_out && digitalRead(echo) == LOW) {
 			signal_start = std::chrono::high_resolution_clock::now();
 
-			/*if(std::chrono::duration_cast<std::chrono::milliseconds>(
+			if(std::chrono::duration_cast<std::chrono::milliseconds>(
 				std::chrono::high_resolution_clock::now() - start_time).count() > timeout) {
 				// Timeout
 				return -42.42f;
-			}*/
+			}
 		}
 
 		while (!timed_out && digitalRead(echo) == HIGH) {
 			signal_stop = std::chrono::high_resolution_clock::now();
 
-			/*if(std::chrono::duration_cast<std::chrono::milliseconds>(
+			if(std::chrono::duration_cast<std::chrono::milliseconds>(
 				std::chrono::high_resolution_clock::now() - start_time).count() > timeout) {
 				// Timeout
 				return -42.42f;
-			}*/
+			}
 		}
 
 		timeElapsed += std::chrono::duration_cast<std::chrono::microseconds>(signal_stop - signal_start).count();
 		if(i + 1 != iterations) delay(5);
 	}
-	dist_mutex.unlock();
 	// Multiply with speed of sound (0,0343 cm/us) and divide by 2 to get one-way distance
 	return timeElapsed / (float)iterations * 0.0343f * 0.5f;
 }

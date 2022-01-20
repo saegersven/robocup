@@ -28,7 +28,8 @@ int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
 	while(robot->get_heading() == 0) {
-		delay(10);
+		std::cout << "FRONT DISTANCE: " << robot->distance(DIST_1, 5, 2000) << std::endl;
+		std::cout << "SIDE DISTANCE: " << robot->distance(DIST_2, 5, 2000) << std::endl;
 		robot->m(-30, 30, 20);
 		robot->m(30, -30, 20);
 	}
@@ -44,7 +45,7 @@ int main() {
 	robot->servo(SERVO_1, ARM_UP, 500);
 
 	// CAMERA SETUP
-	const int FRONT_CAM = robot->init_camera(2, false, 80, 48, 60, SUB_MASK_PATH);	// Front camera
+	const int FRONT_CAM = robot->init_camera("/dev/cams/front", false, 80, 48, 60, SUB_MASK_PATH);	// Front camera
 
 	Line line(FRONT_CAM, robot);
 	line.start();

@@ -122,7 +122,9 @@ bool Line::abort_obstacle(cv::Mat frame) {
 // ASYNC
 void Line::obstacle() {
 	while(running) {
-		if(robot->distance(DIST_1, 1) < 7.0f && robot->distance(DIST_1, 10) < 9.0f) {
+		float dist = robot->distance(DIST_1, 1);
+		//std::cout << "Front dist = " << dist << std::endl;
+		if(dist < 7.0f && robot->distance(DIST_1, 10) < 9.0f) {
 			std::cout << "Obstacle" << std::endl;
 			obstacle_active = 1;
 		}
@@ -132,16 +134,23 @@ void Line::obstacle() {
 bool Line::obstacle_straight_line(uint32_t duration) {
 	auto start_t = std::chrono::high_resolution_clock::now();
 
+	robot->stop_video(front_cam_id);
+	robot->start_video(front_cam_id);
+
 	while(1) {
 		robot->m(80, 80);
 
 		cv::Mat frame = robot->capture(front_cam_id);
-		cv::Mat roi = frame(cv::Range(24, 32), cv::Range(30, 50));
+		cv::imshow("Debug", frame);
+		cv::waitKey(1);
+		cv::Mat roi = frame(cv::Range(33, 47), cv::Range(33, 48));
 
 		uint32_t num_black = 0;
 		in_range(frame, &is_black, &num_black);
 
-		if(num_black > 40) {
+		std::cout << num_black << std::endl;
+
+		if(num_black > 600) {
 			// Abort
 			robot->stop();
 			return true;
@@ -156,6 +165,8 @@ bool Line::obstacle_straight_line(uint32_t duration) {
 bool Line::line(cv::Mat& frame) {
 	// Check if obstacle thread has notified main thread
 	if(obstacle_active == 1) {
+		std::cout << "Obstacle!" << std::endl;
+
 		robot->beep(300, LED_1);
 			
 		robot->m(-80, -80, 250);
@@ -167,9 +178,9 @@ bool Line::line(cv::Mat& frame) {
 		delay(50);
 		robot->start_video(front_cam_id);
 
-		const uint32_t durations[] = {1000, 1600, 1600, 1000};
+		const uint32_t durations[] = {450, 1350, 1350, 450};
 
-		for(int i = 0; i < 3; ++i) {
+		for(int i = 0; i < 42; ++i) {
 			if(obstacle_straight_line(durations[i])) break;
 
 			robot->stop_video(front_cam_id);
@@ -177,7 +188,8 @@ bool Line::line(cv::Mat& frame) {
 			robot->start_video(front_cam_id);
 		}
 
-		robot->turn(-RAD_90);
+		//robot->turn(-RAD_90);
+		robot->m(80, -80, 450);
 
 		obstacle_active = 0;
 	} else {
