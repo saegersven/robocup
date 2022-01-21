@@ -47,8 +47,13 @@ void Camera::calibration_from_file(const std::string& file_name) {
 }
 
 void Camera::load_subtractive_mask(const std::string& file_name) {
-	this->subtractive_mask = cv::imread(file_name);
-	has_subtractive_mask = true;
+	this->subtractive_mask = cv::imread(file_name, cv::IMREAD_COLOR);
+	if(this->subtractive_mask.empty()) {
+		std::cout << "Failed to load subtractive mask" << std::endl;
+		has_subtractive_mask = false;
+	} else {
+		has_subtractive_mask = true;
+	}
 }
 
 void Camera::open_video() {

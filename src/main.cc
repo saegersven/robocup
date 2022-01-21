@@ -39,7 +39,7 @@ int main() {
 
 	const auto start_time = std::chrono::system_clock::now();
 
-	const std::string SUB_MASK_PATH = "../runtime_data/front_sub_mask.png";
+	const std::string SUB_MASK_PATH = "/home/pi/robocup/runtime_data/front_sub_mask.png";
 
 	robot->servo(SERVO_2, GRAB_CLOSED, 500);
 	robot->servo(SERVO_1, ARM_UP, 500);

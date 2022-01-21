@@ -64,9 +64,9 @@ bool Line::check_silver2() {
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	const float MINIMUM_RATIO = 0.515; // Ratio of red to sum of blue and green
+	const float MINIMUM_RATIO = 0.53; // Ratio of red to sum of blue and green
 	const float MINIMUM_VALUE = 200; // Note: This is the total, not the average
-	const float CENTER_MINIMUM_VALUE = 200;
+	const float CENTER_MINIMUM_VALUE = 220;
 
 	// Left red dot
 	cv::Mat roi_l = frame(cv::Range(30, 37), cv::Range(23, 30));
@@ -206,7 +206,7 @@ bool Line::line(cv::Mat& frame) {
 
 		green(frame, black);
 
-		if(check_silver(frame)) {
+		if(false/*check_silver(frame)*/) {
 			std::cout << "SILVER" << std::endl;
 #ifndef MOVEMENT_OFF
 			robot->stop();

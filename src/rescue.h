@@ -1,6 +1,6 @@
 #pragma once
 
-#define ARM_UP 95
+#define ARM_UP 102
 #define ARM_DOWN -50
 #define ARM_DROP -10
 
