@@ -24,6 +24,7 @@ extern "C" {
 #include "utils.h"
 #include "errcodes.h"
 #include "vision.h"
+#include <typeinfo>
 
 Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	std::cout << "Robot setup" << std::endl;
@@ -74,12 +75,12 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	// Setup Servo motor pins
 	// 50Hz has a period of 20ms, so multiply value by 100 to get period in microseconds
 	// if(softPwmCreate(SERVO_1, 0, 200)) {
-	// 	std::cout << "Error setting up PWM for Servo 1" << std::endl;
-	// 	exit(ERRCODE_BOT_SETUP_PWM);
+	//  std::cout << "Error setting up PWM for Servo 1" << std::endl;
+	//  exit(ERRCODE_BOT_SETUP_PWM);
 	// }
 	// if(softPwmCreate(SERVO_2, 0, 200)) {
-	// 	std::cout << "Error setting up PWM for Servo 2" << std::endl;
-	// 	exit(ERRCODE_BOT_SETUP_PWM);
+	//  std::cout << "Error setting up PWM for Servo 2" << std::endl;
+	//  exit(ERRCODE_BOT_SETUP_PWM);
 	// }
 
 	io_mutex.unlock();
@@ -105,11 +106,11 @@ int8_t API_I2C_bus_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, 
 		return 1;
 	}
 	// if(write(dev_addr, reg_data, len) != len) {
-	// 	return 1;
+	//  return 1;
 	// }
 	// if(len == 1) {
-	// 	i2c_smbus_write_byte_data(dev_addr, reg_addr, reg_data[0]);
-	// 	return 0;
+	//  i2c_smbus_write_byte_data(dev_addr, reg_addr, reg_data[0]);
+	//  return 0;
 	// }
 
 	// i2c_smbus_write_block_data(dev_addr, reg_addr, len, reg_data);
@@ -132,9 +133,9 @@ int8_t API_I2C_bus_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, u
 		return 1;
 	}
 	// if(len == 1) {
-	// 	reg_data = new uint8_t();
-	// 	reg_data[0] = i2c_smbus_read_byte_data(dev_addr, reg_addr);
-	// 	return 0;
+	//  reg_data = new uint8_t();
+	//  reg_data[0] = i2c_smbus_read_byte_data(dev_addr, reg_addr);
+	//  return 0;
 	// }
 
 	// i2c_smbus_read_block_data(dev_addr, reg_addr, reg_data);
@@ -208,8 +209,8 @@ void Robot::init_bno055() {
 	// W       61      12
 
 
-    uint8_t chip_id[1] = {0};
-    API_I2C_bus_read(bno_fd, 0, chip_id, 1);
+	uint8_t chip_id[1] = {0};
+	API_I2C_bus_read(bno_fd, 0, chip_id, 1);
 
 	API_I2C_bus_write8(bno_fd, 61, 0);
 	delay(30);
@@ -261,7 +262,7 @@ float Robot::get_heading() {
 	//auto end_time = std::chrono::high_resolution_clock::now();
 
 	//std::cout << "Reading took " <<
-	//	std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms" << std::endl;
+	//  std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms" << std::endl;
 
 	// bno_comres += bno055_convert_float_euler_r_rad(&f_euler_data_r);
 	// bno_comres += bno055_convert_float_euler_p_rad(&f_euler_data_p);
@@ -272,14 +273,14 @@ float Robot::get_heading() {
 }
 
 // void Robot::delay_c(uint32_t ms, int id) {
-// 	if(!cams[id].cap.isOpened()) {
-// 		delay(ms);
-// 		return;
-// 	}
-// 	std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
-// 	while(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start) < ms) {
-// 		cams[cam_id].cap.grab();
-// 	}
+//  if(!cams[id].cap.isOpened()) {
+//      delay(ms);
+//      return;
+//  }
+//  std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
+//  while(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start) < ms) {
+//      cams[cam_id].cap.grab();
+//  }
 // }
 
 int Robot::init_camera(const std::string& id, bool calibrated, int width, int height, int fps, const std::string& subtractive_mask_path) {
@@ -587,6 +588,23 @@ void Robot::button_wait(uint8_t pin, bool state, uint32_t timeout) {
 		}
 	}
 	io_mutex.unlock();
+}
+
+float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
+	digitalWrite(trig, HIGH);
+	delayMicroseconds(10);
+	digitalWrite(trig, LOW);
+
+	long now = micros();
+
+	while (digitalRead(echo) == LOW && micros() - now < timeout);
+	volatile long startTimeUsec = micros();
+	while (digitalRead(echo) == HIGH);
+	volatile long endTimeUsec = micros();
+
+	long travelTimeUsec = endTimeUsec - startTimeUsec;
+  
+	return (((travelTimeUsec / 10000.0f) * 340.29f) / 2.0f);
 }
 
 float Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t timeout) {

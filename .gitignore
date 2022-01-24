@@ -35,6 +35,7 @@
 ftpsync.settings
 simple-ftp-deploy.json
 sftp-config.json
+sftp-config-alt.json
 
 # Machine Learning datasets
 ml/**/data

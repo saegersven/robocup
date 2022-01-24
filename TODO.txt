@@ -1,8 +1,6 @@
 TODO:
 - "speedboost" on ramps
-- obstacle
 - improve accuracy when detecting silver (include front distance sensor, make sure there are no black contours, check side distance)
-- FPS counter
 - NN for intersections
 - global variable for movement on/off which is changed whenever the button on the robot is pressed
 - calibration scripts (silver, ...)

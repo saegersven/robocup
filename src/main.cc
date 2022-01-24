@@ -39,6 +39,12 @@ int main() {
 	robot->beep(10, LED_1);
 	robot->beep(10, LED_2);
 
+	// Sensor testing:
+	while (1) {
+		std::cout << "FRONT DISTANCE: " << robot->single_distance(DIST_2, 3000) << std::endl;
+		delay(10);
+	}
+
 	const auto start_time = std::chrono::system_clock::now();
 
 	const std::string SUB_MASK_PATH = "/home/pi/robocup/runtime_data/front_sub_mask.png";
