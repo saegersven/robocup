@@ -46,6 +46,3 @@ ml
 # CMake junk
 **/CMakeFiles
 **/CMakeCache.txt
-
-# gitignore file
-git/info/exclude
