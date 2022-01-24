@@ -31,7 +31,7 @@
 *.out
 *.app
 
-# FTPSync (contains credentials)
+# FTP & SFPT syncing files(contains credentials)
 ftpsync.settings
 simple-ftp-deploy.json
 sftp-config.json
@@ -46,3 +46,6 @@ ml
 # CMake junk
 **/CMakeFiles
 **/CMakeCache.txt
+
+# gitignore file
+.gitignore
