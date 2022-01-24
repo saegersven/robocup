@@ -48,4 +48,4 @@ ml
 **/CMakeCache.txt
 
 # gitignore file
-.gitignore
+git/info/exclude
