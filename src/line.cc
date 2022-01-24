@@ -44,6 +44,7 @@ void Line::start() {
 
 	std::thread obstacle_thread([this]{obstacle();});
 	obstacle_thread.detach();
+	obstacle_active = 0;
 }
 
 void Line::stop() {
@@ -124,9 +125,9 @@ void Line::obstacle() {
 	while(running) {
 		float dist = robot->distance(DIST_1, 1);
 		//std::cout << "Front dist = " << dist << std::endl;
-		if(dist < 7.0f && robot->distance(DIST_1, 10) < 9.0f) {
+		if(dist < 9.0f && robot->distance(DIST_1, 2) < 9.0f) {
 			std::cout << "Obstacle" << std::endl;
-			obstacle_active = 1;
+			obstacle_active = 2;
 		}
 	}
 }
@@ -143,14 +144,16 @@ bool Line::obstacle_straight_line(uint32_t duration) {
 		cv::Mat frame = robot->capture(front_cam_id);
 		cv::imshow("Debug", frame);
 		cv::waitKey(1);
-		cv::Mat roi = frame(cv::Range(33, 47), cv::Range(33, 48));
+		cv::Mat roi = frame(cv::Range(26, 47), cv::Range(26, 55));
+		uint32_t roi_size = roi.cols * roi.rows;
 
 		uint32_t num_black = 0;
 		in_range(frame, &is_black, &num_black);
 
-		std::cout << num_black << std::endl;
+		float p = (float)num_black / roi_size;
+		std::cout << p << std::endl;
 
-		if(num_black > 600) {
+		if(p > 0.8f) {
 			// Abort
 			robot->stop();
 			return true;
@@ -164,35 +167,42 @@ bool Line::obstacle_straight_line(uint32_t duration) {
 
 bool Line::line(cv::Mat& frame) {
 	// Check if obstacle thread has notified main thread
-	if(obstacle_active == 1) {
-		std::cout << "Obstacle!" << std::endl;
+	if(obstacle_active == 2) {
+		robot->stop();
+		if(robot->distance(DIST_1, 10) < 9.0f) {
+			std::cout << "Obstacle!" << std::endl;
 
-		robot->beep(300, LED_1);
-			
-		robot->m(-80, -80, 250);
+			robot->beep(300, LED_1);
+				
+			robot->m(-80, -80, 100);
 
-		robot->turn(-RAD_90);
-		robot->m(80, 80, 200);
-
-		robot->stop_video(front_cam_id);
-		delay(50);
-		robot->start_video(front_cam_id);
-
-		const uint32_t durations[] = {450, 1350, 1350, 450};
-
-		for(int i = 0; i < 42; ++i) {
-			if(obstacle_straight_line(durations[i])) break;
+			robot->turn(-RAD_90);
+			robot->m(80, 80, 200);
 
 			robot->stop_video(front_cam_id);
-			robot->turn(RAD_90);
+			delay(50);
 			robot->start_video(front_cam_id);
-		}
 
-		//robot->turn(-RAD_90);
-		robot->m(80, -80, 450);
+			const uint32_t durations[] = {450, 1250, 1250, 1250, 450};
+
+			for(int i = 0; i < 42; ++i) {
+				if(obstacle_straight_line(durations[i])) break;
+
+				robot->stop_video(front_cam_id);
+				robot->turn(RAD_90);
+				robot->start_video(front_cam_id);
+			}
+
+			//robot->turn(-RAD_90);
+			robot->m(-40, -40, 150);
+			robot->m(40, -40, 250);
+			robot->m(80, 80, 350);
+			robot->m(80, -80, 250);
+		}
 
 		obstacle_active = 0;
 	} else {
+		obstacle_active = 1;
 		auto start_t = std::chrono::high_resolution_clock::now();
 #ifdef DEBUG
 		debug_frame = frame.clone();
@@ -206,7 +216,7 @@ bool Line::line(cv::Mat& frame) {
 
 		green(frame, black);
 
-		if(false/*check_silver(frame)*/) {
+		if(check_silver(frame)) {
 			std::cout << "SILVER" << std::endl;
 #ifndef MOVEMENT_OFF
 			robot->stop();

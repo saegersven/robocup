@@ -27,10 +27,10 @@
 
 #define FOLLOW_MOTOR_SPEED 35
 
-#define RUNTIME_DISTANCE_WEIGHT_MAP_PATH "../runtime_data/distance_weights.png"
+#define RUNTIME_DISTANCE_WEIGHT_MAP_PATH "/home/pi/robocup/runtime_data/distance_weights.png"
 
 // SILVER DETECTION
-#define RUNTIME_AVERAGE_SILVER_PATH "../runtime_data/average_silver.png"
+#define RUNTIME_AVERAGE_SILVER_PATH "/home/pi/robocup/runtime_data/average_silver.png"
 #define SILVER_X 29, 54
 #define SILVER_Y 21, 31
 

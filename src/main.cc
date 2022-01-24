@@ -22,7 +22,7 @@ enum class State {
 int main() {
 	std::cout << "Init" << std::endl;
 
-	const std::string GREEN_MODEL_PATH = "../ml/green/model.tflite";
+	const std::string GREEN_MODEL_PATH = "/home/pi/robocup/ml/green/model.tflite";
 
 	State state = State::line;
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
@@ -36,6 +36,8 @@ int main() {
 	std::cout << "Heading not zero" << std::endl;
 
 	robot->beep(200, BUZZER);
+	robot->beep(10, LED_1);
+	robot->beep(10, LED_2);
 
 	const auto start_time = std::chrono::system_clock::now();
 
