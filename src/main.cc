@@ -28,8 +28,8 @@ int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
 	while(robot->get_heading() == 0) {
-		std::cout << "FRONT DISTANCE: " << robot->distance(DIST_1, 5, 2000) << std::endl;
-		std::cout << "SIDE DISTANCE: " << robot->distance(DIST_2, 5, 2000) << std::endl;
+		//std::cout << "FRONT DISTANCE: " << robot->distance(DIST_1, 5, 2000) << std::endl;
+		//std::cout << "SIDE DISTANCE: " << robot->distance(DIST_2, 5, 2000) << std::endl;
 		robot->m(-30, 30, 20);
 		robot->m(30, -30, 20);
 	}

@@ -57,8 +57,8 @@ void Line::stop() {
 	running = false;
 }
 
-bool Line::check_silver2() {
-	if (90.00 < robot->distance(DIST_1, 3, 2) && robot->distance(DIST_1, 3, 2) < 130.00) {
+bool Line::check_silver_distance() {
+	if (90.00 < robot->distance(DIST_1, 20, 0.1f, 5000) && robot->distance(DIST_1, 20, 0.1f, 5000) < 130.00) {
 		return true;
 	}
 	return false;
@@ -123,11 +123,15 @@ bool Line::abort_obstacle(cv::Mat frame) {
 // ASYNC
 void Line::obstacle() {
 	while(running) {
-		float dist = robot->distance(DIST_1, 1);
-		//std::cout << "Front dist = " << dist << std::endl;
-		if(dist < 9.0f && robot->distance(DIST_1, 2) < 9.0f) {
-			std::cout << "Obstacle" << std::endl;
-			obstacle_active = 2;
+		if(robot->single_distance(DIST_1, 1000) < 10.0f) {
+			robot->stop();
+			delay(10);
+			if(robot->distance(DIST_1, 10, 0.1f, 5000) < 9.0f) {
+				if(robot->distance(DIST_1, 30, 0.1f, 5000) < 9.0f) {				
+					std::cout << "Obstacle" << std::endl;
+					obstacle_active = 2;
+				}
+			}
 		}
 	}
 }
@@ -169,7 +173,7 @@ bool Line::line(cv::Mat& frame) {
 	// Check if obstacle thread has notified main thread
 	if(obstacle_active == 2) {
 		robot->stop();
-		if(robot->distance(DIST_1, 10) < 9.0f) {
+		if(robot->distance(DIST_1, 10, 0.1f, 3000) < 9.0f) {
 			std::cout << "Obstacle!" << std::endl;
 
 			robot->beep(300, LED_1);
