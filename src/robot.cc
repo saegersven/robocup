@@ -595,9 +595,9 @@ float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
 	delayMicroseconds(10);
 	digitalWrite(trig, LOW);
 
-	long now = micros();
+	long start_time = micros();
 
-	while (digitalRead(echo) == LOW && micros() - now < timeout);
+	while (digitalRead(echo) == LOW && micros() - start_time < timeout);
 	volatile long startTimeUsec = micros();
 	while (digitalRead(echo) == HIGH);
 	volatile long endTimeUsec = micros();
@@ -608,6 +608,14 @@ float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
 	return ((travelTimeUsec / 10000.0f) * 340.29f * 0.5f);
 }
 
-float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, float remove_percentage, uint32_t timeout) {
-	long startTime = micros();
+float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, float remove_percentage, uint32_t timeout_single_measurement, uint32_t timeout) {
+	float arr[measurements];
+
+	for(int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
+		float dist = single_distance(echo, trig, timeout_single_measurement);
+		std::cout << i << ": "<< dist << std::endl;
+		arr[i] = dist;
+		delay(10);
+	}
+	return 43.42f;
 }

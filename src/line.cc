@@ -58,14 +58,16 @@ void Line::stop() {
 }
 
 bool Line::check_silver_distance() {
-	if (90.00 < robot->distance(DIST_1, 20, 0.1f, 5000) && robot->distance(DIST_1, 20, 0.1f, 5000) < 130.00) {
+	/*
+	if (90.00 < robot->single_distance(DIST_1, 20, 0.1f, 5000) && robot->distance(DIST_1, 20, 0.1f, 5000) < 130.00) {
 		return true;
 	}
+	*/
 	return false;
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	const float MINIMUM_RATIO = 0.53; // Ratio of red to sum of blue and green
+	const float MINIMUM_RATIO = 0.7; // Ratio of red to sum of blue and green
 	const float MINIMUM_VALUE = 200; // Note: This is the total, not the average
 	const float CENTER_MINIMUM_VALUE = 220;
 
@@ -126,8 +128,8 @@ void Line::obstacle() {
 		if(robot->single_distance(DIST_1, 1000) < 10.0f) {
 			robot->stop();
 			delay(10);
-			if(robot->distance(DIST_1, 10, 0.1f, 5000) < 9.0f) {
-				if(robot->distance(DIST_1, 30, 0.1f, 5000) < 9.0f) {				
+			if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 3000) < 9.0f) {
+				if(robot->distance_avg(DIST_1, 30, 0.2f, 500, 10000) < 9.0f) {				
 					std::cout << "Obstacle" << std::endl;
 					obstacle_active = 2;
 				}
@@ -173,7 +175,7 @@ bool Line::line(cv::Mat& frame) {
 	// Check if obstacle thread has notified main thread
 	if(obstacle_active == 2) {
 		robot->stop();
-		if(robot->distance(DIST_1, 10, 0.1f, 3000) < 9.0f) {
+		if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 5000) < 9.0f) {
 			std::cout << "Obstacle!" << std::endl;
 
 			robot->beep(300, LED_1);

@@ -33,17 +33,11 @@ int main() {
 		robot->m(-30, 30, 20);
 		robot->m(30, -30, 20);
 	}
-	std::cout << "Heading not zero" << std::endl;
+	std::cout << "Heading not zer" << std::endl;
 
 	robot->beep(200, BUZZER);
 	robot->beep(10, LED_1);
 	robot->beep(10, LED_2);
-
-	// Sensor testing:
-	while (1) {
-		std::cout << "FRONT DISTANCE: " << robot->single_distance(DIST_2, 3000) << std::endl;
-		delay(10);
-	}
 
 	const auto start_time = std::chrono::system_clock::now();
 
