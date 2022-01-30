@@ -611,11 +611,28 @@ float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
 float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, float remove_percentage, uint32_t timeout_single_measurement, uint32_t timeout) {
 	float arr[measurements];
 
+	// take measurements
 	for(int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
 		float dist = single_distance(echo, trig, timeout_single_measurement);
 		std::cout << i << ": "<< dist << std::endl;
 		arr[i] = dist;
-		delay(10);
+		delay(100);
 	}
-	return 43.42f;
+
+	// calculate avg after removing n percent of exteme measurements
+	int arr_len = sizeof(arr) / sizeof(arr[0]);
+
+	std::sort(arr, arr + arr_len);
+	int kthPercent = (arr_len * remove_percentage);
+	float sum = 0;
+
+	for (int i = 0; i < arr_len; i++)
+		if (i >= kthPercent && i < (arr_len - kthPercent))
+			sum += arr[i];
+
+	float avg = sum / (arr_len - 2 * kthPercent);
+
+	std::cout << avg << std::endl;
+
+	return 42.42f;
 }

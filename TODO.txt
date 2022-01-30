@@ -1,4 +1,5 @@
 TODO:
+- implement timeout for single_distance() and distance_avg()
 - "speedboost" on ramps
 - improve accuracy when detecting silver (include front distance sensor, make sure there are no black contours, check side distance)
 - NN for intersections

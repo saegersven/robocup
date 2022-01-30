@@ -33,8 +33,9 @@ int main() {
 		robot->m(-30, 30, 20);
 		robot->m(30, -30, 20);
 	}
-	std::cout << "Heading not zer" << std::endl;
+	std::cout << "Heading not zero" << std::endl;
 
+	robot->single_distance(DIST_2, 500);
 	robot->beep(200, BUZZER);
 	robot->beep(10, LED_1);
 	robot->beep(10, LED_2);
