@@ -28,14 +28,12 @@ int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
 	while(robot->get_heading() == 0) {
-		//std::cout << "FRONT DISTANCE: " << robot->distance(DIST_1, 5, 2000) << std::endl;
-		//std::cout << "SIDE DISTANCE: " << robot->distance(DIST_2, 5, 2000) << std::endl;
+		std::cout << "FRONT DISTANCE: " << robot->single_distance(DIST_1, 2000) << std::endl;
+		std::cout << "SIDE DISTANCE: " << robot->single_distance(DIST_2, 2000) << std::endl;
 		robot->m(-30, 30, 20);
 		robot->m(30, -30, 20);
 	}
 	std::cout << "Heading not zero" << std::endl;
-
-	robot->single_distance(DIST_2, 500);
 	robot->beep(200, BUZZER);
 	robot->beep(10, LED_1);
 	robot->beep(10, LED_2);
@@ -53,8 +51,8 @@ int main() {
 	Line line(FRONT_CAM, robot);
 	line.start();
 
-	while(!robot->button(BTN_DEBUG));
-	while(robot->button(BTN_DEBUG));
+	//while(!robot->button(BTN_RESTART));
+	//while(robot->button(BTN_RESTART));
 	robot->beep(200, BUZZER);
 
 	// cv::Mat f1 = robot->capture(FRONT_CAM);

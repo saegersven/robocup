@@ -89,6 +89,8 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	this->asc_speed_right = 0.0f;
 	this->asc_has_duration = false;
 
+	this->block_m = false;
+
 	std::thread motor_update_thread(&Robot::asc, this); // Create async motor control thread
 	motor_update_thread.detach();
 }
@@ -311,6 +313,8 @@ void Robot::stop_video(int cam_id) {
 }
 
 void Robot::m(int8_t left, int8_t right, int32_t duration, uint8_t brake_duty_cycle) {
+	if(block_m) return;
+
 	left = clip(left, -100, 100);
 	right = clip(right, -100, 100);
 
@@ -349,6 +353,10 @@ void Robot::m(int8_t left, int8_t right, int32_t duration, uint8_t brake_duty_cy
 	io_mutex.unlock();
 }
 
+void Robot::block(bool val) {
+	block_m = val;
+}
+
 void Robot::stop(uint8_t brake_duty_cycle) {
 	io_mutex.lock();
 	digitalWrite(M1_1, LOW);
@@ -362,6 +370,8 @@ void Robot::stop(uint8_t brake_duty_cycle) {
 }
 
 void Robot::turn(float rad) {
+	if(block_m) return;
+
 	//m(100, -100, deg * TURN_DURATION_FACTOR);
 	float start_heading = get_heading();
 	float to_turn = std::abs(rad);
@@ -616,7 +626,7 @@ float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, floa
 		float dist = single_distance(echo, trig, timeout_single_measurement);
 		std::cout << i << ": "<< dist << std::endl;
 		arr[i] = dist;
-		delay(100);
+		delay(5);
 	}
 
 	// calculate avg after removing n percent of exteme measurements
@@ -634,5 +644,9 @@ float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, floa
 
 	std::cout << avg << std::endl;
 
-	return 42.42f;
+	return avg;
+}
+
+void Robot::set_gpio(int pin, bool state) {
+	digitalWrite(pin, state);
 }

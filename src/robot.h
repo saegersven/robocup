@@ -100,6 +100,8 @@ private:
 	// Speed values will be set to zero at this point in time
 	std::atomic<std::chrono::time_point<std::chrono::high_resolution_clock>> asc_stop_time;
 
+	std::atomic<bool> block_m;
+
 	// WiringPI id of Encoder GPIO Expander
 	int mcp_fd;
 
@@ -136,6 +138,7 @@ public:
 	void m(int8_t left, int8_t right, int32_t duration = 0, uint8_t brake_duty_cycle = 100);
 	// Set motor speed with async speed control
 	void m_asc(int8_t left, int8_t right, uint16_t duration = 0, bool wait = false);
+	void block(bool val = true);
 
 	void servo(uint8_t pin, float angle, uint16_t d = 0);
 	void attach_servo(uint8_t pin);
@@ -152,4 +155,5 @@ public:
 	float distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, float remove_percentage, uint32_t timeout_single_measurement, uint32_t timeout);
 
 	float get_heading();
+	void set_gpio(int pin, bool state);
 };

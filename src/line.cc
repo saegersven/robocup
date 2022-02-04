@@ -125,15 +125,20 @@ bool Line::abort_obstacle(cv::Mat frame) {
 // ASYNC
 void Line::obstacle() {
 	while(running) {
-		if(robot->single_distance(DIST_1, 1000) < 10.0f) {
+		if(obstacle_active != 1) continue;
+		if(robot->single_distance(DIST_1, 1000) < 9.0f) {
+			robot->set_gpio(LED_1, true);
 			robot->stop();
+			robot->block();
 			delay(10);
-			if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 3000) < 9.0f) {
-				if(robot->distance_avg(DIST_1, 30, 0.2f, 500, 10000) < 9.0f) {				
+			if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 3000) < 9.5f) {
+				if(robot->distance_avg(DIST_1, 30, 0.2f, 500, 10000) < 9.5f) {				
 					std::cout << "Obstacle" << std::endl;
 					obstacle_active = 2;
 				}
 			}
+			robot->set_gpio(LED_1, false);
+			robot->block(false);
 		}
 	}
 }
@@ -177,9 +182,7 @@ bool Line::line(cv::Mat& frame) {
 		robot->stop();
 		if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 5000) < 9.0f) {
 			std::cout << "Obstacle!" << std::endl;
-
-			robot->beep(300, LED_1);
-				
+			robot->set_gpio(LED_2, true);				
 			robot->m(-80, -80, 100);
 
 			robot->turn(-RAD_90);
@@ -189,7 +192,7 @@ bool Line::line(cv::Mat& frame) {
 			delay(50);
 			robot->start_video(front_cam_id);
 
-			const uint32_t durations[] = {450, 1250, 1250, 1250, 450};
+			const uint32_t durations[] = {550, 1250, 1250, 1250, 450};
 
 			for(int i = 0; i < 42; ++i) {
 				if(obstacle_straight_line(durations[i])) break;
@@ -199,7 +202,7 @@ bool Line::line(cv::Mat& frame) {
 				robot->start_video(front_cam_id);
 			}
 
-			//robot->turn(-RAD_90);
+			robot->set_gpio(LED_2, false);
 			robot->m(-40, -40, 150);
 			robot->m(40, -40, 250);
 			robot->m(80, 80, 350);
