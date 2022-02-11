@@ -601,6 +601,7 @@ void Robot::button_wait(uint8_t pin, bool state, uint32_t timeout) {
 }
 
 float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
+	timeout = timeout * 1000; // convert msec to usec for micros() function
 	digitalWrite(trig, HIGH);
 	delayMicroseconds(10);
 	digitalWrite(trig, LOW);
@@ -624,7 +625,7 @@ float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, floa
 	// take measurements
 	for(int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
 		float dist = single_distance(echo, trig, timeout_single_measurement);
-		std::cout << i << ": "<< dist << std::endl;
+		//std::cout << i << ": "<< dist << std::endl;
 		arr[i] = dist;
 		delay(5);
 	}
@@ -642,7 +643,7 @@ float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, floa
 
 	float avg = sum / (arr_len - 2 * kthPercent);
 
-	std::cout << avg << std::endl;
+	//std::cout << "Avg: "<< avg << std::endl;
 
 	return avg;
 }

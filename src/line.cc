@@ -67,7 +67,7 @@ bool Line::check_silver_distance() {
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	const float MINIMUM_RATIO = 0.7; // Ratio of red to sum of blue and green
+	const float MINIMUM_RATIO = 0.51; // Ratio of red to sum of blue and green
 	const float MINIMUM_VALUE = 200; // Note: This is the total, not the average
 	const float CENTER_MINIMUM_VALUE = 220;
 
@@ -236,6 +236,17 @@ bool Line::line(cv::Mat& frame) {
 			// robot->start_video(front_cam_id);
 			// delay(200);
 #endif
+			// Align with line
+			robot->stop_video(front_cam_id);
+			robot->m(-40, -40, 300);
+			cv::Mat f = robot->capture(front_cam_id);
+			cv::Mat black = in_range(f, &is_black);
+			float angle = circular_line(black);
+			std::cout << "Angle: " << angle << std::endl;
+
+			robot->turn(-angle);
+			robot->m(40, 40, 300);
+
 			return true;
 		}
 	}

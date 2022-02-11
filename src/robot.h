@@ -152,7 +152,7 @@ public:
 	bool button(uint8_t pin);
 	void button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
 	float single_distance(int8_t echo, uint8_t trig, int timeout = 1000);
-	float distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, float remove_percentage, uint32_t timeout_single_measurement, uint32_t timeout);
+	float distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements = 1, float remove_percentage = 0.2f, uint32_t timeout_single_measurement = 200, uint32_t timeout = 2000);
 
 	float get_heading();
 	void set_gpio(int pin, bool state);

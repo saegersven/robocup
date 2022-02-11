@@ -27,6 +27,9 @@ int main() {
 	State state = State::line;
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
+	robot->set_gpio(LED_1, true);
+	robot->set_gpio(LED_2, false);
+
 	while(robot->get_heading() == 0) {
 		std::cout << "FRONT DISTANCE: " << robot->single_distance(DIST_1, 2000) << std::endl;
 		std::cout << "SIDE DISTANCE: " << robot->single_distance(DIST_2, 2000) << std::endl;
@@ -34,9 +37,8 @@ int main() {
 		robot->m(30, -30, 20);
 	}
 	std::cout << "Heading not zero" << std::endl;
-	robot->beep(200, BUZZER);
-	robot->beep(10, LED_1);
-	robot->beep(10, LED_2);
+	robot->set_gpio(LED_1, false);
+	robot->set_gpio(LED_2, true);
 
 	const auto start_time = std::chrono::system_clock::now();
 
@@ -51,39 +53,23 @@ int main() {
 	Line line(FRONT_CAM, robot);
 	line.start();
 
-	//while(!robot->button(BTN_RESTART));
-	//while(robot->button(BTN_RESTART));
-	robot->beep(200, BUZZER);
+	Rescue rescue(robot);
 
-	// cv::Mat f1 = robot->capture(FRONT_CAM);
-
-	// robot->stop_video(FRONT_CAM);
-
-	// robot->m(100, 100, 48 * DISTANCE_FACTOR);
-
-	// robot->start_video(FRONT_CAM);
-
-	// cv::Mat f2 = robot->capture(FRONT_CAM);
-
-	// cv::imshow("F1", f1);
-	// cv::imshow("F2", f2);
-	// cv::waitKey(10000);
-
-	// exit(0);
-
-	// robot->servo(SERVO_2, ARM_UP_ANGLE);
-	// delay(500);
+	while(!robot->button(BTN_RESTART));
+	while(robot->button(BTN_RESTART));
+	robot->set_gpio(LED_2, false);
+	robot->beep(100, BUZZER);
 
 	// MAIN LOOP
 	while(1) {
-		if(robot->button(BTN_DEBUG)) {
-			while(robot->button(BTN_DEBUG));
+		if(robot->button(BTN_RESTART)) {
+			while(robot->button(BTN_RESTART));
 			switch(state) {
 				case State::line:
 					line.stop();
 					break;
 				case State::rescue:
-					//rescue.stop();
+					rescue.stop();
 					state = State::line;
 					break;
 			}
@@ -110,7 +96,7 @@ int main() {
 					line.stop();
 
 					state = State::rescue;
-					//rescue.start();
+					rescue.start();
 				}
 				break;
 			}

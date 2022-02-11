@@ -33,14 +33,23 @@ void Rescue::rescue() {
 	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 	
 	// Gets called once inside the evacuation zone
+	robot->m(80, 80, 1000);
+	delay(100);
 
 	// Determine entrance position
-	// float distance_right = robot->distance(DIST_1, 10);
-	// float distance_front = robot->distance(DIST_2, 10);
+	float distance_right = robot->distance_avg(DIST_2, 20);
+	float distance_front = robot->single_distance(DIST_1, 20);
 
-	uint8_t corner_pos = 0x02;
-	// corner_pos |= distance_front > 90.0f ? 0x02 : 0x00;
-	// corner_pos |= distance_right < 40.0f ? 0x01 : 0x00;
+	std::cout << "Right: " << distance_right << std::endl;
+	std::cout << "Front: " << distance_front << std::endl;
+
+	uint8_t corner_pos = 0;
+	corner_pos |= distance_front > 90.0f ? 0x02 : 0x00;
+	corner_pos |= distance_right < 40.0f ? 0x01 : 0x00;
+
+	std::cout << std::to_string(corner_pos) << std::endl;
+	std::cout << "Wall right? " << std::to_string(WALL_RIGHT(corner_pos)) << std::endl;
+	return;
 
 	// Turn around and search for first victim
 	robot->turn(WALL_RIGHT(corner_pos) ? RAD_180 : -RAD_180);
