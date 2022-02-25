@@ -6,3 +6,5 @@ TODO:
 - global variable for movement on/off which is changed whenever the button on the robot is pressed
 - calibration scripts (silver, ...)
 - timout when waiting for gyroscope heading, entering "savetymode" after timout 
+- find_black_corner can't cope with exits
+- adjust values in find_black_corner (especially the threshold for detecting the black corner)

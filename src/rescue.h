@@ -46,8 +46,8 @@ private:
 	cv::Mat debug_frame;
 
 	void rescue();
-
-	bool find_victim(bool ignore_dead);
+	void find_black_corner();
+	bool is_corner();
 
 public:
 	Rescue(std::shared_ptr<Robot> robot);

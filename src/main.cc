@@ -59,6 +59,7 @@ int main() {
 	while(robot->button(BTN_RESTART));
 	robot->set_gpio(LED_2, false);
 	robot->beep(100, BUZZER);
+	delay(200);
 
 	// MAIN LOOP
 	while(1) {
