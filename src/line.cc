@@ -238,13 +238,13 @@ bool Line::line(cv::Mat& frame) {
 #endif
 			// Align with line
 			robot->stop_video(front_cam_id);
-			robot->m(-40, -40, 300);
-			cv::Mat f = robot->capture(front_cam_id);
-			cv::Mat black = in_range(f, &is_black);
-			float angle = circular_line(black);
-			std::cout << "Angle: " << angle << std::endl;
+			// robot->m(-40, -40, 300);
+			// cv::Mat f = robot->capture(front_cam_id);
+			// cv::Mat black = in_range(f, &is_black);
+			// float angle = circular_line(black);
+			// std::cout << "Angle: " << angle << std::endl;
 
-			robot->turn(-angle);
+			// robot->turn(-angle);
 			robot->m(40, 40, 300);
 
 			return true;

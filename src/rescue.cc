@@ -26,6 +26,7 @@ void Rescue::stop() {
 
 void Rescue::rescue() {
 	std::cout << "Rescue, whoooooooo" << std::endl;
+	robot->beep(500, BUZZER);
 	//this->back_cam_id = robot->init_camera(0, false, 640, 480, 60);
 	cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
 	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
@@ -49,7 +50,6 @@ void Rescue::rescue() {
 
 	std::cout << std::to_string(corner_pos) << std::endl;
 	std::cout << "Wall right? " << std::to_string(WALL_RIGHT(corner_pos)) << std::endl;
-	return;
 
 	// Turn around and search for first victim
 	robot->turn(WALL_RIGHT(corner_pos) ? RAD_180 : -RAD_180);
@@ -63,7 +63,6 @@ void Rescue::rescue() {
 
 		// Flip sign to avoid hitting wall
 		float turn_sign = WALL_RIGHT(corner_pos) ? -1.0f : 1.0f;
-
 		if(!ignore_dead) {
 			// When no living victim was found, we are turned 90°
 			// Flip sign to turn the other way
@@ -107,12 +106,16 @@ bool Rescue::find_victim(bool ignore_dead) {
 	debug_frame = frame.clone();
 
 	cv::Rect rect_roi(ROI_X, ROI_Y, ROI_WIDTH, ROI_HEIGHT);
+
+
+	// Error:
 	cv::Mat roi = frame(rect_roi);
 
 	cv::cvtColor(roi, roi, cv::COLOR_BGR2GRAY);
 	cv::GaussianBlur(roi, roi, cv::Size(7, 7), 0, 0);
 
 	std::vector<cv::Vec3f> circles;
+
 	cv::HoughCircles(roi, circles, cv::HOUGH_GRADIENT, 1,
 		60, // minDist
 		34, // param1
@@ -133,7 +136,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 		}
 	}
 	cv::imshow("Frame", debug_frame);
-	cv::waitKey(1000);
+	cv::waitKey(5000);
 
 	if(circles.size() == 0) return false;
 
@@ -191,15 +194,17 @@ bool Rescue::find_victim(bool ignore_dead) {
 			robot->servo(SERVO_2, GRAB_OPEN, 750);
 			robot->servo(SERVO_1, ARM_DOWN, 750);
 			robot->servo(SERVO_2, GRAB_CLOSED, 750);
-			robot->servo(SERVO_1, ARM_UP, 750);
+			std::cout << "Nice" << std::endl;
+			delay(100);
+			robot->servo(SERVO_1, ARM_UP, 1500);
+			std::cout << "Nice2" << std::endl;
 			robot->turn(RAD_180);
 			robot->m(30, 30, 500);
 
 			// Search for corner
-			while(1) {// Capture from back camera
-
-
+			while(1) { // Capture from back camera
 				cap.open("/dev/cams/back", cv::CAP_V4L2);
+				delay(2000);
 				cap.grab();
 				cap.retrieve(frame);
 				cap.release();
