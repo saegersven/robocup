@@ -45,6 +45,10 @@ void Rescue::rescue() {
 	robot->beep(100, BUZZER);
 
 	find_black_corner(); // 1)
+
+	float heading = robot->get_heading(); // 3)
+
+	find_victim();
 }
 
 // see 1)
@@ -93,12 +97,140 @@ void Rescue::find_black_corner() {
 		if (cv::countNonZero(black) > 1500) {
 			std::cout << "Found corner" << std::endl;
 			robot->beep(400);
-			robot->m(-100, -100, 1500);
+			// 2)
+			robot->m(-100, -100, 800);
 			robot->turn(deg_to_rad(180));
+			cap.release();
 			return;
 		} 
 		robot->m(-100, -100, 200);
 		robot->turn(deg_to_rad(-135));
 		robot->m(-100, -100, 1500);
+	}
+}
+
+bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
+	std::vector<cv::Vec3f> circles;
+	cv::HoughCircles(roi, circles, cv::HOUGH_GRADIENT, 1,
+		60, // minDist
+		34, // param1
+		40, // param2
+		2,  // minRadius
+		300 // maxRadius
+	);
+
+	if(circles.size() == 0) return false; // No circles
+
+	if(circles.size() == 1) {
+		out = circles[0];
+		return true;
+	}
+
+	// Select largest circle (maximum radius)
+	float max_r = 0.0f;
+	int max_index = 0;
+	for(int i = 0; i < circles.size(); ++i) {
+		cv::Vec3f c = circles[i];
+
+		if(c[2] > max_r) {
+			out = c;
+			max_r = c[2];
+		}
+	}
+	return true;
+}
+
+bool Rescue::find_victim() {
+	// Capture one frame from camera
+	cv::VideoCapture cap;
+	if(!cap.isOpened()) {
+		std::cout << "Back cam not opened" << std::endl;
+	}
+
+	cap.open("/dev/cams/back", cv::CAP_V4L2);
+	cap.grab();
+	cap.retrieve(frame);
+	cap.release();
+
+	cv::flip(frame, frame, -1);
+
+	// Cut out horizontal region of interest
+	cv::Rect rect_roi(ROI_X, ROI_Y, ROI_WIDTH, ROI_HEIGHT);
+	cv::Mat roi = frame(rect_roi);
+
+	cv::cvtColor(roi, roi, cv::COLOR_BGR2GRAY);
+	cv::GaussianBlur(roi, roi, cv::Size(7, 7), 0, 0);
+
+	cv::Vec3f victim;
+	if(!get_largest_circle(roi, victim)) return false;
+	int victim_x = victim[0] - 640 / 2;	
+
+	// Turn to victim based on horizontal pixel coordinate
+	const float pixel_angle = deg_to_rad(65.0f) / 640;
+	float angle1 = pixel_angle * x_max;
+	robot->turn(angle1);
+	delay(100);
+
+	// Turn around and search with front camera
+	robot->m(-30, -30, 300);
+	robot->turn(RAD_180);
+	delay(100);
+
+	cv::VideoCapture cap2("/dev/cams/front", cv::CAP_V4L2);
+	cap2.set(cv::CAP_PROP_FRAME_WIDTH, 160);
+	cap2.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
+	cap2.set(cv::CAP_PROP_FPS, 30);
+	cap2.set(cv::CAP_PROP_FORMAT, CV_8UC3);
+
+	if(!cap2.isOpened) {
+		std::cout << "Front cam not opened" << std::endl;
+	}
+
+	delay(100);
+	robot->m(15, 15);
+	auto search_start_time = std::chrono::high_resolution_clock::now();
+	while(1) {
+		cap2.grab();
+		cap2.retrieve(frame);
+
+		cv::Vec3f c;
+		if(get_largest_circle(frame, c)) {
+			cap2.release();
+			robot->stop();
+			auto search_end_time = std::chrono::high_resolution_clock::now();
+
+			// Turn to victim
+			const float center_x = frame.cols / 2.0f;
+			const float center_y = frame.rows + 20;
+			float angle2 = std::atan2(c[1] - center_y, c[0] - center_x) +
+				(PI / 2.0f);
+			robot->turn(angle2);
+
+			// Turn around, pick up and turn back
+			robot->m(-60, -60, 520);
+			robot->turn(RAD_180);
+
+			robot->servo(SERVO_2, GRAB_OPEN, 750);
+			robot->servo(SERVO_1, ARM_DOWN, 750);
+			robot->servo(SERVO_2, GRAB_CLOSED, 750);
+			robot->servo(SERVO_1, ARM_UP, 750);
+			robot->turn(RAD_180);
+			robot->m(30, 30, 500);
+
+			// Turn back
+			robot->turn(-angle2);
+
+			// Drive back
+			uint32_t search_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+				search_end_time - search_start_time).count();
+			robot->m(-15, -15, search_time);
+
+			// Turn initial angle
+			robot->turn(-angle1);
+
+			// Now the robot is back in the position it started when
+			// this method was called, hand back to the rescue() method
+			return true;
+		}
 	}
 }
