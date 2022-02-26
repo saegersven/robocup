@@ -2,7 +2,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#define PI (double)3.141592653
+#define PI (double) 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679 // should be accurate enough XD
 #define RAD_360 (2.0 * PI)
 #define RAD_180 PI
 #define RAD_90 (0.5 * PI)

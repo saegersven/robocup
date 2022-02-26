@@ -30,7 +30,7 @@ void Rescue::rescue() {
 	############### ultimate plan for rescue area: ###############
 
 	1) find black corner, turn robots back to corner (-> find_black_corner())
-	2) drive ~15cm forward and align using back cam
+	2) drive forward and align using back cam
 	3) save measurement from gyroscope
 	4) search for victims, pick one up
 	5) drive back to "homepos" and turn to saved value
@@ -46,16 +46,16 @@ void Rescue::rescue() {
 
 	find_black_corner(); // 1)
 
-	robot->m(-100, -100, 2000); // 2)
+	robot->m(-100, -100, 1500); // 2)
 	robot->turn(deg_to_rad(180));
 
-	align_black_corner();
-	robot->m(100, 100, 100);
-	robot->turn(deg_to_rad(-90));
-
+	drive_to_black_corner();
+	robot->m(100, 100, 1500);
 	float heading = robot->get_heading(); // 3)
 
 	find_victim(); // 4) and 5)
+	robot->beep(2000);
+	delay(10000);
 }
 
 // see 1)
@@ -114,6 +114,8 @@ void Rescue::find_black_corner() {
 }
 
 bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
+	cv::cvtColor(roi, roi, cv::COLOR_BGR2GRAY);
+	cv::GaussianBlur(roi, roi, cv::Size(7, 7), 0, 0);
 	std::vector<cv::Vec3f> circles;
 	cv::HoughCircles(roi, circles, cv::HOUGH_GRADIENT, 1,
 		60, // minDist
@@ -161,9 +163,6 @@ bool Rescue::find_victim() {
 	// Cut out horizontal region of interest
 	cv::Rect rect_roi(ROI_X, ROI_Y, ROI_WIDTH, ROI_HEIGHT);
 	cv::Mat roi = frame(rect_roi);
-
-	cv::cvtColor(roi, roi, cv::COLOR_BGR2GRAY);
-	cv::GaussianBlur(roi, roi, cv::Size(7, 7), 0, 0);
 
 	cv::Vec3f victim;
 	if(!get_largest_circle(roi, victim)) return false;
@@ -239,7 +238,7 @@ bool Rescue::find_victim() {
 	}
 }
 
-void Rescue::align_black_corner() {
+void Rescue::drive_to_black_corner() {
 	// aligns robot with black corner using back cam
 	cv::VideoCapture cap;
 	cv::Mat frame;
@@ -290,7 +289,6 @@ void Rescue::align_black_corner() {
 
 			if(A > 100000) {
 				robot->m(-100, -100, 1000);
-				robot->beep(1000);
 				return;
 			}
 		}
