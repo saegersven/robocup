@@ -45,17 +45,42 @@ void Rescue::rescue() {
 	robot->beep(100, BUZZER);
 
 	find_black_corner(); // 1)
-
-	robot->m(-100, -100, 1500); // 2)
+	robot->m(-100, -100, 800);
 	robot->turn(deg_to_rad(180));
+	robot->m(-100, -100, 1000);
 
-	drive_to_black_corner();
-	robot->m(100, 100, 1500);
-	float heading = robot->get_heading(); // 3)
+	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
+		std::cout << "In for loop" << std::endl;
 
-	find_victim(); // 4) and 5)
-	robot->beep(2000);
-	delay(10000);
+		robot->m(100, 100, 1000);
+		delay(100);
+		float heading = robot->get_heading(); // 3)
+
+		bool searching_victim = true;
+		while (searching_victim) {
+			std::cout << "In while loop" << std::endl;
+
+			if (find_victim()) {
+				robot->beep(1000);
+				searching_victim = false;
+			} else {
+				std::cout << "turning..." << std::endl;
+				robot->turn(deg_to_rad(-45));
+			}
+		}
+
+		std::cout << "Rescueing victim..." << std::endl;
+
+
+		// turn_back_to_saved_heading
+		drive_to_black_corner();
+
+		// unload victim
+		robot->servo(SERVO_1, ARM_DOWN, 500);
+		robot->servo(SERVO_2, GRAB_OPEN, 500);
+		robot->servo(SERVO_2, GRAB_CLOSED, 500);
+		robot->servo(SERVO_1, ARM_UP, 500);
+	}
 }
 
 // see 1)
@@ -79,7 +104,7 @@ void Rescue::find_black_corner() {
 
 		// check for corner	using front camera
 		robot->turn(deg_to_rad(-45));
-		robot->m(100, 100, 600);
+		robot->m(100, 100, 500);
 		robot->turn(deg_to_rad(90));
 		robot->m(50, 50, 700);
 
