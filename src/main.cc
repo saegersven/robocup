@@ -37,6 +37,10 @@ int main() {
 		robot->m(30, -30, 20);
 	}
 	std::cout << "Heading not zero" << std::endl;
+
+	std::cout << "\n/dev/cams/:" << std::endl;
+   	system("ls /dev/cams/");
+
 	robot->set_gpio(LED_1, false);
 	robot->set_gpio(LED_2, true);
 

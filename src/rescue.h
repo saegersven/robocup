@@ -48,9 +48,10 @@ private:
 	void rescue();
 	void find_black_corner();
 	bool is_corner();
+	void align_black_corner();
 
-	bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out);
-	bool Rescue::find_victim();
+	bool get_largest_circle(cv::Mat roi, cv::Vec3f& out);
+	bool find_victim();
 
 public:
 	Rescue(std::shared_ptr<Robot> robot);

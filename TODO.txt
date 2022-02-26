@@ -8,3 +8,4 @@ TODO:
 - timout when waiting for gyroscope heading, entering "savetymode" after timout 
 - find_black_corner can't cope with exits
 - adjust values in find_black_corner (especially the threshold for detecting the black corner)
+- check files in /dev/cams/ folder during initialisation and light up red led if one file is missing
