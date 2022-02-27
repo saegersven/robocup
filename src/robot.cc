@@ -414,6 +414,21 @@ void Robot::turn(float rad) {
 	//std::cout << "Accuracy: " << rad_to_deg(std::abs(get_heading() - start_heading)) << "°" << std::endl;
 }
 
+void Robot::turn_to(float heading) {
+	if(block_m) return;
+
+	float curr_heading = get_heading();
+	const float tolerance = deg_to_rad(3.0f);
+
+	while(heading - tolerance < curr_heading
+		|| heading + tolerance > curr_heading) {
+		
+		m(-60, 60);
+		curr_heading = get_heading();
+	}
+	stop();
+}
+
 void Robot::straight(int8_t speed, uint32_t duration) {
 	auto start_time = std::chrono::high_resolution_clock::now();
 	auto last_update = std::chrono::high_resolution_clock::now();

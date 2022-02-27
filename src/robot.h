@@ -132,6 +132,7 @@ public:
 	// MOVEMENT
 	void stop(uint8_t brake_duty_cycle = 100);
 	void turn(float rad);
+	void turn_to(float heading);
 	void straight(int8_t speed, uint32_t duration = 0);
 
 	// Directly set motor speed
