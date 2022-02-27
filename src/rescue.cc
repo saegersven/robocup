@@ -45,7 +45,6 @@ void Rescue::rescue() {
 	robot->beep(100, BUZZER);
 
 	find_black_corner(); // 1)
-	robot->beep(3999);
 	robot->m(-100, -100, 800);
 	robot->turn(deg_to_rad(180));
 	robot->m(-100, -100, 1000);
@@ -63,6 +62,7 @@ void Rescue::rescue() {
 
 			if (find_victim()) {
 				robot->beep(1000);
+				robot->turn_to(heading);
 				searching_victim = false;
 			} else {
 				std::cout << "turning..." << std::endl;
@@ -101,7 +101,14 @@ void Rescue::find_black_corner() {
 	*/
 
 	while (1) {
-		while (robot->single_distance(DIST_1, 10) > 35) robot->m(100, 100, 50);
+		bool no_wall = true;
+		while (no_wall) {
+			if (robot->single_distance(DIST_1, 10) < 35 && robot->distance_avg(DIST_1, 10, 0.2f)) {
+				no_wall = false;
+			} else {
+				robot->m(100, 100, 50);					
+			}
+		}
 
 		// check for corner	using front camera
 		robot->turn(deg_to_rad(-45));
@@ -151,6 +158,12 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 		300 // maxRadius
 	);
 
+	std::string path = "/home/pi/Desktop/";
+	std::string file_name = std::to_string (micros());
+	std::string full_path = path + file_name + ".png";
+
+	cv::imwrite(full_path, roi);
+	std::cout << circles.size() << std::endl;
 	if(circles.size() == 0) return false; // No circles
 
 	if(circles.size() == 1) {
@@ -199,7 +212,7 @@ bool Rescue::find_victim() {
 	float angle1 = pixel_angle * victim_x;
 	robot->turn(angle1);
 	delay(100);
-
+	
 	// Turn around and search with front camera
 	robot->m(-30, -30, 300);
 	robot->turn(RAD_180);

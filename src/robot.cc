@@ -418,12 +418,12 @@ void Robot::turn_to(float heading) {
 	if(block_m) return;
 
 	float curr_heading = get_heading();
-	const float tolerance = deg_to_rad(3.0f);
+	const float tolerance = deg_to_rad(5.0f);
 
 	while(heading - tolerance < curr_heading
 		|| heading + tolerance > curr_heading) {
 		
-		m(-60, 60);
+		m(-20, 20);
 		curr_heading = get_heading();
 	}
 	stop();
