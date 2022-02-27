@@ -45,6 +45,7 @@ void Rescue::rescue() {
 	robot->beep(100, BUZZER);
 
 	find_black_corner(); // 1)
+	robot->beep(3999);
 	robot->m(-100, -100, 800);
 	robot->turn(deg_to_rad(180));
 	robot->m(-100, -100, 1000);

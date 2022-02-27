@@ -36,7 +36,7 @@ int main() {
 		robot->m(-30, 30, 20);
 		robot->m(30, -30, 20);
 	}
-	std::cout << "Heading not zero" << std::endl;
+	std::cout << "Heading not zer" << std::endl;
 
 	std::cout << "\n/dev/cams/:" << std::endl;
    	system("ls /dev/cams/");
