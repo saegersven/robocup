@@ -42,42 +42,45 @@ void Rescue::rescue() {
 
 	robot->m(30, 30, 1000);
 	robot->stop();
-	robot->beep(100, BUZZER);
+	robot->beep(1000, BUZZER);
 
 	find_black_corner(); // 1)
 	
-	robot->m(-100, -100, 250);
-	robot->turn(deg_to_rad(35.0f));
+	robot->m(-100, -100, 400);
+	float heading = robot->get_heading(); // 3)
+	robot->turn(deg_to_rad(45));
 
 	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
-
-		float heading = robot->get_heading(); // 3)
-
 		bool searching_victim = true;
 		while (searching_victim) {
 			if (find_victim()) {
 				std::cout << "Turning to heading" << std::endl;
 				robot->turn_to_heading(heading);
 				std::cout << "Turned to heading" << std::endl;
-
 				searching_victim = false;
 			} else {
 				std::cout << "looking for victim" << std::endl;
-				robot->turn(deg_to_rad(-45.0f));
+				robot->turn(deg_to_rad(-35));
 			}
 		}
 
 		std::cout << "Rescuing victim..." << std::endl;
 
-
 		// align with black corner
-		drive_to_black_corner();
+		robot->turn_to_heading(heading);
+		robot->m(-100, -100, 600);
+		robot->turn(deg_to_rad(180));
+		robot->m(-100, -100, 1200);
 
 		// unload victim
 		robot->servo(SERVO_1, ARM_DROP, 500);
 		robot->servo(SERVO_2, GRAB_OPEN, 500);
 		robot->servo(SERVO_2, GRAB_CLOSED, 500);
 		robot->servo(SERVO_1, ARM_UP, 500);
+
+		robot->m(-100, -100, 250);
+		robot->m(100, 100, 250);
+		robot->turn(deg_to_rad(-135));
 	}
 
 	find_exit();
@@ -100,20 +103,18 @@ void Rescue::find_black_corner() {
 	*/
 
 	while (1) {
-		bool no_wall = true;
-		while (no_wall) {
-			if (robot->single_distance(DIST_1, 10) < 35 && robot->distance_avg(DIST_1, 10, 0.2f)) {
-				no_wall = false;
-			} else {
-				robot->m(100, 100, 50);					
-			}
+		while (1) {
+			if (robot->single_distance(DIST_1) < 35 && robot->distance_avg(DIST_1, 10, 0.2f) < 35) break;
+			robot->m(100, 100);	
 		}
 
 		// check for corner	using front camera
-		robot->turn(deg_to_rad(-45));
-		robot->m(100, 100, 500);
+		robot->turn(deg_to_rad(-8));
+		robot->m(100, 100, 300);
+		robot->turn(deg_to_rad(-37));
+		robot->m(100, 100, 250);
 		robot->turn(deg_to_rad(90));
-		robot->m(50, 50, 700);
+		robot->m(50, 50, 650);
 
 		cv::VideoCapture cap("/dev/cams/front");
 		cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
@@ -139,8 +140,8 @@ void Rescue::find_black_corner() {
 			cap.release();
 			return;
 		} 
-		robot->m(-100, -100, 200);
-		robot->turn(deg_to_rad(-135));
+		robot->m(-100, -100, 300);
+		robot->turn(deg_to_rad(-145));
 		robot->m(-100, -100, 1500);
 	}
 }
@@ -157,11 +158,6 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 		300 // maxRadius
 	);
 
-	std::string path = "/home/pi/Desktop/";
-	std::string file_name = std::to_string (micros());
-	std::string full_path = path + file_name + ".png";
-
-	cv::imwrite(full_path, roi);
 	std::cout << circles.size() << std::endl;
 	if(circles.size() == 0) return false; // No circles
 
@@ -248,7 +244,8 @@ bool Rescue::find_victim() {
 			robot->turn(angle2);
 
 			// Turn around, pick up and turn back
-			robot->m(-60, -60, 520);
+			robot->m(-60, -60, 600);
+			delay(100);
 			robot->turn(RAD_180);
 
 			robot->servo(SERVO_2, GRAB_OPEN, 750);
@@ -256,7 +253,9 @@ bool Rescue::find_victim() {
 			robot->servo(SERVO_2, GRAB_CLOSED, 750);
 			robot->servo(SERVO_1, ARM_UP, 750);
 			robot->turn(RAD_180);
+			delay(100);
 			robot->m(30, 30, 500);
+			delay(100);
 
 			// Turn back
 			robot->turn(-angle2);
@@ -264,7 +263,7 @@ bool Rescue::find_victim() {
 			// Drive back
 			uint32_t search_time = std::chrono::duration_cast<std::chrono::milliseconds>(
 				search_end_time - search_start_time).count();
-			robot->m(-15, -15, search_time);
+			robot->m(-15, search_time);
 
 			// Turn initial angle
 			robot->turn(-angle1);
@@ -272,71 +271,6 @@ bool Rescue::find_victim() {
 			// Now the robot is back in the position it started when
 			// this method was called, hand back to the rescue() method
 			return true;
-		}
-	}
-}
-
-void Rescue::drive_to_black_corner() {
-	// aligns robot with black corner using back cam
-	cv::VideoCapture cap;
-	cv::Mat frame;
-	cap.open("/dev/cams/back", cv::CAP_V4L2);
-
-	if(!cap.isOpened()) {
-		std::cout << "Back cam not opened" << std::endl;
-	}
-
-	delay(100);
-	const float pixel_angle = deg_to_rad(65.0f) / 640;
-
-	while(1) {
-		cap.open("/dev/cams/back", cv::CAP_V4L2);
-		delay(200);
-		cap.grab();
-		cap.retrieve(frame);
-		cap.release();
-		cv::flip(frame, frame, -1);
-
-		cv::Rect rect_roi(ROI_X, ROI_Y, ROI_WIDTH, ROI_HEIGHT);
-		cv::Mat roi = frame(rect_roi);
-
-		cv::cvtColor(roi, roi, cv::COLOR_BGR2GRAY);
-		cv::GaussianBlur(roi, roi, cv::Size(7, 7), 0, 0);
-		cv::Mat black;
-		cv::threshold(roi, black, 50, 255, 1);
-
-		// cv::imshow("B", black);
-		// cv::waitKey(200);
-
-		std::vector<std::vector<cv::Point>> contours;
-		std::vector<cv::Vec4i> hierarchy;
-		cv::findContours(black, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
-
-		std::vector<cv::Point> corner_contour;
-
-		int x = 2000;
-		for(std::vector<cv::Point> c : contours) {
-			double A = cv::contourArea(c);
-			cv::Rect bounding_rect = cv::boundingRect(c);
-			int y = bounding_rect.y + bounding_rect.height / 2;
-			// std::cout << "Contour " << A << " " << y << std::endl;
-			if(A < 200) continue;
-			if(y < 40 || y > 220) continue;
-			if(bounding_rect.width / bounding_rect.height < 2) continue;
-			x = bounding_rect.x + bounding_rect.width / 2 - frame.cols / 2;
-
-			if(A > 100000) {
-				robot->m(-100, -100, 1000);
-				return;
-			}
-		}
-
-		if(x == 2000) {
-			// Corner was not found
-			robot->turn(deg_to_rad(42.0f));
-		} else {
-			robot->turn(pixel_angle * x);
-			robot->m(-80, -80, 600);
 		}
 	}
 }

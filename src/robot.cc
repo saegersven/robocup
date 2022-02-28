@@ -315,6 +315,7 @@ void Robot::stop_video(int cam_id) {
 }
 
 void Robot::m(int8_t left, int8_t right, int32_t duration, uint8_t brake_duty_cycle) {
+	// WARNING: left and rigth motor swapped
 	if(block_m) return;
 
 	left = clip(left, -100, 100);
@@ -421,7 +422,7 @@ void Robot::turn_to_heading_last(float heading, float speed, bool dir) {
 	float last_heading = get_heading();
 	float curr_heading = last_heading;
 
-	const float CORRECTION_DURATION = 50;
+	const float CORRECTION_DURATION = 70;
 
 	while(1) {
 		curr_heading = get_heading();
@@ -450,7 +451,7 @@ void Robot::turn_to_heading(float heading) {
 
 	if (heading == 0) heading = 0.01f;
 	int SPEED = 30;
-	int CORRECTION = 50; // 
+	int CORRECTION = 50; // nice comment
 
 	if (curr_heading < heading && heading - PI < curr_heading) {
 		std::cout << "Case 1" << std::endl;

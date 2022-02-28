@@ -29,24 +29,21 @@ int main() {
 
 	robot->set_gpio(LED_1, true);
 	robot->set_gpio(LED_2, false);
+	robot->set_gpio(BUZZER, false);
+
+	int waiting_for_heading_cnt = 0;
 
 	while(robot->get_heading() == 0) {
 		std::cout << "FRONT DISTANCE: " << robot->single_distance(DIST_1, 2000) << std::endl;
 		std::cout << "SIDE DISTANCE: " << robot->single_distance(DIST_2, 2000) << std::endl;
 		robot->m(-30, 30, 20);
 		robot->m(30, -30, 20);
+		waiting_for_heading_cnt++;
+		if (waiting_for_heading_cnt > 50) robot->beep(3000);
 	}
 
 	std::cout << "Heading not zero" << std::endl;
-	delay(1000);
-	float heading = robot->get_heading();
-	delay(500);
-	robot->turn(deg_to_rad(50));	
-	delay(2000);
-	robot->turn_to_heading(heading);
-
-	exit(0);
-
+	
 	std::cout << "\n/dev/cams/:" << std::endl;
    	system("ls /dev/cams/");
 
