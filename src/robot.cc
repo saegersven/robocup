@@ -424,22 +424,21 @@ void Robot::turn_to_heading(float heading) {
 	const float tolerance = deg_to_rad(5.0f);
 
 	bool clockwise = false;
-	float offset = 0.0f;
+	float offset_curr = 0.0f;
+	float offset_goal = 0.0f;
 	if(heading > curr_heading) {
 		if(heading - curr_heading > RAD_180) {
 			clockwise = false;
-			offset = RAD_360;
+			offset_curr = RAD_360;
 		} else {
 			clockwise = true;
-			offset = 0.0f;
 		}
 	} else {
 		if(curr_heading - heading > RAD_180) {
 			clockwise = true;
-			offset = -RAD_360;
+			offset_goal = RAD_360;
 		} else {
 			clockwise = false;
-			offset = 0.0f;
 		}
 	}
 
@@ -451,20 +450,13 @@ void Robot::turn_to_heading(float heading) {
 		if(clockwise) m(-SPEED, SPEED);
 		else m(SPEED, -SPEED);
 
-		curr_heading = get_heading() + offset;
+		curr_heading = get_heading() + offset_curr;
 		std::cout << curr_heading << "      " << heading << std::endl;
 
-		if(curr_heading - last_heading > RAD_180) {
-			// FLIP!
-			offset -= RAD_360;
-		} else if(curr_heading - last_heading < -RAD_180) {
-			offset += RAD_360;
-		}
-		
 		last_heading = curr_heading;
 
-		if((clockwise && curr_heading >= heading)
-		  || (!clockwise && curr_heading <= heading))
+		if((clockwise && curr_heading >= heading + offset_goal)
+		  || (!clockwise && curr_heading <= heading + offset_goal))
 			break;
 	}
 	stop();
