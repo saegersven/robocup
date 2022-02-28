@@ -82,6 +82,8 @@ void Rescue::rescue() {
 		robot->servo(SERVO_2, GRAB_CLOSED, 500);
 		robot->servo(SERVO_1, ARM_UP, 500);
 	}
+
+	find_exit();
 }
 
 // see 1)
@@ -212,7 +214,7 @@ bool Rescue::find_victim() {
 	float angle1 = pixel_angle * victim_x;
 	robot->turn(angle1);
 	delay(100);
-	
+
 	// Turn around and search with front camera
 	robot->m(-30, -30, 300);
 	robot->turn(RAD_180);
@@ -340,4 +342,24 @@ void Rescue::drive_to_black_corner() {
 			robot->m(-80, -80, 600);
 		}
 	}
+}
+
+void Rescue::find_exit() {
+	// finds exit of evacuation zone
+
+	robot->m(100, 100, 250);
+	robot->turn(deg_to_rad(90));
+	while(robot->single_distance(DIST_1) > 10 && robot->distance_avg(DIST_1, 10, 0.2f) > 10) {
+		robot->m(100, 100);
+	}
+	robot->turn(deg_to_rad(-45));
+	while(robot->single_distance(DIST_1) > 7 && robot->distance_avg(DIST_1, 10, 0.2f) > 7) {
+		robot->m(100, 100);
+	}
+	robot->turn(deg_to_rad(90));
+	robot->beep(100);
+	robot->m(100, 100, 100);	
+	exit(0);
+
+	// start line thread:
 }
