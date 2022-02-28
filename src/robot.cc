@@ -416,6 +416,33 @@ void Robot::turn(float rad) {
 	//std::cout << "Accuracy: " << rad_to_deg(std::abs(get_heading() - start_heading)) << "°" << std::endl;
 }
 
+// dir: true = clockwise, false = counterclockwise
+void Robot::turn_to_heading_last(float heading, float speed, bool dir) {
+	float last_heading = get_heading();
+	float curr_heading = last_heading;
+
+	const float CORRECTION_DURATION = 50;
+
+	while(1) {
+		curr_heading = get_heading();
+		if(std::abs(curr_heading - last_heading) > RAD_180) break;
+		last_heading = curr_heading;
+		if(dir) {
+			if(curr_heading >= heading) break;
+			m(-speed, speed);
+		} else {
+			if(curr_heading <= heading) break;
+			m(speed, -speed);
+		}
+	}
+
+	if(dir) {
+		m(50, -50, CORRECTION_DURATION);
+	} else {
+		m(-50, 50, CORRECTION_DURATION);
+	}
+}
+
 void Robot::turn_to_heading(float heading) {
 	// TODO: recursive
 	float curr_heading = get_heading();
@@ -427,27 +454,38 @@ void Robot::turn_to_heading(float heading) {
 
 	if (curr_heading < heading && heading - PI < curr_heading) {
 		std::cout << "Case 1" << std::endl;
-		while (get_heading() < heading) m(-SPEED, SPEED);
-		m(50, -50, CORRECTION);
+		turn_to_heading_last(heading, SPEED, true);
+		//while (get_heading() < heading) m(-SPEED, SPEED);
+		//m(50, -50, CORRECTION);
 	} 
 	else if (curr_heading < heading && heading - PI > curr_heading) {
 		std::cout << "Case 2" << std::endl;
 		while (get_heading() > 0.15) m(SPEED, -SPEED); // turn to ~0°
 		turn(-0.2); // turn over 0° threshold
-		while (get_heading() > heading) m(SPEED, -SPEED);
-		m(-50, 50, CORRECTION);
+		//while (get_heading() > heading) m(SPEED, -SPEED);
+		//m(-50, 50, CORRECTION);
+		turn_to_heading_last(heading, SPEED, false);
 	}
 	else if (curr_heading > heading && heading + PI < curr_heading) {
 		std::cout << "Case 3" << std::endl;
 		while (get_heading() < 6.13) m(-SPEED, SPEED); // turn to ~0°
 		turn(0.2); // turn over 0° threshold
-		while (get_heading() < heading) m(-SPEED, SPEED);
-		m(50, -50, CORRECTION);
+		//while (get_heading() < heading) m(-SPEED, SPEED);
+		//m(50, -50, CORRECTION);
+		turn_to_heading_last(heading, SPEED, true);
 	}
 	else if (curr_heading > heading && heading + PI > curr_heading) {
 		std::cout << "Case 4" << std::endl;
-		while (get_heading() > heading) m(SPEED, -SPEED);
-		m(-50, 50, CORRECTION);
+		/*float last_heading = get_heading();
+		float curr_heading = get_heading();
+		while (curr_heading > heading) {
+			m(SPEED, -SPEED);
+			curr_heading = get_heading();
+			if(std::abs(curr_heading - last_heading) > RAD_180) break;
+			last_heading = curr_heading;
+		}
+		m(-50, 50, CORRECTION);*/
+		turn_to_heading_last(heading, SPEED, false);
 	} else {
 		std::cout << "turn_to_heading: UNKNOWN CASE, pHeading: " << heading << "   curr_heading: " << curr_heading << std::endl;
 	}

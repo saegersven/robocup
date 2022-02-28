@@ -134,6 +134,7 @@ public:
 	void turn(float rad);
 	void turn_to(float heading);
 	void turn_to_heading(float heading);
+	void turn_to_heading_last(float heading, float speed, bool dir);
 	void straight(int8_t speed, uint32_t duration = 0);
 
 	// Directly set motor speed
