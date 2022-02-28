@@ -6,6 +6,7 @@
 #define RAD_360 (2.0 * PI)
 #define RAD_180 PI
 #define RAD_90 (0.5 * PI)
+#define RAD_45 (0.25 * PI)
 
 #define delay(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms))
 

@@ -25,7 +25,6 @@ void Rescue::stop() {
 }
 
 void Rescue::rescue() {
-
 	/*
 	############### ultimate plan for rescue area: ###############
 
@@ -40,20 +39,22 @@ void Rescue::rescue() {
 	jump to 2)
 
 	*/
+
 	robot->m(30, 30, 1000);
 	robot->stop();
 	robot->beep(100, BUZZER);
 
 	find_black_corner(); // 1)
-	robot->m(-100, -100, 800);
-	robot->turn(deg_to_rad(180));
-	robot->m(-100, -100, 1000);
+	
+	robot->m(80, 80, 200);
+	robot->m(-80, -80, 500);
+	robot->turn(-deg_to_rad(35.0f));
 
 	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
 		std::cout << "In for loop" << std::endl;
 
-		robot->m(100, 100, 1000);
-		delay(100);
+		//robot->m(100, 100, 1000);
+		//delay(100);
 		float heading = robot->get_heading(); // 3)
 
 		bool searching_victim = true;
@@ -66,11 +67,11 @@ void Rescue::rescue() {
 				searching_victim = false;
 			} else {
 				std::cout << "turning..." << std::endl;
-				robot->turn(deg_to_rad(-45));
+				robot->turn(deg_to_rad(-45.0f));
 			}
 		}
 
-		std::cout << "Rescueing victim..." << std::endl;
+		std::cout << "Rescuing victim..." << std::endl;
 
 
 		// turn_back_to_saved_heading
