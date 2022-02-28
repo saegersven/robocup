@@ -70,11 +70,11 @@ void Rescue::rescue() {
 		std::cout << "Rescuing victim..." << std::endl;
 
 
-		// turn_back_to_saved_heading
+		// align with black corner
 		drive_to_black_corner();
 
 		// unload victim
-		robot->servo(SERVO_1, ARM_DOWN, 500);
+		robot->servo(SERVO_1, ARM_DROP, 500);
 		robot->servo(SERVO_2, GRAB_OPEN, 500);
 		robot->servo(SERVO_2, GRAB_CLOSED, 500);
 		robot->servo(SERVO_1, ARM_UP, 500);

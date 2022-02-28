@@ -462,6 +462,32 @@ void Robot::turn_to_heading(float heading) {
 	stop();
 }
 
+void Robot::turn_to_heading2(float heading) {
+	// TODO: recursive
+	float curr_heading = get_heading();
+	int SPEED = 20;
+	if (curr_heading < heading && heading - PI < curr_heading) {
+		while (curr_heading < heading) m(SPEED, -SPEED);
+	} 
+	else if (curr_heading < heading && heading - PI > curr_heading) {
+		while (get_heading() > 0.15) m(-SPEED, SPEED); // turn to ~0°
+		turn(-0.2) // turn over 0° threshold
+		while (get_heading() > heading) m(-SPEED, SPEED);
+	}
+	else if (curr_heading > heading && heading + PI < curr_heading) {
+		while (get_heading() < 6.13) m(SPEED, -SPEED); // turn to ~0°
+		turn(0.2) // turn over 0° threshold
+		while (get_heading() < heading) m(SPEED, -SPEED);
+	}
+	else if (curr_heading > heading && heading + PI > curr_heading) {
+		while (get_heading > heading) m(-SPEED, SPEED);
+	} else {
+		std::cout << "turn_to_heading: UNKNOWN CASE, pHeading: " << heading
+			<< "curr_heading: ", << curr_heading << std::endl;
+	}
+	stop();
+
+}
 
 void Robot::straight(int8_t speed, uint32_t duration) {
 	auto start_time = std::chrono::high_resolution_clock::now();

@@ -39,10 +39,10 @@ int main() {
 	std::cout << "Heading not zer" << std::endl;
 	
 	float heading = robot->get_heading();
-	delay(100);
-	robot->turn(0.25*2*PI);	
-	delay(100);
-	robot->turn_to_heading(heading);
+	delay(500);
+	robot->turn(deg_to_rad(90));	
+	delay(2000);
+	robot->turn_to_heading2(heading);
 
 	exit(0);
 
