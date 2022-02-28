@@ -445,12 +445,23 @@ void Robot::turn_to_heading(float heading) {
 
 	const int8_t SPEED = 30;
 
+	float last_heading = curr_heading;
+
 	while(1) {
 		if(clockwise) m(-SPEED, SPEED);
 		else m(SPEED, -SPEED);
 
 		curr_heading = get_heading() + offset;
 		std::cout << curr_heading << "      " << heading << std::endl;
+
+		if(curr_heading - last_heading > RAD_180) {
+			// FLIP!
+			offset -= RAD_360;
+		} else if(curr_heading - last_heading < -RAD_180) {
+			offset += RAD_360;
+		}
+		
+		last_heading = curr_heading;
 
 		if((clockwise && curr_heading >= heading)
 		  || (!clockwise && curr_heading <= heading))
