@@ -38,6 +38,14 @@ int main() {
 	}
 	std::cout << "Heading not zer" << std::endl;
 
+	float heading = robot->get_heading();
+	delay(100);
+	robot->turn(0.25*2*PI);	
+	delay(100);
+	robot->turn_to_heading(heading);
+
+	exit(0);
+
 	std::cout << "\n/dev/cams/:" << std::endl;
    	system("ls /dev/cams/");
 

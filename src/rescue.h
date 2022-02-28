@@ -49,6 +49,7 @@ private:
 	void find_black_corner();
 	bool is_corner();
 	void drive_to_black_corner();
+	void find_exit();
 
 	bool get_largest_circle(cv::Mat roi, cv::Vec3f& out);
 	bool find_victim();

@@ -63,7 +63,7 @@ void Rescue::rescue() {
 
 			if (find_victim()) {
 				robot->beep(1000);
-				robot->turn_to(heading);
+				robot->turn_to_heading(heading);
 				searching_victim = false;
 			} else {
 				std::cout << "turning..." << std::endl;
