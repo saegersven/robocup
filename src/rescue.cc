@@ -46,27 +46,23 @@ void Rescue::rescue() {
 
 	find_black_corner(); // 1)
 	
-	robot->m(80, 80, 200);
-	robot->m(-80, -80, 500);
-	robot->turn(-deg_to_rad(35.0f));
+	robot->m(-100, -100, 250);
+	robot->turn(deg_to_rad(35.0f));
 
 	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
-		std::cout << "In for loop" << std::endl;
 
-		//robot->m(100, 100, 1000);
-		//delay(100);
 		float heading = robot->get_heading(); // 3)
 
 		bool searching_victim = true;
 		while (searching_victim) {
-			std::cout << "In while loop" << std::endl;
-
 			if (find_victim()) {
-				robot->beep(1000);
+				std::cout << "Turning to heading" << std::endl;
 				robot->turn_to_heading(heading);
+				std::cout << "Turned to heading" << std::endl;
+
 				searching_victim = false;
 			} else {
-				std::cout << "turning..." << std::endl;
+				std::cout << "looking for victim" << std::endl;
 				robot->turn(deg_to_rad(-45.0f));
 			}
 		}

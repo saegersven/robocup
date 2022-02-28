@@ -101,7 +101,7 @@ private:
 	std::atomic<std::chrono::time_point<std::chrono::high_resolution_clock>> asc_stop_time;
 
 	std::atomic<bool> block_m;
-
+	float last_heading = 0.0f;
 	// WiringPI id of Encoder GPIO Expander
 	int mcp_fd;
 

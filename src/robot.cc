@@ -270,6 +270,8 @@ float Robot::get_heading() {
 	// bno_comres += bno055_convert_float_euler_p_rad(&f_euler_data_p);
 
 	//std::cout << "X: " << std::to_string(rad_to_deg(f_euler_data_h)) << std::endl;
+	if (fl_euler_data_h < 0) return last_heading;
+	last_heading = fl_euler_data_h;
 
 	return fl_euler_data_h;
 }
@@ -441,13 +443,14 @@ void Robot::turn_to_heading(float heading) {
 		}
 	}
 
-	const float SPEED = 30;
+	const int8_t SPEED = 30;
 
 	while(1) {
-		if(clockwise) m(SPEED, -SPEED);
-		else m(-SPEED, SPEED);
+		if(clockwise) m(-SPEED, SPEED);
+		else m(SPEED, -SPEED);
 
 		curr_heading = get_heading() + offset;
+		std::cout << curr_heading << "      " << heading << std::endl;
 
 		if((clockwise && curr_heading >= heading)
 		  || (!clockwise && curr_heading <= heading))

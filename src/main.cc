@@ -37,7 +37,7 @@ int main() {
 		robot->m(30, -30, 20);
 	}
 	std::cout << "Heading not zer" << std::endl;
-
+	
 	float heading = robot->get_heading();
 	delay(100);
 	robot->turn(0.25*2*PI);	
