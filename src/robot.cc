@@ -417,76 +417,42 @@ void Robot::turn(float rad) {
 }
 
 void Robot::turn_to_heading(float heading) {
-	if(block_m) return;
-	std::cout << heading << std::endl;
-
-	float curr_heading = get_heading();
-	const float tolerance = deg_to_rad(5.0f);
-
-	bool clockwise = false;
-	float offset_curr = 0.0f;
-	float offset_goal = 0.0f;
-	if(heading > curr_heading) {
-		if(heading - curr_heading > RAD_180) {
-			clockwise = false;
-			offset_curr = RAD_360;
-		} else {
-			clockwise = true;
-		}
-	} else {
-		if(curr_heading - heading > RAD_180) {
-			clockwise = true;
-			offset_goal = RAD_360;
-		} else {
-			clockwise = false;
-		}
-	}
-
-	const int8_t SPEED = 30;
-
-	float last_heading = curr_heading;
-
-	while(1) {
-		if(clockwise) m(-SPEED, SPEED);
-		else m(SPEED, -SPEED);
-
-		curr_heading = get_heading() + offset_curr;
-		std::cout << curr_heading << "      " << heading << std::endl;
-
-		last_heading = curr_heading;
-
-		if((clockwise && curr_heading >= heading + offset_goal)
-		  || (!clockwise && curr_heading <= heading + offset_goal))
-			break;
-	}
-	stop();
-}
-
-void Robot::turn_to_heading2(float heading) {
 	// TODO: recursive
 	float curr_heading = get_heading();
-	int SPEED = 20;
+	std::cout << "pHeading: " << heading << "   curr_heading: " << curr_heading << std::endl;
+
+	if (heading == 0) heading = 0.01f;
+	int SPEED = 30;
+	int CORRECTION = 50; // 
+
 	if (curr_heading < heading && heading - PI < curr_heading) {
-		while (curr_heading < heading) m(SPEED, -SPEED);
+		std::cout << "Case 1" << std::endl;
+		while (get_heading() < heading) m(-SPEED, SPEED);
+		m(50, -50, CORRECTION);
 	} 
 	else if (curr_heading < heading && heading - PI > curr_heading) {
-		while (get_heading() > 0.15) m(-SPEED, SPEED); // turn to ~0°
-		turn(-0.2) // turn over 0° threshold
-		while (get_heading() > heading) m(-SPEED, SPEED);
+		std::cout << "Case 2" << std::endl;
+		while (get_heading() > 0.15) m(SPEED, -SPEED); // turn to ~0°
+		turn(-0.2); // turn over 0° threshold
+		while (get_heading() > heading) m(SPEED, -SPEED);
+		m(-50, 50, CORRECTION);
 	}
 	else if (curr_heading > heading && heading + PI < curr_heading) {
-		while (get_heading() < 6.13) m(SPEED, -SPEED); // turn to ~0°
-		turn(0.2) // turn over 0° threshold
-		while (get_heading() < heading) m(SPEED, -SPEED);
+		std::cout << "Case 3" << std::endl;
+		while (get_heading() < 6.13) m(-SPEED, SPEED); // turn to ~0°
+		turn(0.2); // turn over 0° threshold
+		while (get_heading() < heading) m(-SPEED, SPEED);
+		m(50, -50, CORRECTION);
 	}
 	else if (curr_heading > heading && heading + PI > curr_heading) {
-		while (get_heading > heading) m(-SPEED, SPEED);
+		std::cout << "Case 4" << std::endl;
+		while (get_heading() > heading) m(SPEED, -SPEED);
+		m(-50, 50, CORRECTION);
 	} else {
-		std::cout << "turn_to_heading: UNKNOWN CASE, pHeading: " << heading
-			<< "curr_heading: ", << curr_heading << std::endl;
+		std::cout << "turn_to_heading: UNKNOWN CASE, pHeading: " << heading << "   curr_heading: " << curr_heading << std::endl;
 	}
-	stop();
 
+	stop();
 }
 
 void Robot::straight(int8_t speed, uint32_t duration) {

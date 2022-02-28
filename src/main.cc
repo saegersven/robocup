@@ -36,13 +36,14 @@ int main() {
 		robot->m(-30, 30, 20);
 		robot->m(30, -30, 20);
 	}
-	std::cout << "Heading not zer" << std::endl;
-	
+
+	std::cout << "Heading not zero" << std::endl;
+	delay(1000);
 	float heading = robot->get_heading();
 	delay(500);
-	robot->turn(deg_to_rad(90));	
+	robot->turn(deg_to_rad(50));	
 	delay(2000);
-	robot->turn_to_heading2(heading);
+	robot->turn_to_heading(heading);
 
 	exit(0);
 
