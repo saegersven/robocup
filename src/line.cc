@@ -226,28 +226,22 @@ bool Line::line(cv::Mat& frame) {
 		green(frame, black);
 
 		if(check_silver(frame)) {
-			std::cout << "SILVER" << std::endl;
-#ifndef MOVEMENT_OFF
+			std::cout << "cam detected silver!\nchecking distance..." << std::endl;
+			robot->m(100, 100, 1400);
 			robot->stop();
-			// robot->stop_video(front_cam_id);
-			// robot->m(60, -60, 600);
-			// delay(200);
-			// robot->m(20, 20, 300);
-			// robot->start_video(front_cam_id);
-			// delay(200);
-#endif
-			// Align with line
-			robot->stop_video(front_cam_id);
-			// robot->m(-40, -40, 300);
-			// cv::Mat f = robot->capture(front_cam_id);
-			// cv::Mat black = in_range(f, &is_black);
-			// float angle = circular_line(black);
-			// std::cout << "Angle: " << angle << std::endl;
+			delay(100);
 
-			// robot->turn(-angle);
-			robot->m(40, 40, 300);
+			float dist_front = robot->distance_avg(DIST_1, 100, 0.4f);
+			float dist_side = robot->distance_avg(DIST_2, 100, 0.4f);
 
-			return true;
+			std::cout << "Front distance: " << dist_front << std::endl;
+			std::cout << "Side distance: " << dist_side << std::endl;
+
+			if (dist_front > 50.0f && dist_front < 130.0f && dist_side < 120.0f && dist_side > 3.0f) {
+				return true;
+			} else {
+				robot->m(-100, -100, 1350); // return to previous position (a bit further to avoid another false positive)
+			}
 		}
 	}
 #ifdef DEBUG

@@ -27,9 +27,11 @@ int main() {
 	State state = State::line;
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
+	robot->stop();
 	robot->set_gpio(LED_1, true);
 	robot->set_gpio(LED_2, false);
 	robot->set_gpio(BUZZER, false);
+	robot->beep(200);
 
 	int waiting_for_heading_cnt = 0;
 
