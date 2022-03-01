@@ -446,10 +446,12 @@ void Robot::turn_to_heading_last(float heading, float speed, bool dir) {
 
 void Robot::turn_to_heading(float heading) {
 	// TODO: recursive
+
 	float curr_heading = get_heading();
 	std::cout << "pHeading: " << heading << "   curr_heading: " << curr_heading << std::endl;
 
 	if (heading == 0) heading = 0.01f;
+	if (heading = curr_heading) turn(deg_to_rad(3));
 	int SPEED = 30;
 	int CORRECTION = 50; // nice comment
 

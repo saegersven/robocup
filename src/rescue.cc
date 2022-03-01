@@ -40,15 +40,14 @@ void Rescue::rescue() {
 
 	*/
 
-	robot->m(30, 30, 1000);
 	robot->stop();
-	robot->beep(1000, BUZZER);
+	robot->beep(100, BUZZER);
 
 	find_black_corner(); // 1)
 	
 	robot->m(-100, -100, 400);
 	float heading = robot->get_heading(); // 3)
-	robot->turn(deg_to_rad(45));
+	robot->turn(deg_to_rad(60));
 
 	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
 		bool searching_victim = true;
@@ -109,10 +108,8 @@ void Rescue::find_black_corner() {
 		}
 
 		// check for corner	using front camera
-		robot->turn(deg_to_rad(-15));
+		robot->turn(deg_to_rad(-45));
 		robot->m(100, 100, 400);
-		robot->turn(deg_to_rad(-30));
-		robot->m(100, 100, 100);
 		robot->turn(deg_to_rad(90));
 		robot->m(50, 50, 650);
 
@@ -140,9 +137,11 @@ void Rescue::find_black_corner() {
 			cap.release();
 			return;
 		} 
+		robot->turn(deg_to_rad(45));
 		robot->m(-100, -100, 300);
-		robot->turn(deg_to_rad(-145));
+		robot->turn(deg_to_rad(-180));
 		robot->m(-100, -100, 1500);
+
 	}
 }
 
