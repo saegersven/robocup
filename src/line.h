@@ -95,6 +95,7 @@ private:
 
 	bool check_silver_distance();
 	bool check_silver(cv::Mat& frame);
+	bool black_pixel_threshold_under(int threshold);
 
 	//std::vector<cv::Point> find_green_group_centers_old(cv::Mat frame, cv::Mat& green);
 

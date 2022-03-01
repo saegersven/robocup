@@ -231,13 +231,24 @@ bool Line::line(cv::Mat& frame) {
 			robot->stop();
 			delay(100);
 
-			float dist_front = robot->distance_avg(DIST_1, 100, 0.4f);
-			float dist_side = robot->distance_avg(DIST_2, 100, 0.4f);
+			float dist_front = robot->distance_avg(DIST_1, 100, 0.3f);
+			float dist_side = robot->distance_avg(DIST_2, 100, 0.3f);
 
 			std::cout << "Front distance: " << dist_front << std::endl;
 			std::cout << "Side distance: " << dist_side << std::endl;
 
-			if (dist_front > 50.0f && dist_front < 130.0f && dist_side < 120.0f && dist_side > 3.0f) {
+
+			// check front distance < foo and side distance < foo and black pixels in frame < foo
+			// increase rescue_cnt for each
+			// #redundancy
+			int rescue_cnt = 0;
+			if (dist_front > 50.0f && dist_front < 130.0f) rescue_cnt++;
+			if (dist_side > 3.0f && dist_side < 120.0f) rescue_cnt++;
+			if (black_pixel_threshold_under(1000)) rescue_cnt++;
+			
+			std::cout << "Rescue_cnt: " << rescue_cnt << std::endl;
+
+			if (rescue_cnt >= 2) {
 				return true;
 			} else {
 				robot->m(-100, -100, 1350); // return to previous position (a bit further to avoid another false positive)
@@ -655,4 +666,8 @@ void Line::rescue_kit(cv::Mat& frame) {
 		// Restart video to continue
 		robot->start_video(front_cam_id);
 	}
+}
+
+bool Line::black_pixel_threshold_under(int threshold) {
+	return true;
 }

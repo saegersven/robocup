@@ -109,10 +109,10 @@ void Rescue::find_black_corner() {
 		}
 
 		// check for corner	using front camera
-		robot->turn(deg_to_rad(-8));
-		robot->m(100, 100, 300);
-		robot->turn(deg_to_rad(-37));
-		robot->m(100, 100, 250);
+		robot->turn(deg_to_rad(-15));
+		robot->m(100, 100, 400);
+		robot->turn(deg_to_rad(-30));
+		robot->m(100, 100, 100);
 		robot->turn(deg_to_rad(90));
 		robot->m(50, 50, 650);
 
