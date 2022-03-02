@@ -5,6 +5,7 @@
 #include <opencv2/opencv.hpp>
 #include <pthread.h>
 
+#include "line.h"
 #include "robot.h"
 #include "rescue.h"
 #include "utils.h"
@@ -290,4 +291,54 @@ void Rescue::find_exit() {
 	exit(0);
 
 	// start line thread:
+}
+
+void Rescue::find_exit() {
+	robot->m(100, 100, 400);
+	robot->turn(RAD_90);
+	robot->m(100, 100, 400);
+	robot->m(-100, -100, 250);
+	robot->turn(-RAD_90);
+
+	// Drive while there is a side wall
+	while(robot->single_distance(DIST_2) < 30.0f || robot->distance_avg(DIST_2, 10, 0.2f) < 30.0f) {
+		if(robot->single_distance(DIST_1) < 10.0f && bot->distance_avg(DIST_1, 10, 0.2f) < 10.0f) {
+			robot->turn(-RAD_45);
+			robot->drive(100, 100, 500);
+			robot->turn(-RAD_45);
+			robot->drive(-100, -100, 500);
+		}
+		robot->drive(100, 100);
+	}
+	robot->drive(100, 100, 500);
+
+	// Turn right and check for green strip
+	robot->stop();
+
+	robot->turn(RAD_90);
+	robot->drive(100, 100, 200);
+
+	cv::VideoCapture cap;
+
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
+	cap.set(cv::CAP_PROP_FPS, 30);
+	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
+
+	cap.open("/dev/cams/front", cv::CAP_V4L2);
+	if(!cap.isOpened()) {
+		std::cout << "Front cam not opened" << std::endl;
+	}
+	cap.grab();
+	cap.retrieve(frame);
+	cap.release();
+
+	uint32_t num_pixels = 0;
+	in_range(frame, &is_green, &num_pixels);
+
+	if(num_pixels > 1500) {
+		// Found exit
+		robot->drive(100, 100, 800);
+		return;
+	}
 }
