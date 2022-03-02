@@ -44,13 +44,17 @@ int main() {
 		if (waiting_for_heading_cnt > 50) robot->beep(3000);
 	}
 
-	std::cout << "Heading not zero" << std::endl;
+	std::cout << "Heading not zer" << std::endl;
 	
 	std::cout << "\n/dev/cams/:" << std::endl;
    	system("ls /dev/cams/");
 
 	robot->set_gpio(LED_1, false);
 	robot->set_gpio(LED_2, true);
+
+	float heading = robot->get_heading();
+	robot->turn(deg_to_rad(90));
+	robot->turn_to_heading(heading);
 
 	const auto start_time = std::chrono::system_clock::now();
 

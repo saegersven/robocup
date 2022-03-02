@@ -53,9 +53,6 @@ void Rescue::rescue() {
 		bool searching_victim = true;
 		while (searching_victim) {
 			if (find_victim()) {
-				std::cout << "Turning to heading" << std::endl;
-				robot->turn_to_heading(heading);
-				std::cout << "Turned to heading" << std::endl;
 				searching_victim = false;
 			} else {
 				std::cout << "looking for victim" << std::endl;
