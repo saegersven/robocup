@@ -51,11 +51,6 @@ int main() {
 
 	robot->set_gpio(LED_1, false);
 	robot->set_gpio(LED_2, true);
-
-	float heading = robot->get_heading();
-	robot->turn(deg_to_rad(90));
-	robot->turn_to_heading(heading);
-
 	const auto start_time = std::chrono::system_clock::now();
 
 	const std::string SUB_MASK_PATH = "/home/pi/robocup/runtime_data/front_sub_mask.png";

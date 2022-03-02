@@ -66,7 +66,7 @@ void Rescue::rescue() {
 		robot->turn_to_heading(heading);
 		robot->m(-100, -100, 600);
 		robot->turn(deg_to_rad(180));
-		robot->m(-100, -100, 1200);
+		robot->m(-100, -100, 2500);
 
 		// unload victim
 		robot->servo(SERVO_1, ARM_DROP, 500);
@@ -74,9 +74,8 @@ void Rescue::rescue() {
 		robot->servo(SERVO_2, GRAB_CLOSED, 500);
 		robot->servo(SERVO_1, ARM_UP, 500);
 
-		robot->m(-100, -100, 250);
-		robot->m(100, 100, 250);
-		robot->turn(deg_to_rad(-135));
+		robot->m(100, 100, 300);
+		robot->turn(deg_to_rad(60));
 	}
 
 	find_exit();
@@ -136,7 +135,7 @@ void Rescue::find_black_corner() {
 		} 
 		robot->turn(deg_to_rad(45));
 		robot->m(-100, -100, 300);
-		robot->turn(deg_to_rad(-180));
+		robot->turn(deg_to_rad(-185));
 		robot->m(-100, -100, 1500);
 
 	}
@@ -272,10 +271,12 @@ bool Rescue::find_victim() {
 }
 
 void Rescue::find_exit() {
-	// finds exit of evacuation zone
+	// finds exit of evacuation zone	
 
+	robot->m(-100, -100, 250);
 	robot->m(100, 100, 250);
 	robot->turn(deg_to_rad(90));
+
 	while(robot->single_distance(DIST_1) > 10 && robot->distance_avg(DIST_1, 10, 0.2f) > 10) {
 		robot->m(100, 100);
 	}
