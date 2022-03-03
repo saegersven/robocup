@@ -66,7 +66,7 @@ void Rescue::rescue() {
 		// align with black corner
 		robot->turn_to_heading(heading);
 		robot->m(-100, -100, 600);
-		robot->turn(deg_to_rad(180));
+		robot->turn(RAD_180);
 		robot->m(-100, -100, 2500);
 
 		// unload victim
@@ -105,9 +105,9 @@ void Rescue::find_black_corner() {
 		}
 
 		// check for corner	using front camera
-		robot->turn(deg_to_rad(-45));
+		robot->turn(-RAD_45);
 		robot->m(100, 100, 400);
-		robot->turn(deg_to_rad(90));
+		robot->turn(RAD_90);
 		robot->m(50, 50, 650);
 
 		cv::VideoCapture cap("/dev/cams/front");
@@ -134,7 +134,7 @@ void Rescue::find_black_corner() {
 			cap.release();
 			return;
 		} 
-		robot->turn(deg_to_rad(45));
+		robot->turn(RAD_45);
 		robot->m(-100, -100, 300);
 		robot->turn(deg_to_rad(-185));
 		robot->m(-100, -100, 1500);
@@ -270,13 +270,13 @@ bool Rescue::find_victim() {
 		}
 	}
 }
-
+/*
 void Rescue::find_exit() {
 	// finds exit of evacuation zone	
 
 	robot->m(-100, -100, 250);
 	robot->m(100, 100, 250);
-	robot->turn(deg_to_rad(90));
+	robot->turn(RAD_90);
 
 	while(robot->single_distance(DIST_1) > 10 && robot->distance_avg(DIST_1, 10, 0.2f) > 10) {
 		robot->m(100, 100);
@@ -285,38 +285,42 @@ void Rescue::find_exit() {
 	while(robot->single_distance(DIST_1) > 7 && robot->distance_avg(DIST_1, 10, 0.2f) > 7) {
 		robot->m(100, 100);
 	}
-	robot->turn(deg_to_rad(90));
+	robot->turn(RAD_90);
 	robot->beep(100);
 	robot->m(100, 100, 100);	
 	exit(0);
 
 	// start line thread:
 }
+*/
 
 void Rescue::find_exit() {
-	robot->m(100, 100, 400);
+	robot->m(100, 100, 250);
+	robot->turn(RAD_45);
+	robot->m(100, 100, 500);
 	robot->turn(RAD_90);
-	robot->m(100, 100, 400);
-	robot->m(-100, -100, 250);
+	robot->m(100, 100, 1000);
+	robot->m(100, 100, -250);
 	robot->turn(-RAD_90);
+	robot->beep(100);
 
 	// Drive while there is a side wall
 	while(robot->single_distance(DIST_2) < 30.0f || robot->distance_avg(DIST_2, 10, 0.2f) < 30.0f) {
-		if(robot->single_distance(DIST_1) < 10.0f && bot->distance_avg(DIST_1, 10, 0.2f) < 10.0f) {
+		if(robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 10.0f) {
 			robot->turn(-RAD_45);
-			robot->drive(100, 100, 500);
+			robot->m(100, 100, 500);
 			robot->turn(-RAD_45);
-			robot->drive(-100, -100, 500);
+			robot->m(-100, -100, 500);
 		}
-		robot->drive(100, 100);
+		robot->m(100, 100);
 	}
-	robot->drive(100, 100, 500);
+	robot->m(100, 100, 500);
 
 	// Turn right and check for green strip
 	robot->stop();
 
 	robot->turn(RAD_90);
-	robot->drive(100, 100, 200);
+	robot->m(100, 100, 200);
 
 	cv::VideoCapture cap;
 
@@ -338,7 +342,7 @@ void Rescue::find_exit() {
 
 	if(num_pixels > 1500) {
 		// Found exit
-		robot->drive(100, 100, 800);
+		robot->m(100, 100, 800);
 		return;
 	}
 }
