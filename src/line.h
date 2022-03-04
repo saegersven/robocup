@@ -77,6 +77,7 @@ private:
 	std::atomic<int> obstacle_active;
 
 	cv::Mat debug_frame;
+	uint64_t micros_start;
 
 	float last_line_pos;
 	float last_line_angle;

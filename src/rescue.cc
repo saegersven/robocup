@@ -10,7 +10,7 @@
 #include "rescue.h"
 #include "utils.h"
 
-Rescue::Rescue(std::shared_ptr<Robot> robot) {
+Rescue::Rescue(std::shared_ptr<Robot> robot) : finished(false) {
 	this->robot = robot;
 }
 
@@ -47,8 +47,9 @@ void Rescue::rescue() {
 	find_black_corner(); // 1)
 	
 	robot->m(-100, -100, 400);
-	float heading = robot->get_heading(); // 3)
-	robot->turn(deg_to_rad(60));
+	//float heading = robot->get_heading(); // 3)
+	robot->turn(deg_to_rad(50));
+	uint8_t turn_counter = 0;
 
 	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
 		bool searching_victim = true;
@@ -58,16 +59,20 @@ void Rescue::rescue() {
 			} else {
 				std::cout << "looking for victim" << std::endl;
 				robot->turn(deg_to_rad(-35));
+				++turn_counter;
 			}
 		}
 
 		std::cout << "Rescuing victim..." << std::endl;
 
 		// align with black corner
-		robot->turn_to_heading(heading);
-		robot->m(-100, -100, 600);
+		//robot->turn_to_heading(heading);
+		robot->turn(turn_counter * deg_to_rad(35) - deg_to_rad(50));
+
+		robot->m(100, 100, 1000);
+		robot->m(-100, -100, 500);
 		robot->turn(RAD_180);
-		robot->m(-100, -100, 2500);
+		robot->m(-100, -100, 1400);
 
 		// unload victim
 		robot->servo(SERVO_1, ARM_DROP, 500);
@@ -75,11 +80,13 @@ void Rescue::rescue() {
 		robot->servo(SERVO_2, GRAB_CLOSED, 500);
 		robot->servo(SERVO_1, ARM_UP, 500);
 
-		robot->m(100, 100, 300);
-		robot->turn(deg_to_rad(60));
+		robot->m(100, 100, 130);
+		robot->turn(deg_to_rad(-120));
+		turn_counter = 0;
 	}
 
 	find_exit();
+	finished = true;
 }
 
 // see 1)
@@ -240,17 +247,17 @@ bool Rescue::find_victim() {
 			robot->turn(angle2);
 
 			// Turn around, pick up and turn back
-			robot->m(-60, -60, 600);
+			robot->m(-60, -60, 650);
 			delay(100);
 			robot->turn(RAD_180);
 
 			robot->servo(SERVO_2, GRAB_OPEN, 750);
-			robot->servo(SERVO_1, ARM_DOWN, 750);
+			robot->servo(SERVO_1, ARM_DOWN, 670);
 			robot->servo(SERVO_2, GRAB_CLOSED, 750);
 			robot->servo(SERVO_1, ARM_UP, 750);
-			robot->turn(RAD_180);
+			//robot->turn(RAD_180);
 			delay(100);
-			robot->m(30, 30, 500);
+			robot->m(-60, -60, 600);
 			delay(100);
 
 			// Turn back
@@ -259,10 +266,14 @@ bool Rescue::find_victim() {
 			// Drive back
 			uint32_t search_time = std::chrono::duration_cast<std::chrono::milliseconds>(
 				search_end_time - search_start_time).count();
-			robot->m(-15, search_time);
+
+			std::cout << search_time << std::endl;
+
+			robot->m(15, 15, search_time);
 
 			// Turn initial angle
 			robot->turn(-angle1);
+			delay(150);
 
 			// Now the robot is back in the position it started when
 			// this method was called, hand back to the rescue() method
@@ -295,12 +306,10 @@ void Rescue::find_exit() {
 */
 
 void Rescue::find_exit() {
-	robot->m(100, 100, 250);
-	robot->turn(RAD_45);
-	robot->m(100, 100, 500);
-	robot->turn(RAD_90);
-	robot->m(100, 100, 1000);
-	robot->m(100, 100, -250);
+	robot->m(-100, -100, 650);
+	robot->turn(-RAD_90);
+	robot->m(100, 100, 1400);
+	robot->m(100, 100, -300);
 	robot->turn(-RAD_90);
 	robot->beep(100);
 
@@ -314,13 +323,15 @@ void Rescue::find_exit() {
 		}
 		robot->m(100, 100);
 	}
-	robot->m(100, 100, 500);
+	robot->m(100, 100, 150);
+
+	std::cout << "Check for green" << std::endl;
 
 	// Turn right and check for green strip
 	robot->stop();
 
 	robot->turn(RAD_90);
-	robot->m(100, 100, 200);
+	robot->m(100, 100, 350);
 
 	cv::VideoCapture cap;
 
@@ -342,7 +353,8 @@ void Rescue::find_exit() {
 
 	if(num_pixels > 1500) {
 		// Found exit
-		robot->m(100, 100, 800);
+		robot->m(100, 100, 500);
+		std::cout << "Found exit" << std::endl;
 		return;
 	}
 }

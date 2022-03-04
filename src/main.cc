@@ -114,7 +114,11 @@ int main() {
 			case State::rescue:
 			{
 				// Monitor rescue thread
-
+				if(rescue.finished) {
+					//rescue.stop();
+					line.start();
+					state = State::line;
+				}
 				break;
 			}
 		}
@@ -122,3 +126,4 @@ int main() {
 
 	return 0;
 }
+ 

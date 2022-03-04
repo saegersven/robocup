@@ -55,6 +55,7 @@ private:
 	bool find_victim();
 
 public:
+	std::atomic<bool> finished;
 	Rescue(std::shared_ptr<Robot> robot);
 	void start();
 	void stop();

@@ -45,6 +45,7 @@ void Line::start() {
 	std::thread obstacle_thread([this]{obstacle();});
 	obstacle_thread.detach();
 	obstacle_active = 0;
+	micros_start = micros();
 }
 
 void Line::stop() {
@@ -67,7 +68,9 @@ bool Line::check_silver_distance() {
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	const float MINIMUM_RATIO = 0.51; // Ratio of red to sum of blue and green
+	if(micros() - micros_start < 60000000) return false; 
+
+	const float MINIMUM_RATIO = 0.52; // Ratio of red to sum of blue and green
 	const float MINIMUM_VALUE = 200; // Note: This is the total, not the average
 	const float CENTER_MINIMUM_VALUE = 220;
 
@@ -101,6 +104,8 @@ bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat roi_c = frame(cv::Range(30, 37), cv::Range(25, 50));
 	cv::Vec3b col_c = average_color(roi_c);
 	float v_c = (float)col_c[2] + col_c[1] + col_c[0];
+
+	//std::cout << r_l << "\t" << r_r << std::endl;
 
 	return v_c > CENTER_MINIMUM_VALUE;
 }
@@ -185,28 +190,28 @@ bool Line::line(cv::Mat& frame) {
 			robot->set_gpio(LED_2, true);				
 			robot->m(-80, -80, 100);
 
-			robot->turn(-RAD_90);
+			robot->turn(RAD_90);
 			robot->m(80, 80, 200);
 
 			robot->stop_video(front_cam_id);
 			delay(50);
 			robot->start_video(front_cam_id);
 
-			const uint32_t durations[] = {550, 1250, 1250, 1250, 450};
+			const uint32_t durations[] = {550, 1450, 1250, 1250, 450};
 
 			for(int i = 0; i < 42; ++i) {
 				if(obstacle_straight_line(durations[i])) break;
 
 				robot->stop_video(front_cam_id);
-				robot->turn(RAD_90);
+				robot->turn(-RAD_90);
 				robot->start_video(front_cam_id);
 			}
 
 			robot->set_gpio(LED_2, false);
 			robot->m(-40, -40, 150);
-			robot->m(40, -40, 250);
+			robot->m(-40, 40, 250);
 			robot->m(80, 80, 350);
-			robot->m(80, -80, 250);
+			robot->m(-80, 80, 250);
 		}
 
 		obstacle_active = 0;
