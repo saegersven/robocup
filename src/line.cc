@@ -560,20 +560,21 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 		robot->stop();
 
 		robot->turn(angle);
-		delay(300);
+		delay(70);
 
 		robot->m(100, 100, DISTANCE_FACTOR * (distance - 45));
-		delay(200);
-
-		// Take another picture
+		
+		// Take another picture and reevaluate
 		frame = robot->capture(front_cam_id);
 		black = in_range(frame, &is_black);
 
 		auto millisecondsUTC = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 		cv::imwrite("/home/pi/Desktop/green_images/" + std::to_string(millisecondsUTC) + ".png", frame);
 
+#ifdef DEBUG
 		cv::imshow("Green frame", frame);
-		cv::waitKey(100);
+		cv::waitKey(1);
+#endif
 
 		// Re-determine green result
 		uint8_t new_green_result = green_direction(frame, black, global_average_x, global_average_y);
@@ -584,15 +585,17 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 			green_result == GREEN_RESULT_DEAD_END) {
 			std::cout << "DEAD-END" << std::endl;
 			robot->turn(deg_to_rad(180.0f));
+			delay(70);
 			robot->m(60, 60, 150);
 		} else if(green_result == GREEN_RESULT_LEFT) {
 			std::cout << "LEFT" << std::endl;
 			robot->turn(deg_to_rad(-70.0f));
+			delay(70);
 		} else if(green_result == GREEN_RESULT_RIGHT) {
 			std::cout << "RIGHT" << std::endl;
 			robot->turn(deg_to_rad(70.0f));
+			delay(70);
 		}
-		delay(100);
 		robot->m(60, 60, 130);
 		robot->start_video(front_cam_id);
 	}
