@@ -1,3 +1,4 @@
+# recompiles all source files
 cd build
 ninja -t clean
 ninja 

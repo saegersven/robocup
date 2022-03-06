@@ -1,11 +1,11 @@
 TODO:
-- implement timeout for single_distance() and distance_avg()
-- "speedboost" on ramps
+- "speedboost" on ramps (check gyroscope in seperate thread)
 - improve accuracy when detecting silver (include front distance sensor, make sure there are no black contours, check side distance)
 - NN for intersections
 - global variable for movement on/off which is changed whenever the button on the robot is pressed
 - calibration scripts (silver, ...)
 - timout when waiting for gyroscope heading, entering "savetymode" after timout 
 - find_black_corner can't cope with exits
-- adjust values in find_black_corner (especially the threshold for detecting the black corner)
-- check files in /dev/cams/ folder during initialisation and light up red led if one file is missing
+- savetymode for detecting silver
+- rewrite black_pixel_threshold_under()
+- add wallfollower in find_black_corner()
