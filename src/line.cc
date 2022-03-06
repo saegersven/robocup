@@ -58,17 +58,8 @@ void Line::stop() {
 	running = false;
 }
 
-bool Line::check_silver_distance() {
-	/*
-	if (90.00 < robot->single_distance(DIST_1, 20, 0.1f, 5000) && robot->distance(DIST_1, 20, 0.1f, 5000) < 130.00) {
-		return true;
-	}
-	*/
-	return false;
-}
-
 bool Line::check_silver(cv::Mat& frame) {
-	if(micros() - micros_start < 60000000) return false; 
+	// if(micros() - micros_start < 60000000) return false; // cant't detect silver before 1 minute passed
 
 	const float MINIMUM_RATIO = 0.52; // Ratio of red to sum of blue and green
 	const float MINIMUM_VALUE = 200; // Note: This is the total, not the average
@@ -231,6 +222,7 @@ bool Line::line(cv::Mat& frame) {
 		green(frame, black);
 
 		if(check_silver(frame)) {
+			save_img("/home/pi/Desktop/silver_images/", frame);
 			std::cout << "cam detected silver!\nchecking distance..." << std::endl;
 			robot->m(100, 100, 1400);
 			robot->stop();
@@ -568,9 +560,7 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 		frame = robot->capture(front_cam_id);
 		black = in_range(frame, &is_black);
 
-		auto millisecondsUTC = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-		cv::imwrite("/home/pi/Desktop/green_images/" + std::to_string(millisecondsUTC) + ".png", frame);
-
+		save_img("/home/pi/Desktop/green_images/", frame);
 #ifdef DEBUG
 		cv::imshow("Green frame", frame);
 		cv::waitKey(1);

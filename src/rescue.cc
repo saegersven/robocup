@@ -105,9 +105,17 @@ void Rescue::find_black_corner() {
 	robot->beep(1000);
 	*/
 
-	while (1) {
+	// check if there's a wall next to the robot (right side):
+	if (robot->distance_avg(DIST_2, 10, 0.2f) > 10) {
+		// if not drive so that there is one:
+		robot->turn(RAD_90);
+	}
+	while (1) { 
+		// repeat until corner is found:
+
 		while (1) {
 			if (robot->single_distance(DIST_1) < 35 && robot->distance_avg(DIST_1, 10, 0.2f) < 35) break;
+			// Add wallfollowing logic here:
 			robot->m(100, 100);	
 		}
 
@@ -166,6 +174,7 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 
 	if(circles.size() == 1) {
 		out = circles[0];
+		save_img("/home/pi/Desktop/victims_images/", frame);
 		return true;
 	}
 

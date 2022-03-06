@@ -1,7 +1,7 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
-
+#include <string>
 #define PI (double) 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679 // should be accurate enough XD
 #define RAD_360 (2.0 * PI)
 #define RAD_180 PI
@@ -29,5 +29,6 @@ void draw_rotated_rect(cv::Mat out, cv::RotatedRect r, cv::Scalar color, int thi
 cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f, uint32_t* num_pixels = nullptr);
 
 void clipped_difference(cv::Mat a, cv::Mat b, cv::Mat out);
+void save_img(std::string path, cv::Mat frame);
 
 cv::Vec3b average_color(cv::Mat in);

@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include <opencv2/opencv.hpp>
+#include <string>
 
 float clip(float n, float lower, float upper) {
 	return std::max(lower, std::min(n, upper));
@@ -103,4 +104,10 @@ cv::Vec3b average_color(cv::Mat in) {
 	total_r /= size;
 
 	return cv::Vec3b((uint8_t)total_b, (uint8_t)total_g, (uint8_t)total_r);
+}
+
+void save_img(std::string path, cv::Mat frame) {
+	auto millisecondsUTC = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	cv::imwrite(path + std::to_string(millisecondsUTC) + ".png", frame);
+
 }
