@@ -58,47 +58,125 @@ void Line::stop() {
 	running = false;
 }
 
+float Line::get_redness(cv::Mat& in) {
+	CV_Assert(in.depth() == CV_8U);
+	uint8_t* ptr;
+	float total_b = 0;
+	float total_g = 0;
+	float total_r = 0;
+
+	int i, j;
+	for(i = 0; i < in.rows; ++i) {
+		ptr = in.ptr<uint8_t>(i);
+		for(j = 0; j < in.cols; ++j) {
+			float r = (float)ptr[j + 2];
+			if(r > 100 && r < 210) {
+				total_b += (float)ptr[j];
+				total_g += (float)ptr[j + 1];
+				total_r += r;
+			}
+		}
+	}
+
+	return total_r / (total_g + total_b);
+}
+
 bool Line::check_silver(cv::Mat& frame) {
+	cv::Mat roi = frame(cv::Range(23, 44), cv::Range(12, 70));
+	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
+	//return false;
+
+	uint8_t* ptr;
+	uint8_t* ptr_s;
+	float dot_prod = 0.0f;
+	float mag_s = 0.0f;
+	float mag = 0.0f;
+
+	for(int i = 0; i < roi.rows; ++i) {
+		ptr = roi.ptr<uint8_t>(i);
+		ptr_s = average_silver.ptr<uint8_t>(i);
+		for(int j = 0; j < roi.cols; ++j) {
+			for(int k = 0; k < 3; ++k) {
+				float s = ptr_s[j + k];
+				float c = ptr[j + k];
+				dot_prod += s * c;
+				mag_s += s * s;
+				mag += c * c;
+			}
+		}
+	}
+	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
+	std::cout << dot_prod << std::endl;
+	//return false;
+	return dot_prod > 0.98f;
+/*
+	uint8_t* ptr;
+	uint8_t* ptr_s;
+	float value_diff = 0.0f;
+
+	int i, j, k;
+	for(i = 0; i < roi.rows; ++i) {
+		ptr = roi.ptr<uint8_t>(i);
+		ptr_s = average_silver.ptr<uint8_t>(i);
+		for(j = 0; j < roi.cols; ++j) {
+			for(k = 0; k < 3; ++k) {
+				value_diff += std::abs((float)ptr_s[j + k] - ptr[j + k]);	
+			}
+		}
+	}
+
+	value_diff /= (roi.rows * roi.cols);
+	std::cout << value_diff << std::endl;
+
+	if(value_diff < 130) {
+		robot->beep(300);
+	}
+
+	return value_diff < 100;
+
 	// if(micros() - micros_start < 60000000) return false; // cant't detect silver before 1 minute passed
 
-	const float MINIMUM_RATIO = 0.52; // Ratio of red to sum of blue and green
-	const float MINIMUM_VALUE = 200; // Note: This is the total, not the average
-	const float CENTER_MINIMUM_VALUE = 220;
+	const float MINIMUM_RATIO = 0.57; // Ratio of red to sum of blue and green
+	const float MINIMUM_VALUE = 100; // Note: This is the total, not the average
+	const float CENTER_MINIMUM_VALUE = 180;
 
 	// Left red dot
-	cv::Mat roi_l = frame(cv::Range(30, 37), cv::Range(23, 30));
+	cv::Mat roi_l = frame(cv::Range(28, 39), cv::Range(21, 31));
 	cv::Vec3b col_l = average_color(roi_l);
 	float r_l = (float)col_l[2] / (col_l[1] + col_l[0]);
+	float red_l = get_redness(roi_l);
 	float v_l = (float)col_l[2] + col_l[1] + col_l[0];
 
-	if(r_l < MINIMUM_RATIO || v_l < MINIMUM_VALUE) return false;
+	//if(r_l < MINIMUM_RATIO || v_l < MINIMUM_VALUE) return false;
 
 	std::cout << "Right dot" << std::endl;
 	// Right red dot
-	cv::Mat roi_r = frame(cv::Range(30, 37), cv::Range(52, 59));
+	cv::Mat roi_r = frame(cv::Range(28, 39), cv::Range(51, 61));
 	cv::Vec3b col_r = average_color(roi_r);
 	float r_r = (float)col_r[2] / (col_r[1] + col_r[0]);
+	float red_r = get_redness(roi_r);
 	float v_r = (float)col_r[2] + col_r[1] + col_r[0];
 
 	cv::imshow("roi_r", roi_r);
 
-	if(r_r < MINIMUM_RATIO || v_r < MINIMUM_VALUE) return false;
+	//if(r_r < MINIMUM_RATIO || v_r < MINIMUM_VALUE) return false;
 
 	/*std::cout << "Distance" << std::endl;
 	// Distance
 	float dist = robot->distance(DIST_1, 2, 500);
 	std::cout << dist << std::endl;
-	if(dist < 90.0f || dist > 130.0f) return false;*/
+	if(dist < 90.0f || dist > 130.0f) return false;
 
 	std::cout << "Center" << std::endl;
 	// Center
-	cv::Mat roi_c = frame(cv::Range(30, 37), cv::Range(25, 50));
+	cv::Mat roi_c = frame(cv::Range(28, 39), cv::Range(30, 51));
 	cv::Vec3b col_c = average_color(roi_c);
 	float v_c = (float)col_c[2] + col_c[1] + col_c[0];
 
-	//std::cout << r_l << "\t" << r_r << std::endl;
-
-	return v_c > CENTER_MINIMUM_VALUE;
+	std::cout << red_l << "\t" << red_r << std::endl;
+	return false;
+	//return v_c > CENTER_MINIMUM_VALUE;
+	*/
 }
 
 bool Line::abort_obstacle(cv::Mat frame) {
@@ -222,7 +300,11 @@ bool Line::line(cv::Mat& frame) {
 		green(frame, black);
 
 		if(check_silver(frame)) {
-			save_img("/home/pi/Desktop/silver_images/", frame);
+			std::cout << "Silver" << std::endl;
+			robot->stop();
+			delay(100);
+			exit(0);
+			//save_img("/home/pi/Desktop/silver_images/", frame);
 			std::cout << "cam detected silver!\nchecking distance..." << std::endl;
 			robot->m(100, 100, 1400);
 			robot->stop();
