@@ -88,6 +88,7 @@ bool Line::check_silver(cv::Mat& frame) {
 
 	uint8_t* ptr;
 	uint8_t* ptr_s;
+<<<<<<< HEAD
 	float dot_prod = 0.0f;
 	float mag_s = 0.0f;
 	float mag = 0.0f;
@@ -112,6 +113,8 @@ bool Line::check_silver(cv::Mat& frame) {
 /*
 	uint8_t* ptr;
 	uint8_t* ptr_s;
+=======
+>>>>>>> d4c0a6d7c56021c7925c990943891cdbb4d1d100
 	float value_diff = 0.0f;
 
 	int i, j, k;
@@ -176,7 +179,10 @@ bool Line::check_silver(cv::Mat& frame) {
 	std::cout << red_l << "\t" << red_r << std::endl;
 	return false;
 	//return v_c > CENTER_MINIMUM_VALUE;
+<<<<<<< HEAD
 	*/
+=======
+>>>>>>> d4c0a6d7c56021c7925c990943891cdbb4d1d100
 }
 
 bool Line::abort_obstacle(cv::Mat frame) {
