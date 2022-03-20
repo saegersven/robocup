@@ -88,7 +88,7 @@ bool Line::check_silver(cv::Mat& frame) {
 
 	uint8_t* ptr;
 	uint8_t* ptr_s;
-<<<<<<< HEAD
+
 	float dot_prod = 0.0f;
 	float mag_s = 0.0f;
 	float mag = 0.0f;
@@ -109,7 +109,7 @@ bool Line::check_silver(cv::Mat& frame) {
 	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
 	std::cout << dot_prod << std::endl;
 	//return false;
-	return dot_prod > 0.98f;
+	return dot_prod > 0.92f;
 /*
 	uint8_t* ptr;
 	uint8_t* ptr_s;
@@ -181,8 +181,6 @@ bool Line::check_silver(cv::Mat& frame) {
 	//return v_c > CENTER_MINIMUM_VALUE;
 <<<<<<< HEAD
 	*/
-=======
->>>>>>> d4c0a6d7c56021c7925c990943891cdbb4d1d100
 }
 
 bool Line::abort_obstacle(cv::Mat frame) {
@@ -306,13 +304,14 @@ bool Line::line(cv::Mat& frame) {
 		green(frame, black);
 
 		if(check_silver(frame)) {
+			float dist = robot->distance_avg(DIST_2, 20, 0.2f);
+			std::cout << "Distance: " << dist << std::endl;
+
+			// if ((dist > 80.0 && dist < 100.0) || (dist > 110.0 && dist < 130.0))
 			std::cout << "Silver" << std::endl;
-			robot->stop();
-			delay(100);
-			exit(0);
-			//save_img("/home/pi/Desktop/silver_images/", frame);
+			save_img("/home/pi/Desktop/silver_images/", frame);
 			std::cout << "cam detected silver!\nchecking distance..." << std::endl;
-			robot->m(100, 100, 1400);
+			robot->m(100, 100, 750);
 			robot->stop();
 			delay(100);
 

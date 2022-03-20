@@ -726,7 +726,7 @@ float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, floa
 	float avg = sum / (arr_len - 2 * kthPercent);
 
 	//std::cout << "Avg: "<< avg << std::endl;
-
+	delay(5);
 	return avg;
 }
 

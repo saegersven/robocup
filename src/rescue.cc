@@ -15,14 +15,16 @@ Rescue::Rescue(std::shared_ptr<Robot> robot) : finished(false) {
 }
 
 void Rescue::start() {
-	// std::thread rescue_thread([this]() { this->rescue(); });
-	// this->native_handle = rescue_thread.native_handle();
-	// rescue_thread.detach();
-	rescue();
+	std::thread rescue_thread([this]() { this->rescue(); });
+	this->native_handle = rescue_thread.native_handle();
+	rescue_thread.detach();
+	//rescue();
 }
 
 void Rescue::stop() {
 	pthread_cancel(this->native_handle);
+	//finished = true;
+	cap.release();
 }
 
 void Rescue::rescue() {
@@ -106,15 +108,16 @@ void Rescue::find_black_corner() {
 	*/
 
 	// check if there's a wall next to the robot (right side):
-	if (robot->distance_avg(DIST_2, 10, 0.2f) > 10) {
+	if (robot->distance_avg(DIST_2, 10, 0.2f) > 10.0f) {
 		// if not drive so that there is one:
 		robot->turn(RAD_90);
+
 	}
 	while (1) { 
 		// repeat until corner is found:
 
 		while (1) {
-			if (robot->single_distance(DIST_1) < 35 && robot->distance_avg(DIST_1, 10, 0.2f) < 35) break;
+			if (robot->single_distance(DIST_1) < 35.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 35.0f) break;
 			// Add wallfollowing logic here:
 			robot->m(100, 100);	
 		}
@@ -125,7 +128,7 @@ void Rescue::find_black_corner() {
 		robot->turn(RAD_90);
 		robot->m(50, 50, 650);
 
-		cv::VideoCapture cap("/dev/cams/front");
+		cap.open("/dev/cams/front");
 		cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
 		cap.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
 		cap.set(cv::CAP_PROP_FPS, 30);
@@ -147,13 +150,13 @@ void Rescue::find_black_corner() {
 			std::cout << "Found corner" << std::endl;
 			robot->beep(400);
 			cap.release();
+			save_img("/home/pi/Desktop/black_corner_images/", frame);
 			return;
 		} 
 		robot->turn(RAD_45);
 		robot->m(-100, -100, 300);
 		robot->turn(deg_to_rad(-185));
 		robot->m(-100, -100, 1500);
-
 	}
 }
 
@@ -174,7 +177,6 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 
 	if(circles.size() == 1) {
 		out = circles[0];
-		save_img("/home/pi/Desktop/victims_images/", frame);
 		return true;
 	}
 
@@ -194,8 +196,7 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 
 bool Rescue::find_victim() {
 	// Capture one frame from camera
-	cv::VideoCapture cap;
-
+	cap.release();
 	cap.open("/dev/cams/back", cv::CAP_V4L2);
 	if(!cap.isOpened()) {
 		std::cout << "Back cam not opened" << std::endl;
@@ -219,32 +220,35 @@ bool Rescue::find_victim() {
 	float angle1 = pixel_angle * victim_x;
 	robot->turn(angle1);
 	delay(100);
+	save_img("/home/pi/Desktop/victims_images_back_cam/", frame);
+
 
 	// Turn around and search with front camera
 	robot->m(-30, -30, 300);
 	robot->turn(RAD_180);
 	delay(100);
 
-	cv::VideoCapture cap2("/dev/cams/front", cv::CAP_V4L2);
-	cap2.set(cv::CAP_PROP_FRAME_WIDTH, 160);
-	cap2.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
-	cap2.set(cv::CAP_PROP_FPS, 30);
-	cap2.set(cv::CAP_PROP_FORMAT, CV_8UC3);
+	cap.open("/dev/cams/front", cv::CAP_V4L2);
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
+	cap.set(cv::CAP_PROP_FPS, 30);
+	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 
-	if(!cap2.isOpened()) {
+	if(!cap.isOpened()) {
 		std::cout << "Front cam not opened" << std::endl;
 	}
 
 	delay(100);
-	robot->m(15, 15);
+	robot->m(35, 35);
 	auto search_start_time = std::chrono::high_resolution_clock::now();
 	while(1) {
-		cap2.grab();
-		cap2.retrieve(frame);
+		cap.grab();
+		cap.retrieve(frame);
 
 		cv::Vec3f c;
 		if(get_largest_circle(frame, c)) {
-			cap2.release();
+			save_img("/home/pi/Desktop/victims_images_front_cam/", frame);
+			cap.release();
 			robot->stop();
 			auto search_end_time = std::chrono::high_resolution_clock::now();
 
@@ -278,7 +282,7 @@ bool Rescue::find_victim() {
 
 			std::cout << search_time << std::endl;
 
-			robot->m(15, 15, search_time);
+			robot->m(35, 35, search_time);
 
 			// Turn initial angle
 			robot->turn(-angle1);
@@ -290,29 +294,6 @@ bool Rescue::find_victim() {
 		}
 	}
 }
-/*
-void Rescue::find_exit() {
-	// finds exit of evacuation zone	
-
-	robot->m(-100, -100, 250);
-	robot->m(100, 100, 250);
-	robot->turn(RAD_90);
-
-	while(robot->single_distance(DIST_1) > 10 && robot->distance_avg(DIST_1, 10, 0.2f) > 10) {
-		robot->m(100, 100);
-	}
-	robot->turn(deg_to_rad(-45));
-	while(robot->single_distance(DIST_1) > 7 && robot->distance_avg(DIST_1, 10, 0.2f) > 7) {
-		robot->m(100, 100);
-	}
-	robot->turn(RAD_90);
-	robot->beep(100);
-	robot->m(100, 100, 100);	
-	exit(0);
-
-	// start line thread:
-}
-*/
 
 void Rescue::find_exit() {
 	robot->m(-100, -100, 650);
@@ -364,6 +345,7 @@ void Rescue::find_exit() {
 		// Found exit
 		robot->m(100, 100, 500);
 		std::cout << "Found exit" << std::endl;
+		save_img("/home/pi/Desktop/exit_images/", frame);
 		return;
 	}
 }

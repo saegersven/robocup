@@ -86,11 +86,15 @@ int main() {
 			}
 			line.stop();
 			robot->stop();
+			std::cout << "Stopped." << std::endl;
 			delay(50);
-			while(!robot->button(BTN_DEBUG));
+			while(!robot->button(BTN_DEBUG)) {
+				robot->stop();
+			}
 			delay(50);
 			while(robot->button(BTN_DEBUG));
 			delay(100);
+			std::cout << "Restarted line." << std::endl;
 
 			line.start();
 		}
@@ -115,6 +119,7 @@ int main() {
 			{
 				// Monitor rescue thread
 				if(rescue.finished) {
+					std::cout << "Starting line" << std::endl;
 					//rescue.stop();
 					line.start();
 					state = State::line;
