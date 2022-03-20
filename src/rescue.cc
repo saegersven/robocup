@@ -45,12 +45,12 @@ void Rescue::rescue() {
 
 	robot->stop();
 	robot->beep(100, BUZZER);
-
+	robot->m(100, 100, 100);
 	find_black_corner(); // 1)
 	
-	robot->m(-100, -100, 400);
+	robot->m(-100, -100, 600);
 	//float heading = robot->get_heading(); // 3)
-	robot->turn(deg_to_rad(50));
+	robot->turn(deg_to_rad(60));
 	uint8_t turn_counter = 0;
 
 	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
@@ -60,7 +60,8 @@ void Rescue::rescue() {
 				searching_victim = false;
 			} else {
 				std::cout << "looking for victim" << std::endl;
-				robot->turn(deg_to_rad(-35));
+				robot->turn(deg_to_rad(-30));
+				delay(100);
 				++turn_counter;
 			}
 		}
@@ -69,7 +70,7 @@ void Rescue::rescue() {
 
 		// align with black corner
 		//robot->turn_to_heading(heading);
-		robot->turn(turn_counter * deg_to_rad(35) - deg_to_rad(50));
+		robot->turn(turn_counter * deg_to_rad(30) - deg_to_rad(60));
 
 		robot->m(100, 100, 1000);
 		robot->m(-100, -100, 500);
@@ -93,7 +94,6 @@ void Rescue::rescue() {
 
 // see 1)
 void Rescue::find_black_corner() {
-
 	// Wallfollower:
 	/*
 	float target_dist = 6.00; // target distance for wallfollowing (in cm) 
@@ -110,16 +110,27 @@ void Rescue::find_black_corner() {
 	// check if there's a wall next to the robot (right side):
 	if (robot->distance_avg(DIST_2, 10, 0.2f) > 10.0f) {
 		// if not drive so that there is one:
-		robot->turn(RAD_90);
-
+		robot->turn(-RAD_90);
+		robot->m(-100, -100, 400);
+		robot->turn(-RAD_180);
+		robot->m(-100, -100, 800);
 	}
 	while (1) { 
 		// repeat until corner is found:
 
 		while (1) {
 			if (robot->single_distance(DIST_1) < 35.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 35.0f) break;
-			// Add wallfollowing logic here:
-			robot->m(100, 100);	
+			// wallfollowing logic:
+			float dist = robot->single_distance(DIST_2);
+			if (dist > 40.0f) {
+				robot->m(100, 100, 50);
+			} else {
+				float error = (10.0f - dist);
+				error = error * (error / 5);
+				std::cout << "Error: " << error << std::endl;
+				robot->m(15-error, 15+error);
+				delay(1000);
+			}
 		}
 
 		// check for corner	using front camera

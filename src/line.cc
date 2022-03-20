@@ -109,7 +109,7 @@ bool Line::check_silver(cv::Mat& frame) {
 	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
 	std::cout << dot_prod << std::endl;
 	//return false;
-	return dot_prod > 0.92f;
+	return dot_prod > 0.85f; // 0.92f
 /*
 	uint8_t* ptr;
 	uint8_t* ptr_s;
