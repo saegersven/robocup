@@ -94,19 +94,6 @@ void Rescue::rescue() {
 
 // see 1)
 void Rescue::find_black_corner() {
-	// Wallfollower:
-	/*
-	float target_dist = 6.00; // target distance for wallfollowing (in cm) 
-	float multiplier = 7.00;
-	while (robot->single_distance(DIST_1, 20) > 35) {
-		float error = (robot->single_distance(DIST_2, 20) - target_dist) * multiplier;
-		robot->m((-error)+30, (error)+30, 10);
-		std::cout << error << std::endl;
-	}
-	robot->stop();
-	robot->beep(1000);
-	*/
-
 	// check if there's a wall next to the robot (right side):
 	if (robot->distance_avg(DIST_2, 10, 0.2f) > 10.0f) {
 		// if not drive so that there is one:
@@ -117,20 +104,9 @@ void Rescue::find_black_corner() {
 	}
 	while (1) { 
 		// repeat until corner is found:
-
 		while (1) {
 			if (robot->single_distance(DIST_1) < 35.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 35.0f) break;
-			// wallfollowing logic:
-			float dist = robot->single_distance(DIST_2);
-			if (dist > 40.0f) {
-				robot->m(100, 100, 50);
-			} else {
-				float error = (10.0f - dist);
-				error = error * (error / 5);
-				std::cout << "Error: " << error << std::endl;
-				robot->m(15-error, 15+error);
-				delay(1000);
-			}
+				robot->m(100, 100, 10);
 		}
 
 		// check for corner	using front camera
