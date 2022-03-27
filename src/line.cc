@@ -1,5 +1,5 @@
 #include "line.h"
-
+#include<cstdlib>
 #include <algorithm>
 #include <vector>
 #include <limits>
@@ -82,10 +82,7 @@ float Line::get_redness(cv::Mat& in) {
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	cv::Mat roi = frame(cv::Range(25, 42), cv::Range(15, 67));
-	#ifdef DEBUG
-		save_img("/home/pi/Desktop/silver_rois/", roi);
-	#endif
+	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
 
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
 	//return false;
@@ -112,8 +109,14 @@ bool Line::check_silver(cv::Mat& frame) {
 	}
 	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
 	std::cout << dot_prod << std::endl;
-	//return false;
-	return dot_prod > 0.92f; // 0.92f
+
+	if (dot_prod > 0.85f) {		
+		#ifdef DEBUG
+			save_img("/home/pi/Desktop/silver_rois/", roi);
+		#endif
+		return true;
+	}
+	return false;
 /*
 	uint8_t* ptr;
 	uint8_t* ptr_s;
@@ -305,7 +308,19 @@ bool Line::line(cv::Mat& frame) {
 		//rescue_kit(frame);
 
 		green(frame, black);
-
+		if (check_silver(frame)) {
+			robot->m(-50, -50, 50);
+  			int max = 5;
+   			srand(time(0));
+   			if ((rand()%max) % 2) {
+   				robot->turn(deg_to_rad(rand()%max));
+   			} else {   				
+   				robot->turn(-deg_to_rad(rand()%max));
+   			}
+		} else {
+			robot->m(50, 50, 10);
+		}
+		/*
 		if(check_silver(frame)) {
 			float dist = robot->distance_avg(DIST_2, 20, 0.2f);
 			std::cout << "Distance: " << dist << std::endl;
@@ -342,7 +357,7 @@ bool Line::line(cv::Mat& frame) {
 			} else {
 				robot->m(-100, -100, 1350); // return to previous position (a bit further to avoid another false positive)
 			}
-		}
+		}*/
 	}
 #ifdef DEBUG
 #ifdef DEBUG_RESIZE
