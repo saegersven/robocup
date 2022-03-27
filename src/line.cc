@@ -307,6 +307,8 @@ bool Line::line(cv::Mat& frame) {
 
 		//rescue_kit(frame);
 
+		/*
+		// capture silver ml data:
 		green(frame, black);
 		if (check_silver(frame)) {
 			robot->m(-50, -50, 50);
@@ -319,8 +321,8 @@ bool Line::line(cv::Mat& frame) {
    			}
 		} else {
 			robot->m(50, 50, 10);
-		}
-		/*
+		}*/
+		
 		if(check_silver(frame)) {
 			float dist = robot->distance_avg(DIST_2, 20, 0.2f);
 			std::cout << "Distance: " << dist << std::endl;
@@ -357,7 +359,7 @@ bool Line::line(cv::Mat& frame) {
 			} else {
 				robot->m(-100, -100, 1350); // return to previous position (a bit further to avoid another false positive)
 			}
-		}*/
+		}
 	}
 #ifdef DEBUG
 #ifdef DEBUG_RESIZE
