@@ -82,7 +82,11 @@ float Line::get_redness(cv::Mat& in) {
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	cv::Mat roi = frame(cv::Range(23, 44), cv::Range(12, 70));
+	cv::Mat roi = frame(cv::Range(25, 42), cv::Range(15, 67));
+	#ifdef DEBUG
+		save_img("/home/pi/Desktop/silver_rois/", roi);
+	#endif
+
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
 	//return false;
 
@@ -109,12 +113,11 @@ bool Line::check_silver(cv::Mat& frame) {
 	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
 	std::cout << dot_prod << std::endl;
 	//return false;
-	return dot_prod > 0.85f; // 0.92f
+	return dot_prod > 0.92f; // 0.92f
 /*
 	uint8_t* ptr;
 	uint8_t* ptr_s;
-=======
->>>>>>> d4c0a6d7c56021c7925c990943891cdbb4d1d100
+
 	float value_diff = 0.0f;
 
 	int i, j, k;
@@ -309,7 +312,9 @@ bool Line::line(cv::Mat& frame) {
 
 			// if ((dist > 80.0 && dist < 100.0) || (dist > 110.0 && dist < 130.0))
 			std::cout << "Silver" << std::endl;
-			save_img("/home/pi/Desktop/silver_images/", frame);
+			#ifdef DEBUG
+				save_img("/home/pi/Desktop/silver_images/", frame);
+			#endif
 			std::cout << "cam detected silver!\nchecking distance..." << std::endl;
 			robot->m(100, 100, 750);
 			robot->stop();
@@ -646,8 +651,9 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 		// Take another picture and reevaluate
 		frame = robot->capture(front_cam_id);
 		black = in_range(frame, &is_black);
-
-		save_img("/home/pi/Desktop/green_images/", frame);
+		#ifdef DEBUG
+			save_img("/home/pi/Desktop/green_images/", frame);
+		#endif
 #ifdef DEBUG
 		cv::imshow("Green frame", frame);
 		cv::waitKey(1);
