@@ -110,7 +110,7 @@ bool Line::check_silver(cv::Mat& frame) {
 	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
 	std::cout << dot_prod << std::endl;
 
-	if (dot_prod > 0.85f) {		
+	if (dot_prod > 0.95f) {		
 		#ifdef DEBUG
 			save_img("/home/pi/Desktop/silver_rois/", roi);
 		#endif
@@ -261,6 +261,14 @@ bool Line::obstacle_straight_line(uint32_t duration) {
 }
 
 bool Line::line(cv::Mat& frame) {
+	// save roi of frame for ml purposes	
+	#ifdef DEBUG
+   		if (micros() % 21 == 0) {
+			cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
+			save_img("/home/pi/Desktop/linefollowing_rois/", roi);	
+   		}
+	#endif
+
 	// Check if obstacle thread has notified main thread
 	if(obstacle_active == 2) {
 		robot->stop();
