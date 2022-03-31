@@ -53,12 +53,15 @@ AUTOTUNE = tf.data.AUTOTUNE
 train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
 val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
-#normalization_layer = layers.experimental.preprocessing.Rescaling(1./255)
+normalization_layer = layers.experimental.preprocessing.Rescaling(1./255)
+
+normalized_train_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
+normalized_val_ds = val_ds.map(lambda x, y: (normalization_layer(x), y))
 
 
 model = Sequential([
-	layers.Input(shape=(img_height, img_width, 3), dtype="uint8"),
-	layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
+	layers.Input(shape=(img_height, img_width, 3), dtype="float32"),
+	#layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
 	#layers.Conv2D(16, 3, padding="same", activation="relu"),
 	#layers.MaxPooling2D(),
 	#layers.Conv2D(32, 3, padding="same", activation="relu"),
@@ -80,8 +83,8 @@ model.summary()
 
 epochs = 20
 history = model.fit(
-	train_ds,
-	validation_data=val_ds,
+	normalized_train_ds,
+	validation_data=normalized_val_ds,
 	epochs=epochs)
 
 model.save("model.h5", save_format='h5')

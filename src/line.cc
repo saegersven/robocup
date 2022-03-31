@@ -11,6 +11,7 @@
 #include "robot.h"
 #include "utils.h"
 #include "rescue.h"
+#include "silver_ml.h"
 
 bool is_black(uint8_t b, uint8_t g, uint8_t r) {
 	return (uint16_t)b + (uint16_t)g + (uint16_t)r < BLACK_MAX_SUM;
@@ -83,6 +84,10 @@ float Line::get_redness(cv::Mat& in) {
 
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
+
+	predict_silver(roi);
+
+	return false;
 
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
 	//return false;
