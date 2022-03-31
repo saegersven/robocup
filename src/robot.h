@@ -39,8 +39,8 @@
 #define DIST_2_TRIG 13
 #define DIST_2 12, 13
 
-#define SERVO_1 21
-#define SERVO_2 26
+#define SERVO_1 26
+#define SERVO_2 21
 
 // Servo parameters
 #define SERVO_MIN_PULSE 1000
@@ -51,16 +51,8 @@
 // Encoder movement parameters
 #define FORWARD_CORRECTION_FACTOR 0.1f
 // Unit: mm
-#define WHEEL_CIRCUMFERENCE 196.0f
+#define WHEEL_CIRCUMFERENCE 50.0f
 #define GEAR_RATIO 100.0f
-#define WHEEL_SPAN 155.0f
-#define TURN_DIAMETER 486.0f
-
-#define TURN_MAX_DURATION_FACTOR 10.0f
-#define TURN_MIN_DURATION_FACTOR 6.0f
-#define TURN_DURATION_FACTOR 6.5f
-
-#define DISTANCE_FACTOR (4.2f + 3 * 0.42f)
 // Encoder pulses per revolution of encoder shaft
 #define PULSES_PER_REVOLUTION 20.0f
 
@@ -73,14 +65,6 @@
 #define MOTOR_SPEED_CONVERSION_FACTOR 0.01f
 // Factor for proportional control of motor speed
 #define MOTOR_SPEED_CORRECTION_FACTOR 10.0f
-
-
-// I2C API
-int8_t API_I2C_bus_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
-int8_t API_I2C_bus_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
-void API_delay_msek(uint32_t msek);
-#define API_I2C_ADDR1 0x28
-#define _BNO055_I2C_ADDR 0x28
 
 class Robot {
 private:
@@ -100,12 +84,8 @@ private:
 	// Speed values will be set to zero at this point in time
 	std::atomic<std::chrono::time_point<std::chrono::high_resolution_clock>> asc_stop_time;
 
-	std::atomic<bool> block_m;
-	float last_heading = 0.0f;
 	// WiringPI id of Encoder GPIO Expander
 	int mcp_fd;
-
-	int bno_fd;
 
 	// Get encoder value via I2C
 	uint8_t encoder_value_a();
@@ -114,16 +94,14 @@ private:
 	// Main Async speed control function, runs in its own thread
 	void asc();
 
-	void init_bno055();
-
 public:
 	Robot();
 
 	// Delay grabbing frames from the camera to keep it from freezing
-	// void delay_c(uint32_t ms, int id);
+	void delay_c(uint32_t ms, int id);
 
 	// CAMERA
-	int init_camera(const std::string& id, bool calibrated = false,
+	int init_camera(int id, bool calibrated = false,
 		int width = 320, int height = 192, int fps = 60, const std::string& subtractive_mask_path = "");
 	cv::Mat capture(int cam_id, bool undistort = false);
 	void start_video(int cam_id);
@@ -131,32 +109,19 @@ public:
 
 	// MOVEMENT
 	void stop(uint8_t brake_duty_cycle = 100);
-	void turn(float rad);
-	void turn_to(float heading);
-	void turn_to_heading(float heading);
-	void turn_to_heading_last(float heading, float speed, bool dir);
-	void straight(int8_t speed, uint32_t duration = 0);
+	void turn(int8_t degrees);
 
 	// Directly set motor speed
-	void m(int8_t left, int8_t right, int32_t duration = 0, uint8_t brake_duty_cycle = 100);
+	void m(int8_t left, int8_t right, uint16_t duration = 0, uint8_t brake_duty_cycle = 100);
 	// Set motor speed with async speed control
 	void m_asc(int8_t left, int8_t right, uint16_t duration = 0, bool wait = false);
-	void block(bool val = true);
 
-	void servo(uint8_t pin, float angle, uint16_t d = 0);
-	void attach_servo(uint8_t pin);
-	void write_servo(uint8_t pin, float angle);
-	void release_servo(uint8_t pin);
+	void servo(uint8_t pin, int8_t angle, bool wait = false);
 
 	void beep(uint16_t ms, uint8_t pin = BUZZER);
-	void set(uint8_t pin, bool value);
 	
 	// SENSORS
 	bool button(uint8_t pin);
 	void button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
-	float single_distance(int8_t echo, uint8_t trig, int timeout = 20);
-	float distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements = 1, float remove_percentage = 0.2f, uint32_t timeout_single_measurement = 200, uint32_t timeout = 2000);
-
-	float get_heading();
-	void set_gpio(int pin, bool state);
+	float distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t timeout = 1000);
 };
