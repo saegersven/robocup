@@ -37,7 +37,7 @@ simple-ftp-deploy.json
 sftp-config.json
 sftp-config-alt.json
 
-# Machine Learning datasets
+# (Live) Machine Learning datasets
 ml/**/data
 ml/**/original_data
 ml/**/model
