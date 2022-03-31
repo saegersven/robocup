@@ -84,7 +84,7 @@ history = model.fit(
 	validation_data=val_ds,
 	epochs=epochs)
 
-model.save("model")
+model.save("model.h5", save_format='h5')
 
 acc = history.history["accuracy"]
 val_acc = history.history["val_accuracy"]

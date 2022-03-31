@@ -46,3 +46,5 @@ ml
 # CMake junk
 **/CMakeFiles
 **/CMakeCache.txt
+
+libs
