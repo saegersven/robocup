@@ -1,5 +1,5 @@
 #pragma once
-
+#ifdef ENABLE_ML
 #include <vector>
 #include <memory>
 
@@ -23,3 +23,4 @@ public:
 	void load_model(const std::string& path);
 	int infere(int id, cv::Mat& frame, float& confidence);
 };
+#endif

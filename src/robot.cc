@@ -8,14 +8,23 @@
 #include <thread>
 #include <cmath>
 
+#include <unistd.h>
+#include <iomanip>
+
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <softPwm.h>
 #include <opencv2/opencv.hpp>
 
+extern "C" {
+#include <linux/i2c-dev.h>
+#include <i2c/smbus.h>
+}
+
 #include "utils.h"
 #include "errcodes.h"
 #include "vision.h"
+#include <typeinfo>
 
 Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	std::cout << "Robot setup" << std::endl;
@@ -25,6 +34,8 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	// Initialize the robot
 	// Setup GPIO
 	wiringPiSetupGpio();
+
+	init_bno055();
 
 	// Setup I2C
 	/*mcp_fd = wiringPiI2CSetup(0x20); // TODO: Check if this is the actual ID of MCP23017
@@ -63,14 +74,14 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 
 	// Setup Servo motor pins
 	// 50Hz has a period of 20ms, so multiply value by 100 to get period in microseconds
-	if(softPwmCreate(SERVO_1, 0, 200)) {
-		std::cout << "Error setting up PWM for Servo 1" << std::endl;
-		exit(ERRCODE_BOT_SETUP_PWM);
-	}
-	if(softPwmCreate(SERVO_2, 0, 200)) {
-		std::cout << "Error setting up PWM for Servo 2" << std::endl;
-		exit(ERRCODE_BOT_SETUP_PWM);
-	}
+	// if(softPwmCreate(SERVO_1, 0, 200)) {
+	//  std::cout << "Error setting up PWM for Servo 1" << std::endl;
+	//  exit(ERRCODE_BOT_SETUP_PWM);
+	// }
+	// if(softPwmCreate(SERVO_2, 0, 200)) {
+	//  std::cout << "Error setting up PWM for Servo 2" << std::endl;
+	//  exit(ERRCODE_BOT_SETUP_PWM);
+	// }
 
 	io_mutex.unlock();
 
@@ -78,22 +89,205 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	this->asc_speed_right = 0.0f;
 	this->asc_has_duration = false;
 
+	this->block_m = false;
+
 	std::thread motor_update_thread(&Robot::asc, this); // Create async motor control thread
 	motor_update_thread.detach();
 }
 
-void Robot::delay_c(uint32_t ms, int id) {
-	if(!cams[id].cap.isOpened()) {
-		delay(ms);
-		return;
+int8_t API_I2C_bus_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
+	//std::cout << "W\t" << std::to_string(reg_addr) << "\t" << std::to_string(reg_data[0]) << std::endl;
+
+	uint8_t write_buf[1 + len];
+	write_buf[0] = reg_addr;
+	for(int i = 0; i < len; ++i) {
+		write_buf[i + 1] = reg_data[i];
 	}
-	std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
-	while(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start) < ms) {
-		cams[cam_id].cap.grab();
+
+	if(write(dev_addr, write_buf, 1) != 1) {
+		return 1;
 	}
+	// if(write(dev_addr, reg_data, len) != len) {
+	//  return 1;
+	// }
+	// if(len == 1) {
+	//  i2c_smbus_write_byte_data(dev_addr, reg_addr, reg_data[0]);
+	//  return 0;
+	// }
+
+	// i2c_smbus_write_block_data(dev_addr, reg_addr, len, reg_data);
+	return 0;
 }
 
-int Robot::init_camera(int id, bool calibrated, int width, int height, int fps, const std::string& subtractive_mask_path) {
+int8_t API_I2C_bus_write8(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data) {
+	//uint8_t write_buf[1] = {reg_data};
+	//return API_I2C_bus_write(dev_addr, reg_addr, write_buf, 1);
+	wiringPiI2CWriteReg8(dev_addr, reg_addr, reg_data);
+}
+
+int8_t API_I2C_bus_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
+	//std::cout << "R\t" << std::to_string(reg_addr) << std::endl;
+	uint8_t write_buf[1] = {reg_addr};
+	if(write(dev_addr, write_buf, 1) != 1) {
+		return 1;
+	}
+	if(read(dev_addr, reg_data, len) != len) {
+		return 1;
+	}
+	// if(len == 1) {
+	//  reg_data = new uint8_t();
+	//  reg_data[0] = i2c_smbus_read_byte_data(dev_addr, reg_addr);
+	//  return 0;
+	// }
+
+	// i2c_smbus_read_block_data(dev_addr, reg_addr, reg_data);
+	return 0;
+}
+
+void API_delay_msek(uint32_t msek) {
+	delay(msek);
+}
+
+void Robot::init_bno055() {
+	// Init I2C device
+	bno_fd = wiringPiI2CSetup(_BNO055_I2C_ADDR);
+	if(bno_fd == -1) {
+		std::cout << "I2C Error setting up BNO055" << std::endl;
+		exit(ERRCODE_BOT_SETUP_I2C);
+	}
+
+	// bno055.bus_write = &API_I2C_bus_write;
+	// bno055.bus_read = &API_I2C_bus_read;
+	// bno055.delay_msec = &API_delay_msek;
+	// bno055.dev_addr = bno_fd;
+
+	// bno_comres = bno055_init(&this->bno055);
+
+	// bno_comres += bno055_set_sys_rst(0x01);
+	// delay(700);
+
+	// bno_comres += bno055_set_power_mode(BNO055_POWER_MODE_NORMAL);
+
+	// bno_comres += bno055_write_page_id(0x00);
+
+	// uint8_t write_buf[1] = {0x00};
+	// bno_comres += bno055_write_register(BNO055_SYS_TRIGGER_ADDR, write_buf, 1);
+
+	// // Set accelerometer range
+	// bno_comres += bno055_set_accel_range(BNO055_ACCEL_RANGE_2G);
+	// bno_comres += bno055_set_gyro_range(BNO055_GYRO_RANGE_2000DPS);
+	// bno_comres += bno055_set_mag_data_output_rate(0x05);
+
+	// delay(10);
+
+	// // write_buf[0] = BNO055_OPERATION_MODE_NDOF;
+	// // bno_comres += bno055_write_register(BNO055_OPERATION_MODE_REG, write_buf, 1);
+
+	// bno_comres += bno055_set_operation_mode(BNO055_OPERATION_MODE_NDOF);
+
+	// delay(10);
+
+	// R       0
+	// W       61      0
+	// W       63      32
+	// W       62      0
+	// W       7       0
+	// W       63      0
+	// W       7       1
+	// R       8
+	// W       8       13
+	// W       7       0
+	// R       61
+	// W       7       1
+	// R       10
+	// W       10      56
+	// W       7       0
+	// R       61
+	// W       7       1
+	// R       9
+	// W       9       13
+	// W       7       0
+	// W       61      0
+	// W       61      12
+
+
+	uint8_t chip_id[1] = {0};
+	API_I2C_bus_read(bno_fd, 0, chip_id, 1);
+
+	API_I2C_bus_write8(bno_fd, 61, 0);
+	delay(30);
+	API_I2C_bus_write8(bno_fd, 63, 32); // SYS_TRIGGER bit 5: Reset
+	delay(700);
+	API_I2C_bus_write8(bno_fd, 62, 0); // PWR_MODE: Set power mode to 0 (Normal)
+	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
+	API_I2C_bus_write8(bno_fd, 63, 0); // Reset system triggers to 0
+	API_I2C_bus_write8(bno_fd, 7, 1); // Set page id to 1
+	API_I2C_bus_write8(bno_fd, 8, 13); // Set accel range 4G and bandwidth 62_5HZ
+	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
+	API_I2C_bus_write8(bno_fd, 7, 1); // Set page id to 1
+	API_I2C_bus_write8(bno_fd, 10, 56); // Gyro config
+	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
+	API_I2C_bus_write8(bno_fd, 7, 1); // Set page id to 1
+	API_I2C_bus_write8(bno_fd, 9, 13); // Mag config
+	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
+	delay(10);
+	API_I2C_bus_write8(bno_fd, 61, 0); // Enter config mode
+	delay(20);
+	API_I2C_bus_write8(bno_fd, 61, 12); // Enter NDOF operation mode
+	delay(10);
+
+	std::cout << "Init complete" << std::endl;
+}
+
+float Robot::get_heading() {
+	int16_t euler_data_h, euler_data_r, euler_data_p;
+	euler_data_h = euler_data_r = euler_data_p = 0;
+
+	double f_euler_data_h;
+	float fl_euler_data_h;
+
+	// bno_comres += bno055_read_euler_h(&euler_data_h);
+	// bno_comres += bno055_read_euler_r(&euler_data_r);
+	// bno_comres += bno055_read_euler_p(&euler_data_p);
+
+	//bno_comres = 0;
+	//auto start_time = std::chrono::high_resolution_clock::now();
+
+	//bno_comres += bno055_convert_double_euler_h_rad(&f_euler_data_h);
+	int16_t temp = 0;
+	API_I2C_bus_read(bno_fd, 26, (uint8_t*)&temp, 2);
+
+	fl_euler_data_h = (float)temp / 16.0f * PI / 180.0f;
+
+	//std::cout << fl_euler_data_h << std::endl;
+
+	//auto end_time = std::chrono::high_resolution_clock::now();
+
+	//std::cout << "Reading took " <<
+	//  std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms" << std::endl;
+
+	// bno_comres += bno055_convert_float_euler_r_rad(&f_euler_data_r);
+	// bno_comres += bno055_convert_float_euler_p_rad(&f_euler_data_p);
+
+	//std::cout << "X: " << std::to_string(rad_to_deg(f_euler_data_h)) << std::endl;
+	if (fl_euler_data_h < 0) return last_heading;
+	last_heading = fl_euler_data_h;
+
+	return fl_euler_data_h;
+}
+
+// void Robot::delay_c(uint32_t ms, int id) {
+//  if(!cams[id].cap.isOpened()) {
+//      delay(ms);
+//      return;
+//  }
+//  std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
+//  while(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start) < ms) {
+//      cams[cam_id].cap.grab();
+//  }
+// }
+
+int Robot::init_camera(const std::string& id, bool calibrated, int width, int height, int fps, const std::string& subtractive_mask_path) {
 	Camera cam(id, calibrated, width, height, fps);
 
 	if(strcmp(subtractive_mask_path.c_str(), "")) {
@@ -120,9 +314,19 @@ void Robot::stop_video(int cam_id) {
 	cams[cam_id].stop_video();
 }
 
-void Robot::m(int8_t left, int8_t right, uint16_t duration, uint8_t brake_duty_cycle) {
+void Robot::m(int8_t left, int8_t right, int32_t duration, uint8_t brake_duty_cycle) {
+	// WARNING: left and rigth motor swapped
+	if(block_m) return;
+
 	left = clip(left, -100, 100);
 	right = clip(right, -100, 100);
+
+	// If duration is less than zero, flip motor pins
+	if(duration < 0) {
+		duration *= -1;
+		left *= -1;
+		right *= -1;
+	}
 
 	io_mutex.lock();
 
@@ -143,12 +347,17 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration, uint8_t brake_duty_c
 	// Wait for duration and stop
 	if(duration != 0) {
 		//std::this_thread::sleep_for(std::chrono::milliseconds(duration));
-		delay_c(duration, this->front_cam_id);
+		//delay_c(duration, this->front_cam_id);
+		delay(duration);
 		io_mutex.unlock();
 		stop(brake_duty_cycle);
 		return;
 	}
 	io_mutex.unlock();
+}
+
+void Robot::block(bool val) {
+	block_m = val;
 }
 
 void Robot::stop(uint8_t brake_duty_cycle) {
@@ -161,6 +370,183 @@ void Robot::stop(uint8_t brake_duty_cycle) {
 	softPwmWrite(M1_E, brake_duty_cycle);
 	softPwmWrite(M2_E, brake_duty_cycle);
 	io_mutex.unlock();
+}
+
+void Robot::turn(float rad) {
+	if(block_m) return;
+
+	//m(100, -100, deg * TURN_DURATION_FACTOR);
+	float start_heading = get_heading();
+	float to_turn = std::abs(rad);
+
+	bool clockwise = rad > 0.0;
+
+	if(to_turn < 0.3) {
+		m(clockwise ? -30 : 30, clockwise ? 30 : -30, TURN_DURATION_FACTOR * std::abs(rad_to_deg(rad)));
+		return;
+	}
+
+	auto start_time = std::chrono::high_resolution_clock::now();
+	uint32_t min_time = TURN_MIN_DURATION_FACTOR * std::abs(rad);
+	uint32_t max_time = TURN_MAX_DURATION_FACTOR * std::abs(rad);
+
+	//std::cout << to_turn << " " << min_time << " " << max_time << std::endl;
+	m(clockwise ? -30 : 30, clockwise ? 30 : -30);
+	while(1) {
+		float new_heading;
+		do {
+			new_heading = get_heading();
+		} while(new_heading > RAD_360 || new_heading < 0.0);
+		// std::cout << "New heading " << rad_to_deg(new_heading) << std::endl;
+
+		if(clockwise) {
+			if(new_heading < start_heading - RAD_90) start_heading -= RAD_360;
+		} else {
+			if(new_heading > start_heading + RAD_90) start_heading += RAD_360;
+		}
+		float d_heading = new_heading - start_heading;
+		//std::cout << rad_to_deg(new_heading) << " " << rad_to_deg(d_heading) << std::endl;
+		//std::cout << rad_to_deg(new_heading) << " - " << rad_to_deg(start_heading) << " = " << rad_to_deg(std::abs(d_heading)) << std::endl;
+
+		uint32_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
+
+		if((ms > min_time && std::abs(d_heading) >= to_turn - deg_to_rad(10.0f))) break;
+	}
+	stop();
+
+	//std::cout << "Accuracy: " << rad_to_deg(std::abs(get_heading() - start_heading)) << "°" << std::endl;
+}
+
+// dir: true = clockwise, false = counterclockwise
+void Robot::turn_to_heading_last(float heading, float speed, bool dir) {
+	float last_heading = get_heading();
+	float curr_heading = last_heading;
+
+	const float CORRECTION_DURATION = 70;
+
+	while(1) {
+		curr_heading = get_heading();
+		if(std::abs(curr_heading - last_heading) > RAD_180) break;
+		last_heading = curr_heading;
+		if(dir) {
+			if(curr_heading >= heading) break;
+			m(-speed, speed);
+		} else {
+			if(curr_heading <= heading) break;
+			m(speed, -speed);
+		}
+	}
+
+	if(dir) {
+		m(50, -50, CORRECTION_DURATION);
+	} else {
+		m(-50, 50, CORRECTION_DURATION);
+	}
+}
+
+void Robot::turn_to_heading(float heading) {
+	// TODO: recursive
+
+	float curr_heading = get_heading();
+	std::cout << "pHeading: " << heading << "   curr_heading: " << curr_heading << std::endl;
+
+	if (heading == 0) heading = 0.01f;
+	if (heading == curr_heading) turn(deg_to_rad(3));
+	int SPEED = 30;
+	int CORRECTION = 50; // nice comment
+
+	if (curr_heading < heading && heading - PI < curr_heading) {
+		std::cout << "Case 1" << std::endl;
+		turn_to_heading_last(heading, SPEED, true);
+		//while (get_heading() < heading) m(-SPEED, SPEED);
+		//m(50, -50, CORRECTION);
+	} 
+	else if (curr_heading < heading && heading - PI > curr_heading) {
+		std::cout << "Case 2" << std::endl;
+		while (get_heading() > 0.15) m(SPEED, -SPEED); // turn to ~0°
+		turn(-0.2); // turn over 0° threshold
+		//while (get_heading() > heading) m(SPEED, -SPEED);
+		//m(-50, 50, CORRECTION);
+		turn_to_heading_last(heading, SPEED, false);
+	}
+	else if (curr_heading > heading && heading + PI < curr_heading) {
+		std::cout << "Case 3" << std::endl;
+		while (get_heading() < 6.13) m(-SPEED, SPEED); // turn to ~0°
+		turn(0.2); // turn over 0° threshold
+		//while (get_heading() < heading) m(-SPEED, SPEED);
+		//m(50, -50, CORRECTION);
+		turn_to_heading_last(heading, SPEED, true);
+	}
+	else if (curr_heading > heading && heading + PI > curr_heading) {
+		std::cout << "Case 4" << std::endl;
+		/*float last_heading = get_heading();
+		float curr_heading = get_heading();
+		while (curr_heading > heading) {
+			m(SPEED, -SPEED);
+			curr_heading = get_heading();
+			if(std::abs(curr_heading - last_heading) > RAD_180) break;
+			last_heading = curr_heading;
+		}
+		m(-50, 50, CORRECTION);*/
+		turn_to_heading_last(heading, SPEED, false);
+	} else {
+		std::cout << "turn_to_heading: UNKNOWN CASE, pHeading: " << heading << "   curr_heading: " << curr_heading << std::endl;
+	}
+
+	stop();
+}
+
+void Robot::straight(int8_t speed, uint32_t duration) {
+	auto start_time = std::chrono::high_resolution_clock::now();
+	auto last_update = std::chrono::high_resolution_clock::now();
+
+	float start_heading;
+	do {
+		start_heading = get_heading();
+	} while(start_heading > RAD_360 || start_heading < 0.0f);
+
+	std::cout << rad_to_deg(start_heading) << std::endl;
+
+	float integral = 0.0f;
+
+	const float I_FACTOR = 0.1f;
+	const float I_DAMPEN_FACTOR = 0.75f;
+	const float P_FACTOR = 200.0f;
+
+	float last_error = 0.0f;
+
+	while(1) {
+		auto now = std::chrono::high_resolution_clock::now();
+		uint32_t t = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count();
+
+		float dt = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update).count() / 1000000.0f;
+
+		if(duration != 0 && t >= duration) {
+			break;
+		}
+
+		float error = get_heading() - start_heading;
+		if(error > RAD_180) error -= RAD_360;
+		if(error < -RAD_180) error += RAD_360;
+
+		std::cout << "E\t" << rad_to_deg(error) << "\r";
+
+		if((error < 0 && last_error > 0) || (error > 0 && last_error < 0)) {
+			// Sign change, reset integral to prevent overshooting
+			integral = 0.0f;
+		}
+		last_error = error;
+
+		//std::cout << "E\t" << error << std::endl;
+
+		integral = integral * I_DAMPEN_FACTOR + error * dt;
+		float correction = P_FACTOR * error + I_FACTOR * integral;
+
+		m((int8_t)clip(speed - correction, -100.0f, 100.0f), (int8_t)clip(speed + correction, -100.0f, 100.0f));
+	}
+	std::cout << std::endl;
+	stop();
+	delay(20);
 }
 
 uint8_t Robot::encoder_value_a() {
@@ -240,19 +626,41 @@ void Robot::asc() {
 	}
 }
 
-void Robot::servo(uint8_t pin, int8_t angle, bool wait) {
+void Robot::servo(uint8_t pin, float angle, uint16_t d) {
 	io_mutex.lock();
+	attach_servo(pin);
+	
+	write_servo(pin, angle);
+
+	if(d != 0) delay(d);
+	release_servo(pin);
+	io_mutex.unlock();
+}
+
+void Robot::attach_servo(uint8_t pin) {
+	if(softPwmCreate(pin, 0, 200)) {
+		std::cout << "Error setting up PWM for pin " << pin << std::endl;
+		exit(ERRCODE_BOT_SETUP_PWM);
+	}
+}
+
+void Robot::write_servo(uint8_t pin, float angle) {
 	softPwmWrite(pin, map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE,
 		SERVO_MIN_PULSE, SERVO_MAX_PULSE) / 100.0f);
-	io_mutex.unlock();
-	if(wait) std::this_thread::sleep_for(std::chrono::milliseconds(10 * angle));
+}
+
+void Robot::release_servo(uint8_t pin) {
+	softPwmStop(pin);
 }
 
 void Robot::beep(uint16_t ms, uint8_t pin) {
 	digitalWrite(pin, HIGH);
 	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 	digitalWrite(pin, LOW);
+}
 
+void Robot::set(uint8_t pin, bool value) {
+	digitalWrite(pin, value ? HIGH : LOW);
 }
 
 bool Robot::button(uint8_t pin) {
@@ -274,42 +682,54 @@ void Robot::button_wait(uint8_t pin, bool state, uint32_t timeout) {
 	io_mutex.unlock();
 }
 
-float Robot::distance(uint8_t echo, uint8_t trig, uint16_t iterations, uint32_t timeout) {
-	float timeElapsed = 0.0f;
-	dist_mutex.lock();
-	for(uint16_t i = 0; i < iterations; i++) {
-		digitalWrite(trig, HIGH);
-		std::this_thread::sleep_for(std::chrono::microseconds(100));
-		digitalWrite(trig, LOW);
+float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
+	timeout = timeout * 1000; // convert msec to usec for micros() function
+	digitalWrite(trig, HIGH);
+	delayMicroseconds(10);
+	digitalWrite(trig, LOW);
 
-		std::chrono::time_point<std::chrono::high_resolution_clock> signal_start, signal_stop;
-		auto start_time = std::chrono::high_resolution_clock::now();
+	long start_time = micros();
 
-		while (digitalRead(echo) == LOW) {
-			signal_start = std::chrono::high_resolution_clock::now();
+	while (digitalRead(echo) == LOW && micros() - start_time < timeout);
+	volatile long startTimeUsec = micros();
+	while (digitalRead(echo) == HIGH);
+	volatile long endTimeUsec = micros();
 
-			if(std::chrono::duration_cast<std::chrono::milliseconds>(
-				std::chrono::high_resolution_clock::now() - start_time).count() > timeout) {
-				// Timeout
-				goto cnt;
-			}
-		}
+	long travelTimeUsec = endTimeUsec - startTimeUsec;
 
-		while (digitalRead(echo) == HIGH) {
-			signal_stop = std::chrono::high_resolution_clock::now();
+	// convert distance to cm, multiply with speed of sound (0,0343 cm/us) and divide by 2 to get one-way distance
+	return ((travelTimeUsec / 10000.0f) * 340.29f * 0.5f);
+}
 
-			if(std::chrono::duration_cast<std::chrono::milliseconds>(
-				std::chrono::high_resolution_clock::now() - start_time).count() > timeout) {
-				// Timeout
-				goto cnt;
-			}
-		}
+float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, float remove_percentage, uint32_t timeout_single_measurement, uint32_t timeout) {
+	float arr[measurements];
 
-		timeElapsed += std::chrono::duration_cast<std::chrono::microseconds>(signal_stop - signal_start).count();
-		if(i + 1 != iterations) delay(5);
-		cnt:;
+	// take measurements
+	for(int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
+		float dist = single_distance(echo, trig, timeout_single_measurement);
+		//std::cout << i << ": "<< dist << std::endl;
+		arr[i] = dist;
+		delay(5);
 	}
-	dist_mutex.unlock();
-	// Multiply with speed of sound (0,0343 cm/us) and divide by 2 to get one-way distance
-	return timeElapsed / (float)iterations * 0.0343f * 0.5f;
+
+	// calculate avg after removing n percent of exteme measurements
+	int arr_len = sizeof(arr) / sizeof(arr[0]);
+
+	std::sort(arr, arr + arr_len);
+	int kthPercent = (arr_len * remove_percentage);
+	float sum = 0;
+
+	for (int i = 0; i < arr_len; i++)
+		if (i >= kthPercent && i < (arr_len - kthPercent))
+			sum += arr[i];
+
+	float avg = sum / (arr_len - 2 * kthPercent);
+
+	//std::cout << "Avg: "<< avg << std::endl;
+	delay(5);
+	return avg;
+}
+
+void Robot::set_gpio(int pin, bool state) {
+	digitalWrite(pin, state);
 }

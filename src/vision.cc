@@ -5,13 +5,13 @@
 #include "errcodes.h"
 #include "utils.h"
 
-Camera::Camera(int hardware_id, bool calibrated, int width, int height, int fps) {
+Camera::Camera(const std::string& hardware_id, bool calibrated, int width, int height, int fps) {
 	this->hardware_id = hardware_id;
 	this->fps = fps;
 	this->image_size = cv::Size(width, height);
 
 	if(calibrated) {
-		calibration_from_file("cc_" + std::to_string(hardware_id) + ".bin");
+		calibration_from_file("cc_" + hardware_id + ".bin");
 		this->new_camera_matrix = cv::getOptimalNewCameraMatrix(
 			this->camera_matrix, this->distortion_matrix, this->image_size, 1.0);
 		this->calibrated = true;
@@ -47,19 +47,24 @@ void Camera::calibration_from_file(const std::string& file_name) {
 }
 
 void Camera::load_subtractive_mask(const std::string& file_name) {
-	this->subtractive_mask = cv::imread(file_name);
-	has_subtractive_mask = true;
+	this->subtractive_mask = cv::imread(file_name, cv::IMREAD_COLOR);
+	if(this->subtractive_mask.empty()) {
+		std::cout << "Failed to load subtractive mask" << std::endl;
+		has_subtractive_mask = false;
+	} else {
+		has_subtractive_mask = true;
+	}
 }
 
 void Camera::open_video() {
-	this->cap.open(hardware_id);
+	this->cap.open(hardware_id, cv::CAP_V4L2);
 	this->cap.set(cv::CAP_PROP_FRAME_WIDTH, std::max(320, this->image_size.width));
 	this->cap.set(cv::CAP_PROP_FRAME_HEIGHT, std::max(192, this->image_size.height));
 	this->cap.set(cv::CAP_PROP_FPS, this->fps);
 	this->cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 
 	if(!this->cap.isOpened()) {
-		std::cerr << "Could not open camera " << std::to_string(this->hardware_id) << std::endl;
+		std::cerr << "Could not open camera " << this->hardware_id << std::endl;
 		exit(ERRCODE_CAM_SETUP);
 	}
 }

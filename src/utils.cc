@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include <opencv2/opencv.hpp>
+#include <string>
 
 float clip(float n, float lower, float upper) {
 	return std::max(lower, std::min(n, upper));
@@ -79,4 +80,34 @@ void clipped_difference(cv::Mat a, cv::Mat b, cv::Mat out) {
 			out_ptr[j] = (uint8_t)diff;
 		}
 	}
+}
+
+cv::Vec3b average_color(cv::Mat in) {
+	CV_Assert(in.depth() == CV_8U);
+	uint8_t* ptr;
+	float total_b = 0;
+	float total_g = 0;
+	float total_r = 0;
+
+	int i, j;
+	for(i = 0; i < in.rows; ++i) {
+		ptr = in.ptr<uint8_t>(i);
+		for(j = 0; j < in.cols; ++j) {
+			total_b += (float)ptr[j];
+			total_g += (float)ptr[j + 1];
+			total_r += (float)ptr[j + 2];
+		}
+	}
+	float size = in.rows * in.cols;
+	total_b /= size;
+	total_g /= size;
+	total_r /= size;
+
+	return cv::Vec3b((uint8_t)total_b, (uint8_t)total_g, (uint8_t)total_r);
+}
+
+void save_img(std::string path, cv::Mat frame) {
+	auto millisecondsUTC = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	cv::imwrite(path + std::to_string(millisecondsUTC) + ".png", frame);
+
 }

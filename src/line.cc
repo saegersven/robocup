@@ -1,5 +1,5 @@
 #include "line.h"
-
+#include<cstdlib>
 #include <algorithm>
 #include <vector>
 #include <limits>
@@ -10,16 +10,22 @@
 
 #include "robot.h"
 #include "utils.h"
+#include "rescue.h"
 
 bool is_black(uint8_t b, uint8_t g, uint8_t r) {
-	return (uint16_t)b + (uint16_t)g + (uint16_t)r < 300;
+	return (uint16_t)b + (uint16_t)g + (uint16_t)r < BLACK_MAX_SUM;
 }
 
 bool is_green(uint8_t b, uint8_t g, uint8_t r) {
-	return (float)g / ((float)b + (float)r) > 0.5f;
+	return 1.0f / GREEN_RATIO_THRESHOLD * g > b + r && g > GREEN_MIN_VALUE;
 }
 
-Line::Line(int front_cam_id, std::shared_ptr<Robot> robot) : obstacle_active(0), running(false) {
+bool is_blue(uint8_t b, uint8_t g, uint8_t r) {
+	return 1.0f / BLUE_RATIO_THRESHOLD * b > g + r && b > BLUE_MIN_VALUE;
+}
+
+Line::Line(int front_cam_id, std::shared_ptr<Robot> robot)
+	: obstacle_active(0), running(false), last_frame_t(std::chrono::high_resolution_clock::now()) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
 
@@ -33,8 +39,13 @@ void Line::start() {
 
 	running = true;
 
+	line_angle_integral = 0.0f;
+	last_update = std::chrono::high_resolution_clock::now();
+
 	std::thread obstacle_thread([this]{obstacle();});
 	obstacle_thread.detach();
+	obstacle_active = 0;
+	micros_start = micros();
 }
 
 void Line::stop() {
@@ -47,30 +58,135 @@ void Line::stop() {
 	running = false;
 }
 
-bool Line::check_silver(cv::Mat& frame) {
-	cv::Mat a = frame(cv::Range(SILVER_Y), cv::Range(SILVER_X));
-
-	// Calculate difference between frame cutout
-	int rows = a.rows;
-	int cols = a.cols;
-
-	uint32_t total_difference = 0;
-
-	uint8_t* p;
-	uint8_t* p_b;
+float Line::get_redness(cv::Mat& in) {
+	CV_Assert(in.depth() == CV_8U);
+	uint8_t* ptr;
+	float total_b = 0;
+	float total_g = 0;
+	float total_r = 0;
 
 	int i, j;
-	for(i = 0; i < rows; ++i) {
-		p = a.ptr<uint8_t>(i);
-		p_b = average_silver.ptr<uint8_t>(i);
-		for(j = 0; j < cols; ++j) {
-			total_difference += std::abs((int16_t)p[j + 0] - p_b[j + 0])
-				+ std::abs((int16_t)p[j + 1] - p_b[j + 2])
-				+ std::abs((int16_t)p[j + 1] - p_b[j + 2]);
+	for(i = 0; i < in.rows; ++i) {
+		ptr = in.ptr<uint8_t>(i);
+		for(j = 0; j < in.cols; ++j) {
+			float r = (float)ptr[j + 2];
+			if(r > 100 && r < 210) {
+				total_b += (float)ptr[j];
+				total_g += (float)ptr[j + 1];
+				total_r += r;
+			}
 		}
 	}
 
-	return total_difference < 25'000;
+	return total_r / (total_g + total_b);
+}
+
+bool Line::check_silver(cv::Mat& frame) {
+	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
+
+	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
+	//return false;
+
+	uint8_t* ptr;
+	uint8_t* ptr_s;
+
+	float dot_prod = 0.0f;
+	float mag_s = 0.0f;
+	float mag = 0.0f;
+
+	for(int i = 0; i < roi.rows; ++i) {
+		ptr = roi.ptr<uint8_t>(i);
+		ptr_s = average_silver.ptr<uint8_t>(i);
+		for(int j = 0; j < roi.cols; ++j) {
+			for(int k = 0; k < 3; ++k) {
+				float s = ptr_s[j + k];
+				float c = ptr[j + k];
+				dot_prod += s * c;
+				mag_s += s * s;
+				mag += c * c;
+			}
+		}
+	}
+	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
+	std::cout << dot_prod << std::endl;
+
+	if (dot_prod > 0.95f) {		
+		#ifdef DEBUG
+			save_img("/home/pi/Desktop/silver_rois/", roi);
+		#endif
+		return true;
+	}
+	return false;
+/*
+	uint8_t* ptr;
+	uint8_t* ptr_s;
+
+	float value_diff = 0.0f;
+
+	int i, j, k;
+	for(i = 0; i < roi.rows; ++i) {
+		ptr = roi.ptr<uint8_t>(i);
+		ptr_s = average_silver.ptr<uint8_t>(i);
+		for(j = 0; j < roi.cols; ++j) {
+			for(k = 0; k < 3; ++k) {
+				value_diff += std::abs((float)ptr_s[j + k] - ptr[j + k]);	
+			}
+		}
+	}
+
+	value_diff /= (roi.rows * roi.cols);
+	std::cout << value_diff << std::endl;
+
+	if(value_diff < 130) {
+		robot->beep(300);
+	}
+
+	return value_diff < 100;
+
+	// if(micros() - micros_start < 60000000) return false; // cant't detect silver before 1 minute passed
+
+	const float MINIMUM_RATIO = 0.57; // Ratio of red to sum of blue and green
+	const float MINIMUM_VALUE = 100; // Note: This is the total, not the average
+	const float CENTER_MINIMUM_VALUE = 180;
+
+	// Left red dot
+	cv::Mat roi_l = frame(cv::Range(28, 39), cv::Range(21, 31));
+	cv::Vec3b col_l = average_color(roi_l);
+	float r_l = (float)col_l[2] / (col_l[1] + col_l[0]);
+	float red_l = get_redness(roi_l);
+	float v_l = (float)col_l[2] + col_l[1] + col_l[0];
+
+	//if(r_l < MINIMUM_RATIO || v_l < MINIMUM_VALUE) return false;
+
+	std::cout << "Right dot" << std::endl;
+	// Right red dot
+	cv::Mat roi_r = frame(cv::Range(28, 39), cv::Range(51, 61));
+	cv::Vec3b col_r = average_color(roi_r);
+	float r_r = (float)col_r[2] / (col_r[1] + col_r[0]);
+	float red_r = get_redness(roi_r);
+	float v_r = (float)col_r[2] + col_r[1] + col_r[0];
+
+	cv::imshow("roi_r", roi_r);
+
+	//if(r_r < MINIMUM_RATIO || v_r < MINIMUM_VALUE) return false;
+
+	/*std::cout << "Distance" << std::endl;
+	// Distance
+	float dist = robot->distance(DIST_1, 2, 500);
+	std::cout << dist << std::endl;
+	if(dist < 90.0f || dist > 130.0f) return false;
+
+	std::cout << "Center" << std::endl;
+	// Center
+	cv::Mat roi_c = frame(cv::Range(28, 39), cv::Range(30, 51));
+	cv::Vec3b col_c = average_color(roi_c);
+	float v_c = (float)col_c[2] + col_c[1] + col_c[0];
+
+	std::cout << red_l << "\t" << red_r << std::endl;
+	return false;
+	//return v_c > CENTER_MINIMUM_VALUE;
+<<<<<<< HEAD
+	*/
 }
 
 bool Line::abort_obstacle(cv::Mat frame) {
@@ -93,96 +209,186 @@ bool Line::abort_obstacle(cv::Mat frame) {
 // ASYNC
 void Line::obstacle() {
 	while(running) {
-		if(robot->distance(DIST_1, 1) < 7.0f && robot->distance(DIST_1, 20) < 9.0f) {
-			std::cout << "Obstacle" << std::endl;
-			obstacle_active = 1;
+		if(obstacle_active != 1) continue;
+		if(robot->single_distance(DIST_1, 1000) < 9.0f) {
+			robot->set_gpio(LED_1, true);
+			robot->stop();
+			robot->block();
+			delay(10);
+			if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 3000) < 9.5f) {
+				if(robot->distance_avg(DIST_1, 30, 0.2f, 500, 10000) < 9.5f) {				
+					std::cout << "Obstacle" << std::endl;
+					obstacle_active = 2;
+				}
+			}
+			robot->set_gpio(LED_1, false);
+			robot->block(false);
 		}
 	}
 }
 
-bool Line::line(cv::Mat& frame) {
-	// Check if obstacle thread has notified main thread
-	if(obstacle_active == 1) {
-		robot->beep(300, LED_1);
-			
-		robot->m(-80, -80, 150);
+bool Line::obstacle_straight_line(uint32_t duration) {
+	auto start_t = std::chrono::high_resolution_clock::now();
 
-		robot->m(-80, 80, 270);
-		robot->m(80, 80, 200);
+	robot->stop_video(front_cam_id);
+	robot->start_video(front_cam_id);
 
-		obstacle_active = 2;
-		robot->stop_video(front_cam_id);
-		robot->start_video(front_cam_id);
-		delay(500);
-	} else if(obstacle_active == 2) {
-		if(!abort_obstacle(frame)) {
-			robot->m(40, 15, 30);
-			robot->m(50, -20, 30);
-			delay(50);
-		} else {
+	while(1) {
+		robot->m(80, 80);
+
+		cv::Mat frame = robot->capture(front_cam_id);
+		cv::imshow("Debug", frame);
+		cv::waitKey(1);
+		cv::Mat roi = frame(cv::Range(26, 47), cv::Range(26, 55));
+		uint32_t roi_size = roi.cols * roi.rows;
+
+		uint32_t num_black = 0;
+		in_range(frame, &is_black, &num_black);
+
+		float p = (float)num_black / roi_size;
+		std::cout << p << std::endl;
+
+		if(p > 0.8f) {
+			// Abort
 			robot->stop();
-			robot->m(20, 20, 450);
-			robot->m(-20, 20, 500);
-			obstacle_active = 0;
+			return true;
 		}
+
+		auto now = std::chrono::high_resolution_clock::now();
+		uint32_t elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_t).count();
+		if(elapsed >= duration) return false;
+	}
+}
+
+bool Line::line(cv::Mat& frame) {
+	// save roi of frame for ml purposes	
+	#ifdef DEBUG
+   		if (micros() % 21 == 0) {
+			cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
+			save_img("/home/pi/Desktop/linefollowing_rois/", roi);	
+   		}
+	#endif
+
+	// Check if obstacle thread has notified main thread
+	if(obstacle_active == 2) {
+		robot->stop();
+		if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 5000) < 9.0f) {
+			std::cout << "Obstacle!" << std::endl;
+			robot->set_gpio(LED_2, true);				
+			robot->m(-80, -80, 100);
+
+			robot->turn(RAD_90);
+			robot->m(80, 80, 200);
+
+			robot->stop_video(front_cam_id);
+			delay(50);
+			robot->start_video(front_cam_id);
+
+			const uint32_t durations[] = {550, 1450, 1250, 1250, 450};
+
+			for(int i = 0; i < 42; ++i) {
+				if(obstacle_straight_line(durations[i])) break;
+
+				robot->stop_video(front_cam_id);
+				robot->turn(-RAD_90);
+				robot->start_video(front_cam_id);
+			}
+
+			robot->set_gpio(LED_2, false);
+			robot->m(-40, -40, 150);
+			robot->m(-40, 40, 250);
+			robot->m(80, 80, 350);
+			robot->m(-80, 80, 250);
+		}
+
+		obstacle_active = 0;
 	} else {
+		obstacle_active = 1;
+		auto start_t = std::chrono::high_resolution_clock::now();
+#ifdef DEBUG
+		debug_frame = frame.clone();
+#endif
+
 		cv::Mat black = in_range(frame, &is_black);
 
 		follow(frame, black);
 
-		uint8_t green_result = green(frame, black);
+		//rescue_kit(frame);
 
-		switch(green_result) {
-			default:
-				break;
-			case 1:
-				std::cout << "LEFT" << std::endl;
-#ifndef MOVEMENT_OFF
-				// Stop video before doing anything that causes a delay in frame retreival
-				robot->stop_video(front_cam_id);
-				robot->m(50, 50, 150);
-				robot->m(-50, 50, 300);
-				robot->start_video(front_cam_id);
-#endif
-				break;
-			case 2:
-				std::cout << "RIGHT" << std::endl;
-#ifndef MOVEMENT_OFF
-				robot->stop_video(front_cam_id);
-				robot->m(50, 50, 150);
-				robot->m(50, -50, 300);
-				robot->m(50, 50, 150);
-				robot->start_video(front_cam_id);
-#endif
-				break;
-			case 3:
-				std::cout << "DEAD-END" << std::endl;
-#ifndef MOVEMENT_OFF
-				robot->stop_video(front_cam_id);
-				robot->m(50, 50, 150);
-				robot->m(50, -50, 600);
-				robot->m(50, 50, 150);
-				robot->start_video(front_cam_id);
-#endif
-				break;
-		}
-
+		/*
+		// capture silver ml data:
+		green(frame, black);
+		if (check_silver(frame)) {
+			robot->m(-50, -50, 50);
+  			int max = 5;
+   			srand(time(0));
+   			if ((rand()%max) % 2) {
+   				robot->turn(deg_to_rad(rand()%max));
+   			} else {   				
+   				robot->turn(-deg_to_rad(rand()%max));
+   			}
+		} else {
+			robot->m(50, 50, 10);
+		}*/
+		
 		if(check_silver(frame)) {
+			float dist = robot->distance_avg(DIST_2, 20, 0.2f);
+			std::cout << "Distance: " << dist << std::endl;
+
+			// if ((dist > 80.0 && dist < 100.0) || (dist > 110.0 && dist < 130.0))
+			std::cout << "Silver" << std::endl;
+			#ifdef DEBUG
+				save_img("/home/pi/Desktop/silver_images/", frame);
+			#endif
+			std::cout << "cam detected silver!\nchecking distance..." << std::endl;
+			robot->m(100, 100, 750);
 			robot->stop();
-			std::cout << "SILVER" << std::endl;
-			robot->stop_video(front_cam_id);
-			robot->m(60, -60, 600);
-			delay(200);
-			robot->m(20, 20, 300);
-			robot->start_video(front_cam_id);
-			delay(200);
-			return true; // Return true when silver is detected
+			delay(100);
+
+			float dist_front = robot->distance_avg(DIST_1, 100, 0.3f);
+			float dist_side = robot->distance_avg(DIST_2, 100, 0.3f);
+
+			std::cout << "Front distance: " << dist_front << std::endl;
+			std::cout << "Side distance: " << dist_side << std::endl;
+
+
+			// check front distance < foo and side distance < foo and black pixels in frame < foo
+			// increase rescue_cnt for each
+			// #redundancy
+			int rescue_cnt = 0;
+			if (dist_front > 50.0f && dist_front < 130.0f) rescue_cnt++;
+			if (dist_side > 3.0f && dist_side < 120.0f) rescue_cnt++;
+			if (black_pixel_threshold_under(1000)) rescue_cnt++;
+			
+			std::cout << "Rescue_cnt: " << rescue_cnt << std::endl;
+
+			if (rescue_cnt >= 2) {
+				return true;
+			} else {
+				robot->m(-100, -100, 1350); // return to previous position (a bit further to avoid another false positive)
+			}
 		}
-		return false;
 	}
+#ifdef DEBUG
+#ifdef DEBUG_RESIZE
+	cv::resize(debug_frame, debug_frame, cv::Size(), 4.00, 4.00);
+#endif
+	cv::imshow("Debug", debug_frame);
+	cv::waitKey(1);
+#endif
 
 	cv::imshow("Frame", frame);
 	cv::waitKey(1);
+
+#ifdef FPS_COUNTER
+	auto end_t = std::chrono::high_resolution_clock::now();
+	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(end_t - last_frame_t).count();
+	float l_fps = 1.0 / ((float)us / 1'000'000);
+	fps = fps * 0.9f + l_fps * 0.1f;
+	std::cout << fps << " fps, " << us << "us" << std::endl;
+	last_frame_t = end_t;
+#endif
+	return false;
 }
 
 float Line::difference_weight(float x) {
@@ -196,6 +402,7 @@ float Line::distance_weight(float x) {
 float Line::circular_line(cv::Mat& in) {
 	float weighted_line_angle = 0.0f;
 	float total_weight = 0.0f;
+
 	uint32_t num_angles = 0;
 
 	//std::vector<std::pair<float, float>> line_angles; // Map of angle and distance
@@ -213,9 +420,9 @@ float Line::circular_line(cv::Mat& in) {
 		p_dw = distance_weight_map.ptr<uint8_t>(i);
 		for(j = 0; j < in.cols; ++j) {
 			if(p[j]) {
-				// Put point into array based on distance to center
 				float x = (float)j;
 				float y = (float)i;
+
 				uint8_t dw = p_dw[j];
 				if(dw) {
 					++num_angles;
@@ -223,9 +430,8 @@ float Line::circular_line(cv::Mat& in) {
 					float pixel_distance_weight = dw / 255.0f;
 					float angle = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
 					float angle_difference_weight = difference_weight((angle - last_line_angle) / PI * 2.0f);
-					//float angle_distance_weight = distance_weight(map(distance, MINIMUM_DISTANCE, MAXIMUM_DISTANCE, 0.0f, 1.0f));
-
-					average_line_angle += angle_difference_weight * pixel_distance_weight * angle;
+					
+					weighted_line_angle += angle_difference_weight * pixel_distance_weight * angle;
 					total_weight += angle_difference_weight * pixel_distance_weight;
 				}
 			}
@@ -242,9 +448,6 @@ float Line::circular_line(cv::Mat& in) {
 }
 
 void Line::follow(cv::Mat& frame, cv::Mat black) {
-#ifdef DEBUG
-	cv::Mat debug = frame.clone();
-#endif
 	//std::cout << "Follow" << std::endl;
 
 	//cv::Mat black = in_range_black(frame);
@@ -256,60 +459,97 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 	last_line_angle = line_angle;
 
 #ifdef DEBUG
-	cv::Point center(debug.cols / 2, debug.rows);
+	cv::Point center(debug_frame.cols / 2, debug_frame.rows);
 
-	cv::circle(debug, center, MINIMUM_DISTANCE, cv::Scalar(0, 255, 0), 2);
-	cv::circle(debug, center, MAXIMUM_DISTANCE, cv::Scalar(0, 255, 0), 2);
+	cv::circle(debug_frame, center, MINIMUM_DISTANCE, cv::Scalar(0, 255, 0), 2);
+	cv::circle(debug_frame, center, MAXIMUM_DISTANCE, cv::Scalar(0, 255, 0), 2);
 
-	cv::line(debug,
+	cv::line(debug_frame,
 		cv::Point(std::sin(line_angle) * MINIMUM_DISTANCE, -std::cos(line_angle) * MINIMUM_DISTANCE) + center,
 		cv::Point(std::sin(line_angle) * MAXIMUM_DISTANCE, -std::cos(line_angle) * MAXIMUM_DISTANCE) + center,
 		cv::Scalar(0, 255, 0), 2
 		);
-
-	cv::imshow("Debug", debug);
-	cv::waitKey(1);
 #endif
 
-	int16_t error = line_angle * FOLLOW_HORIZONTAL_SENSITIVITY;
+	// auto now = std::chrono::high_resolution_clock::now();
+	// float dt = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update).count() / 1000000.0f;
+	// last_update = now;
+
+	// this->line_angle_integral = line_angle_integral * FOLLOW_LAST_I_FACTOR + line_angle * dt;
+
+	int16_t error = line_angle * FOLLOW_P_FACTOR;
+	/* + line_angle_integral * FOLLOW_I_FACTOR; */
 
 #ifndef MOVEMENT_OFF
-	robot->m(FOLLOW_MOTOR_SPEED + error, FOLLOW_MOTOR_SPEED - error);
+	robot->m(FOLLOW_MOTOR_SPEED - error, FOLLOW_MOTOR_SPEED + error);
 #endif
 }
 
-std::vector<cv::Point> Line::find_green_group_centers(cv::Mat frame, cv::Mat& green) {
-	std::vector<cv::Point> groups;
+void Line::add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y) {
+	int col_limit = ir.cols - 1;
+	int row_limit = ir.rows - 1;
+
+	for(int y = -1; y <= 1; ++y) {
+		int y_index = y_pos + y;
+
+		uint8_t* p = ir.ptr<uint8_t>(y_index);
+
+		for(int x = -1; x <= 1; ++x) {
+			if(y == 0 && x == 0) continue;
+
+			int x_index = x_pos + x;
+
+			if(p[x_index] == 0xFF) {
+				p[x_index] = 0x7F;
+				center_x += (float)x_index;
+				center_y += (float)y_index;
+				++num_pixels;
+
+				if(x_index > 0 && x_index < col_limit && y_index > 0 && y_index < row_limit)
+					add_to_group_center(x_index, y_index, ir, num_pixels, center_x, center_y);
+			}
+		}
+	}
+}
+
+std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {
+	std::vector<Group> groups;
 
 	uint32_t num_pixels = 0;
-	green = in_range(frame, &is_green, &num_pixels);
-#ifdef DEBUG
-	cv::imshow("Green", green);
-#endif
+	ir = in_range(frame, f, &num_pixels);
 
-	if(num_pixels < 50) return groups; // Save some time by not calculating contours
+	if(num_pixels < 50) return groups;
 
-	std::vector<std::vector<cv::Point>> contours;
-	std::vector<cv::Vec4i> hierarchy;
-	cv::findContours(green, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+	for(int y = 0; y < ir.rows; ++y) {
+		uint8_t* p = ir.ptr<uint8_t>(y);
+		for(int x = 0; x < ir.cols; ++x) {
+			// Don't check for non-zero, as found pixels are set to 0xFE instead
+			// so information does not get lost, when using matrix later,
+			// check for non-zero pixels
+			if(p[x] == 0xFF) {
+				//std::cout << "Creating group at " << x << ", " << y << std::endl;
+				uint32_t num_group_pixels = 0;
+				float group_center_x = 0.0f;
+				float group_center_y = 0.0f;
+				add_to_group_center(x, y, ir, num_group_pixels, group_center_x, group_center_y);
 
-	for(int i = 0; i < contours.size(); i++) {
-		cv::RotatedRect bounding_rect = cv::minAreaRect(contours[i]);
-
-		float size = bounding_rect.size.width * bounding_rect.size.height;
-		if(size > 100.0f) {
-			groups.push_back(bounding_rect.center);
+				if(num_group_pixels > 100) {
+					group_center_x /= num_group_pixels;
+					group_center_y /= num_group_pixels;
+					groups.push_back({group_center_x, group_center_y, num_group_pixels});
+				}
+			}
 		}
 	}
 
 	return groups;
 }
 
-uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
+uint8_t Line::green_direction(cv::Mat& frame, cv::Mat& black, float& global_average_x, float& global_average_y) {
 	uint8_t green_mask = 0;
 
 	cv::Mat green;
-	std::vector<cv::Point> groups = find_green_group_centers(frame, green);
+	std::vector<Group> groups = find_groups(frame, green, &is_green);
 
 	const int cut_width = 30;
 	const int cut_height = 30;
@@ -318,22 +558,35 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 	// of a dead-end or late evaluation of green points behind a line, when the lower line is
 	// already out of the frame
 	for(int i = 0; i < groups.size(); ++i) {
-		if(groups[i].y < 20) return 0;
-		if(groups[i].y > 35) return 0; 
+		if(groups[i].y < 10) return 0;
+		if(groups[i].y > 35) return 0;
+		//if(groups[i].x < 8) return 0;
+		//if(groups[i].x > frame.cols - 8) return 0;
 	}
+
+	global_average_x = 0.0f;
+	global_average_y = 0.0f;
+	uint8_t num_green_points = 0; // Amount of green points below the line
+
+	if(groups.size() > 0) {
+		std::cout << std::to_string(groups.size()) << " ---" << std::endl;
+	}
+
+	std::vector<uint8_t> decisions(groups.size());
 
 	// Cut out part of the black matrix around the group centers
 	for(int i = 0; i < groups.size(); ++i) {
-		cv::Range x_range = cv::Range(groups[i].x - cut_width / 2, groups[i].x + cut_width / 2);
-		if(x_range.start < 0) x_range.start = 0;
-		if(x_range.end > black.size[1]) x_range.end = black.cols;
+		// Horizontal range
+		int x_start = groups[i].x - cut_width / 2;
+		int x_end = groups[i].x + cut_width / 2;
+		if(x_start < 0) x_start = 0;
+		if(x_end > black.cols) x_end = black.cols;
 
-		cv::Range y_range = cv::Range(groups[i].y - cut_height / 2, groups[i].y + cut_height / 2);
-		if(y_range.start < 0) y_range.start = 0;
-		if(y_range.end > black.size[0]) y_range.end = black.rows;
-
-		cv::Mat cut = black(y_range, x_range);
-		cv::Mat green_cut = green(y_range, x_range); // TODO
+		// Vertical range
+		int y_start = groups[i].y - cut_height / 2;
+		int y_end = groups[i].y + cut_height / 2;
+		if(y_start < 0) y_start = 0;
+		if(y_end > black.rows) y_end = black.rows;
 
 		// Calculate average black pixel in the cut
 		float average_x = 0.0f;
@@ -344,10 +597,10 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 		uint8_t* p;
 		uint8_t* p_grn;
 		int y, x;
-		for(y = 0; y < cut.rows; ++y) {
-			p = cut.ptr<uint8_t>(y);
-			p_grn = green_cut.ptr<uint8_t>(y);
-			for(x = 0; x < cut.cols; ++x) {
+		for(y = y_start; y < y_end; ++y) {
+			p = black.ptr<uint8_t>(y);
+			p_grn = green.ptr<uint8_t>(y);
+			for(x = x_start; x < x_end; ++x) {
 				if(p[x] && !p_grn[x]) {
 					average_x += (float)x;
 					average_y += (float)y;
@@ -359,17 +612,178 @@ uint8_t Line::green(cv::Mat& frame, cv::Mat& black) {
 		average_y /= num_pixels;
 
 		// Check quadrant of the average pixel to determine location of green point relative to line
-		if(average_y < cut.rows / 2) {
+		if(average_y < groups[i].y) {
 			// Only consider point if average is above
-			green_mask |= average_x < cut.cols / 2 ? 0x02 : 0x01;
+
+			// Convert local average point and add to global average
+			global_average_x += average_x;
+			global_average_y += average_y;
+			++num_green_points;
+
+
+			uint8_t dir_bit = average_x < groups[i].x ? 0x02 : 0x01;
+			decisions[i] = dir_bit;
+
+			std::cout << "Dir: " << std::to_string(dir_bit) << std::endl;
+			green_mask |= dir_bit;
 		}
 	}
-	// If a green point was to the bottom left of the corner/black line,
-	// the first bit will be set. If a green point was to the bottom right of the
-	// corner/black line, the second bit will be set.
-	// left -> 1
-	// right -> 2
-	// both -> 3
-	//std::cout << std::to_string(green_mask) << std::endl;
+	if(groups.size() > 0) {
+		std::cout << "----" << std::endl;
+		for(int i = 0; i < groups.size(); ++i) {
+			cv::circle(debug_frame, cv::Point(groups[i].x, groups[i].y), 2, cv::Scalar(255, 100, 100), 2);
+			cv::putText(debug_frame, std::to_string(decisions[i]), cv::Point(groups[i].x + 3, groups[i].y + 8), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 0, 0), 2);
+		}
+	}
+	global_average_x /= num_green_points;
+	global_average_y /= num_green_points;
+
 	return green_mask;
+}
+
+void Line::green(cv::Mat& frame, cv::Mat& black) {
+	float global_average_x, global_average_y;
+	uint8_t green_result = green_direction(frame, black, global_average_x, global_average_y);
+
+
+#ifndef MOVEMENT_OFF
+	if(green_result != 0) {
+		cv::circle(debug_frame, cv::Point(global_average_x, global_average_y), 2, cv::Scalar(0, 255, 255), 2);
+
+		cv::imshow("Green_debug", debug_frame);
+		cv::waitKey(1);
+		// The global average point roughly represents the center of the intersection
+		// When traversing, move to that point first, then rotate
+
+		float center_x = frame.cols / 2.0f;
+		float center_y = frame.rows + 20.0f;
+		float angle = std::atan2(global_average_y - center_y, global_average_x - center_x) + (PI / 2.0f);
+		float distance = std::sqrt(std::pow(global_average_y - center_y, 2) + std::pow(global_average_x - center_x, 2));
+
+		// std::cout << angle << std::endl;
+		// std::cout << distance << std::endl;
+
+		// Stop video to keep camera from freezing
+		robot->stop_video(front_cam_id);
+
+		robot->stop();
+
+		robot->turn(angle);
+		delay(70);
+
+		robot->m(100, 100, DISTANCE_FACTOR * (distance - 45));
+		
+		// Take another picture and reevaluate
+		frame = robot->capture(front_cam_id);
+		black = in_range(frame, &is_black);
+		#ifdef DEBUG
+			save_img("/home/pi/Desktop/green_images/", frame);
+		#endif
+#ifdef DEBUG
+		cv::imshow("Green frame", frame);
+		cv::waitKey(1);
+#endif
+
+		// Re-determine green result
+		uint8_t new_green_result = green_direction(frame, black, global_average_x, global_average_y);
+
+		robot->m(60, 60, 250);
+
+		if(new_green_result == GREEN_RESULT_DEAD_END ||
+			green_result == GREEN_RESULT_DEAD_END) {
+			std::cout << "DEAD-END" << std::endl;
+			robot->turn(deg_to_rad(180.0f));
+			delay(70);
+			robot->m(60, 60, 150);
+		} else if(green_result == GREEN_RESULT_LEFT) {
+			std::cout << "LEFT" << std::endl;
+			robot->turn(deg_to_rad(-70.0f));
+			delay(70);
+		} else if(green_result == GREEN_RESULT_RIGHT) {
+			std::cout << "RIGHT" << std::endl;
+			robot->turn(deg_to_rad(70.0f));
+			delay(70);
+		}
+		robot->m(60, 60, 130);
+		robot->start_video(front_cam_id);
+	}
+#endif
+}
+
+void Line::rescue_kit(cv::Mat& frame) {
+	cv::Mat blue;
+	std::vector<Group> groups = find_groups(frame, blue, &is_blue);
+
+#ifdef DEBUG
+	cv::imshow("Blue", blue);
+#endif
+
+	if(groups.size() > 0) {
+		Group group = groups[0];
+		// If there is more than one group, select the one with most pixels,
+		// as the smaller ones are likely noise
+		if(groups.size() > 1) {
+			for(int i = 1; i < groups.size(); ++i) {
+				if(groups[i].num_pixels > group.num_pixels) {
+					group = groups[i];
+				}
+			}
+		}
+		// Position robot
+		float center_x = frame.cols / 2.0f;
+		float center_y = frame.rows + 20;
+		float angle = std::atan2(group.y - center_y, group.x - center_x) + (PI / 2.0f);
+		float distance = std::sqrt(std::pow(group.y - center_y, 2) + std::pow(group.x - center_x, 2));
+
+		// Stop video so camera doesn't freeze
+		robot->stop_video(front_cam_id);
+
+		// m() can handle negative durations
+		//robot->m(60, -60, 300 * angle);
+		robot->turn(angle);
+
+		stop();
+		delay(500);
+
+		// Maximum distance is 68, so 44 seems like a good value
+		if(distance < 44) {
+			robot->m(-60, -60, DISTANCE_FACTOR * (distance - 44));
+		} else {
+			robot->m(60, 60, DISTANCE_FACTOR * (distance - 44));
+		}
+
+		delay(1000);
+
+		robot->m(-60, -60, 720);
+		delay(200);
+		robot->turn(RAD_180);
+
+		//delay(1000);
+		robot->servo(SERVO_2, GRAB_OPEN, 750);
+		robot->servo(SERVO_1, ARM_DOWN, 750);
+
+		robot->attach_servo(SERVO_2);
+		robot->write_servo(SERVO_2, GRAB_CLOSED);
+		delay(500);
+		robot->servo(SERVO_1, ARM_UP, 750);
+		robot->write_servo(SERVO_2, GRAB_OPEN);
+		delay(200);
+		robot->write_servo(SERVO_2, GRAB_CLOSED);
+		delay(200);
+		robot->release_servo(SERVO_2);
+
+		delay(200);
+		// Reposition to continue
+		robot->turn(deg_to_rad(180.0f));
+		delay(200);
+		robot->m(60, 60, 500);
+		delay(1000);
+
+		// Restart video to continue
+		robot->start_video(front_cam_id);
+	}
+}
+
+bool Line::black_pixel_threshold_under(int threshold) {
+	return true;
 }
