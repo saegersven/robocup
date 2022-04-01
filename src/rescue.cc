@@ -94,6 +94,7 @@ void Rescue::rescue() {
 
 // see 1)
 void Rescue::find_black_corner() {
+	/*
 	// check if there's a wall next to the robot (right side):
 	if (robot->distance_avg(DIST_2, 10, 0.2f) > 10.0f) {
 		// if not drive so that there is one:
@@ -144,7 +145,53 @@ void Rescue::find_black_corner() {
 		robot->m(-100, -100, 300);
 		robot->turn(deg_to_rad(-185));
 		robot->m(-100, -100, 1500);
+	}*/
+
+	auto start = micros();
+	float min_dist = 99999999.9f;
+	while (micros() - start < 2500000) {
+		robot->m(100, 100, 100);
+		float dist = robot->distance_avg(DIST_2, 10, 0.2f);
+
+		// save min dist
+		if (dist < min_dist) min_dist = dist;
 	}
+
+	float error = min_dist - 60.0f;
+	if(error < 0) {
+		robot->turn(-RAD_90);
+	} else {
+		robot->turn(RAD_90);
+	}
+	robot->m(100, 100, error * 50);
+
+	cap.release();
+	cap.open("/dev/cams/back", cv::CAP_V4L2);
+	if(!cap.isOpened()) {
+		std::cout << "Back cam not opened" << std::endl;
+	}
+
+	uint32_t max_black_pixels = 0;
+	float max_heading = 0.0f;
+
+	for(int i = 0; i < 10; ++i) {
+		robot->turn(deg_to_rad(36.0f));
+
+		cv::Mat image;
+		cap.grab();
+		cap.retrieve(image);
+
+		uint32_t num_black_pixels = 0;
+		in_range(image, &is_black, &num_black_pixels);
+		if(num_black_pixels > max_black_pixels) {
+			max_black_pixels = num_black_pixels;
+			max_heading = robot->get_heading();
+		}
+	}
+	cap.release();
+
+	robot->turn_to_heading(max_heading - RAD_180);
+	
 }
 
 bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {

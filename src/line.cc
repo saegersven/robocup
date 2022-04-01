@@ -85,8 +85,7 @@ float Line::get_redness(cv::Mat& in) {
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
 
-	predict_silver(roi);
-
+	silver_ml.predict_silver(roi);
 	return false;
 
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
@@ -115,7 +114,7 @@ bool Line::check_silver(cv::Mat& frame) {
 	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
 	std::cout << dot_prod << std::endl;
 
-	if (dot_prod > 0.95f) {		
+	if (dot_prod > 0.92f) {		
 		#ifdef DEBUG
 			save_img("/home/pi/Desktop/silver_rois/", roi);
 		#endif
@@ -266,6 +265,7 @@ bool Line::obstacle_straight_line(uint32_t duration) {
 }
 
 bool Line::line(cv::Mat& frame) {
+	/*
 	// save roi of frame for ml purposes	
 	#ifdef DEBUG
    		if (micros() % 21 == 0) {
@@ -273,7 +273,7 @@ bool Line::line(cv::Mat& frame) {
 			save_img("/home/pi/Desktop/linefollowing_rois/", roi);	
    		}
 	#endif
-
+	*/
 	// Check if obstacle thread has notified main thread
 	if(obstacle_active == 2) {
 		robot->stop();
@@ -320,9 +320,9 @@ bool Line::line(cv::Mat& frame) {
 
 		//rescue_kit(frame);
 
+		green(frame, black);
 		/*
 		// capture silver ml data:
-		green(frame, black);
 		if (check_silver(frame)) {
 			robot->m(-50, -50, 50);
   			int max = 5;
@@ -335,7 +335,6 @@ bool Line::line(cv::Mat& frame) {
 		} else {
 			robot->m(50, 50, 10);
 		}*/
-		
 		if(check_silver(frame)) {
 			float dist = robot->distance_avg(DIST_2, 20, 0.2f);
 			std::cout << "Distance: " << dist << std::endl;

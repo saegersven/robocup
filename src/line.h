@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "robot.h"
+#include "silver_ml.h"
 
 
 #define BLACK_MAX_SUM 250
@@ -85,6 +86,8 @@ private:
 	float line_angle_integral;
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_update;
 	
+	SilverML silver_ml;
+
 	bool abort_obstacle(cv::Mat frame);
 	void obstacle();
 	bool obstacle_straight_line(uint32_t duration);
