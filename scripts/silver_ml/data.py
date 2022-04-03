@@ -25,7 +25,7 @@ img_width = 52
 
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
 	data_dir,
-	validation_split=0.05,
+	validation_split=0.2,
 	subset="training",
 	seed=123,
 	image_size=(img_height, img_width),
@@ -35,7 +35,7 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
 
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
 	data_dir,
-	validation_split=0.05,
+	validation_split=0.2,
 	subset="validation",
 	seed=123,
 	image_size=(img_height, img_width),
@@ -70,7 +70,7 @@ model = Sequential([
 	#layers.MaxPooling2D(),
 	layers.Flatten(),
 	#layers.Dense(256, activation="relu"), # 128
-	#layers.Dense(32, activation="relu"), # 128
+	layers.Dense(32, activation="relu"), # 128
 	#layers.Dense(32, activation="relu"),
 	layers.Dense(num_classes, activation="softmax")
 ])

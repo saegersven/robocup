@@ -10,9 +10,7 @@ import cv2
 from tensorflow import keras
 from keras.preprocessing import image
 
-class_names = ["left", "right"]
-
-data_test_dir = "../../ml_data/silver/data_test/silver"
+data_test_dir = "../../ml_data/silver/data_test/no_silver"
 
 test_images = []
 for img in os.listdir(data_test_dir):
@@ -24,23 +22,12 @@ for img in os.listdir(data_test_dir):
 	test_images.append(img)
 test_images = np.vstack(test_images)
 
-model = keras.models.load_model("model")
+model = keras.models.load_model("model.h5")
 
 model.compile(optimizer="adam",
 	loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
 	metrics=["accuracy"])
 
-arr = model.get_weights()[0]
-arr2 = np.zeros(len(arr))
+predictions = model.predict(test_images)
 
-for i in range(len(arr)):
-	arr2[i] = arr[i][1]
-
-arr2 = ((arr2 + 1) * 127).astype('uint8').reshape(19, 52, 3)
-
-cv2.imshow("Weights", arr2)
-cv2.waitKey(6000)
-
-#predictions = model.predict(test_images)
-
-#print(np.around(predictions,2))
+print(np.around(predictions,2))
