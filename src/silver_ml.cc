@@ -11,6 +11,8 @@ bool SilverML::predict_silver(cv::Mat p_image) {
     cv::Mat image;
     byte_image.convertTo(image, CV_32FC3, 1.0f/255.0f);
 
+    std::cout << image.at<cv::Vec3f>(10, 10)[0] << std::endl;
+
     assert(image.isContinuous());
 
     cv::imshow("NN food", image);
