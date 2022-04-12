@@ -9,12 +9,12 @@ include_directories(${WIRINGPI_INCLUDE_DIRS})
 
 find_package(Threads REQUIRED) 
 
-#set(ENABLE_ML)
-#add_subdirectory("libs/tensorflow/tensorflow/lite"
+set(ENABLE_ML)
+add_subdirectory("libs/tensorflow/tensorflow/lite"
 #	"libs/tflite_build/tensorflow-lite" EXCLUDE_FROM_ALL)
 
-#include_directories("libs/tensorflow")
-#include_directories("libs/tflite_build/flatbuffers/include")
+include_directories("libs/tensorflow")
+include_directories("libs/tflite_build/flatbuffers/include")
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
