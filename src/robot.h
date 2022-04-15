@@ -1,3 +1,5 @@
+// robot max speed = 25,33 cm/s = 0.2533 m/s = 0.912 km/h
+
 #pragma once
 
 #include <iostream>

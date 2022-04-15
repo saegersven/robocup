@@ -44,7 +44,6 @@ int main() {
 	}
 
 	std::cout << "Heading not zer" << std::endl;
-	
 	std::cout << "\n/dev/cams/:" << std::endl;
    	system("ls /dev/cams/");
 
@@ -70,7 +69,7 @@ int main() {
 	robot->set_gpio(LED_2, false);
 	robot->beep(100, BUZZER);
 	delay(200);
-
+	
 	// MAIN LOOP
 	while(1) {
 		if(robot->button(BTN_RESTART)) {

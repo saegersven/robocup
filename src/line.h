@@ -35,6 +35,7 @@
 #define SILVER_X 29, 54
 #define SILVER_Y 21, 31
 
+
 // OBSTACLE
 #define OBSTACLE_Y_UPPER 30
 #define OBSTACLE_Y_LOWER 10

@@ -1,5 +1,5 @@
 #include "line.h"
-#include<cstdlib>
+#include <cstdlib>
 #include <algorithm>
 #include <vector>
 #include <limits>
@@ -85,8 +85,7 @@ float Line::get_redness(cv::Mat& in) {
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
 
-	silver_ml.predict_silver(roi);
-	return false;
+	// silver_ml.predict_silver(roi);
 
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
 	//return false;
@@ -114,7 +113,7 @@ bool Line::check_silver(cv::Mat& frame) {
 	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
 	std::cout << dot_prod << std::endl;
 
-	if (dot_prod > 0.92f) {		
+	if (dot_prod > 0.80f) {		
 		#ifdef DEBUG
 			save_img("/home/pi/Desktop/silver_rois/", roi);
 		#endif
@@ -189,7 +188,6 @@ bool Line::check_silver(cv::Mat& frame) {
 	std::cout << red_l << "\t" << red_r << std::endl;
 	return false;
 	//return v_c > CENTER_MINIMUM_VALUE;
-<<<<<<< HEAD
 	*/
 }
 
@@ -380,7 +378,7 @@ bool Line::line(cv::Mat& frame) {
 	cv::imshow("Debug", debug_frame);
 	cv::waitKey(1);
 #endif
-
+	cv::waitKey(1);
 	cv::imshow("Frame", frame);
 	cv::waitKey(1);
 

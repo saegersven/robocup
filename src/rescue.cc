@@ -94,7 +94,6 @@ void Rescue::rescue() {
 
 // see 1)
 void Rescue::find_black_corner() {
-	/*
 	// check if there's a wall next to the robot (right side):
 	if (robot->distance_avg(DIST_2, 10, 0.2f) > 10.0f) {
 		// if not drive so that there is one:
@@ -104,49 +103,82 @@ void Rescue::find_black_corner() {
 		robot->m(-100, -100, 800);
 	}
 	while (1) { 
-		// repeat until corner is found:
-		while (1) {
-			if (robot->single_distance(DIST_1) < 35.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 35.0f) break;
-				robot->m(100, 100, 10);
-		}
-
-		// check for corner	using front camera
-		robot->turn(-RAD_45);
-		robot->m(100, 100, 400);
-		robot->turn(RAD_90);
-		robot->m(50, 50, 650);
-
-		cap.open("/dev/cams/front");
+		cv::VideoCapture cap;
 		cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
 		cap.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
 		cap.set(cv::CAP_PROP_FPS, 30);
 		cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 
+		cap.open("/dev/cams/front", cv::CAP_V4L2);
 		if(!cap.isOpened()) {
-			std::cout << "Not opened" << std::endl;
+			std::cout << "Front cam not opened" << std::endl;
 		}
-		cap.grab();
-		cap.retrieve(frame);
-		cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
-		cv::GaussianBlur(frame, frame, cv::Size(7, 7), 0, 0);
-		cv::Mat black;
-		cv::threshold(frame, black, 60, 255, 1);
 
-		cv::imshow("B", black);
-		cv::waitKey(200);
-		if (cv::countNonZero(black) > 1500) {
-			std::cout << "Found corner" << std::endl;
-			robot->beep(400);
-			cap.release();
-			save_img("/home/pi/Desktop/black_corner_images/", frame);
-			return;
+		bool isWall = false; // is robot < 35cm away from front wall
+		bool isGreen = false; // is there the exit?
+		// repeat until black corner is found:
+		while (!isWall && !isGreen) {
+			float dist = robot->single_distance(DIST_1);
+			if (dist < 35.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 35.0f) {
+				isWall = true; 
+				break;
+			} else {
+				// unlikely, but there could be no front wall due to exit ahead
+				cap.grab();
+				cap.retrieve(frame);
+				cap.release();
+
+				uint32_t num_pixels = 0;
+				// just look at centre of frame -> makes processing faster, avoids false positives due to exit on sides
+				cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
+				in_range(frame, &is_green, &num_pixels);
+
+				// if more than half of the image (whole image has 988px) is green, there is the exit
+				if(num_pixels > 500) {
+					isGreen = true;
+					break;
+				}
+			}
+			robot->m(100, 100, pow((dist - 33.0f), 1.7f) + 3.0f); // checking intervals increase non linear depending on distance to front wall
+		}
+
+		// check for corner	using front camera
+		if (isWall) {
+			robot->turn(-RAD_45);
+			robot->m(100, 100, 400);
+			robot->turn(RAD_90);
+			robot->m(50, 50, 650);
+
+			cap.grab();
+			cap.retrieve(frame);
+			cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
+			cv::GaussianBlur(frame, frame, cv::Size(7, 7), 0, 0);
+			cv::Mat black;
+			cv::threshold(frame, black, 60, 255, 1);
+
+			cv::imshow("B", black);
+			std::cout << "Size of B: " << black.cols << black.rows << std::endl;
+			cv::waitKey(200);
+			if (cv::countNonZero(black) > 1500) {
+				std::cout << "Found corner" << std::endl;
+				robot->beep(400);
+				cap.release();
+				save_img("/home/pi/Desktop/black_corner_images/", frame);
+				return;
+			} 
+			robot->turn(RAD_45);
+			robot->m(-100, -100, 300);
+			robot->turn(deg_to_rad(-185));
+			robot->m(-100, -100, 1500);
 		} 
-		robot->turn(RAD_45);
-		robot->m(-100, -100, 300);
-		robot->turn(deg_to_rad(-185));
-		robot->m(-100, -100, 1500);
-	}*/
-
+		// no need to check for corner since there is the exit
+		else if (isGreen) {
+			robot->stop();
+			robot->beep(3000);
+			delay(100000);
+		}
+	}
+	/*
 	auto start = micros();
 	float min_dist = 99999999.9f;
 	while (micros() - start < 2500000) {
@@ -164,8 +196,27 @@ void Rescue::find_black_corner() {
 		robot->turn(RAD_90);
 	}
 	robot->m(100, 100, error * 50);
+	*/
 
+	/*
+	// drive ~ 52.5cm forward (approximately half of the rescue area no matter where the entry is)
+	robot->beep(3000);
+	robot->m(100, 100, 1600);
+
+	// now turn a bit left/right (depending on where is a sidewall)
+
+	if (robot->distance_avg(DIST_2, 10, 0.2f) > 40.0f) {
+		robot->turn(-RAD_90);
+		robot->m(-100, -100, 700);
+	} else {		
+		robot->turn(RAD_90);
+		robot->m(-100, -100, 700);
+	}
+
+	robot->stop();
 	cap.release();
+	std::cout << "In middle of rescue area" << std::endl;
+
 	cap.open("/dev/cams/back", cv::CAP_V4L2);
 	if(!cap.isOpened()) {
 		std::cout << "Back cam not opened" << std::endl;
@@ -174,23 +225,26 @@ void Rescue::find_black_corner() {
 	uint32_t max_black_pixels = 0;
 	float max_heading = 0.0f;
 
-	for(int i = 0; i < 10; ++i) {
-		robot->turn(deg_to_rad(36.0f));
+	for (int i = 0; i < 20; ++i) {
+		robot->turn(deg_to_rad(18.0f));
+		delay(500);
 
 		cv::Mat image;
 		cap.grab();
 		cap.retrieve(image);
 
-		uint32_t num_black_pixels = 0;
-		in_range(image, &is_black, &num_black_pixels);
-		if(num_black_pixels > max_black_pixels) {
-			max_black_pixels = num_black_pixels;
-			max_heading = robot->get_heading();
-		}
+		cv::imshow("Frame", image);
+		
+		// just look at bottom half of image
+		cv::Mat roi = image(cv::Range(24, 43), cv::Range(15, 67));
+		// count black pixels, if > max_black_pixels -> save heading and update max_black_pixels
+		
+
 	}
 	cap.release();
 
 	robot->turn_to_heading(max_heading - RAD_180);
+	*/
 	
 }
 
