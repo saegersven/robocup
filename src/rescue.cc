@@ -103,17 +103,6 @@ void Rescue::find_black_corner() {
 		robot->m(-100, -100, 800);
 	}
 	while (1) { 
-		cv::VideoCapture cap;
-		cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
-		cap.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
-		cap.set(cv::CAP_PROP_FPS, 30);
-		cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
-
-		cap.open("/dev/cams/front", cv::CAP_V4L2);
-		if(!cap.isOpened()) {
-			std::cout << "Front cam not opened" << std::endl;
-		}
-
 		bool isWall = false; // is robot < 35cm away from front wall
 		bool isGreen = false; // is there the exit?
 
@@ -124,20 +113,38 @@ void Rescue::find_black_corner() {
 				isWall = true; 
 				break;
 			} else {
-				// unlikely, but there could be no front wall due to exit ahead
+				// unlikely, but there could be no front wall due to exit ahead				
+				cv::VideoCapture cap;
+
+				cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
+				cap.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
+				cap.set(cv::CAP_PROP_FPS, 30);
+				cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
+
+				cap.open("/dev/cams/front", cv::CAP_V4L2);
+				if(!cap.isOpened()) {
+					std::cout << "Front cam not opened" << std::endl;
+				}
 				cap.grab();
 				cap.retrieve(frame);
 				cap.release();
-
-				// just look at centre of frame -> makes processing faster, avoids false positives due to exit on sides
 				cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
-				int num_green_pixels = 0; // TODO: update num_green_pixels
+
+				uint32_t num_green_pixels = 0;
+				in_range(roi, &is_green, &num_green_pixels);
+
 				if(num_green_pixels > 500) {
+					robot->beep(1000);
 					isGreen = true;
 					break;
 				}
 			}
-			robot->m(100, 100, (pow((dist - 33.0f), 1.5f) + 10.0f)); // checking intervals increase non linear depending on distance to front wall
+			if (dist < 120) {
+				robot->m(100, 100, (pow((dist - 33.0f), 1.6f) + 10.0f)); // checking intervals increase non linear depending on distance to front wall
+			} else { // there must be the exit since there is no wall. Robot must drive slowly to be able to detect green
+				robot->m(100, 100, 25);
+			}
+			
 		}
 
 		// check for corner	using front camera
