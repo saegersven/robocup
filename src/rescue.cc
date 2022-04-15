@@ -116,6 +116,7 @@ void Rescue::find_black_corner() {
 
 		bool isWall = false; // is robot < 35cm away from front wall
 		bool isGreen = false; // is there the exit?
+
 		// repeat until black corner is found:
 		while (!isWall && !isGreen) {
 			float dist = robot->single_distance(DIST_1);
@@ -128,18 +129,15 @@ void Rescue::find_black_corner() {
 				cap.retrieve(frame);
 				cap.release();
 
-				uint32_t num_pixels = 0;
 				// just look at centre of frame -> makes processing faster, avoids false positives due to exit on sides
 				cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
-				in_range(frame, &is_green, &num_pixels);
-
-				// if more than half of the image (whole image has 988px) is green, there is the exit
-				if(num_pixels > 500) {
+				int num_green_pixels = 0; // TODO: update num_green_pixels
+				if(num_green_pixels > 500) {
 					isGreen = true;
 					break;
 				}
 			}
-			robot->m(100, 100, pow((dist - 33.0f), 1.7f) + 3.0f); // checking intervals increase non linear depending on distance to front wall
+			robot->m(100, 100, (pow((dist - 33.0f), 1.5f) + 10.0f)); // checking intervals increase non linear depending on distance to front wall
 		}
 
 		// check for corner	using front camera
@@ -149,17 +147,26 @@ void Rescue::find_black_corner() {
 			robot->turn(RAD_90);
 			robot->m(50, 50, 650);
 
+			cv::VideoCapture cap;
+			cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
+			cap.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
+			cap.set(cv::CAP_PROP_FPS, 30);
+			cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
+
+			cap.open("/dev/cams/front", cv::CAP_V4L2);
+			if(!cap.isOpened()) {
+				std::cout << "Front cam not opened" << std::endl;
+			}
 			cap.grab();
 			cap.retrieve(frame);
 			cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
 			cv::GaussianBlur(frame, frame, cv::Size(7, 7), 0, 0);
 			cv::Mat black;
 			cv::threshold(frame, black, 60, 255, 1);
-
 			cv::imshow("B", black);
-			std::cout << "Size of B: " << black.cols << black.rows << std::endl;
-			cv::waitKey(200);
-			if (cv::countNonZero(black) > 1500) {
+			cv::waitKey(1000);
+			std::cout << "black Pixels: " << cv::countNonZero(black) << std::endl;
+			if (cv::countNonZero(black) > 15000) {
 				std::cout << "Found corner" << std::endl;
 				robot->beep(400);
 				cap.release();
@@ -426,10 +433,10 @@ void Rescue::find_exit() {
 	cap.retrieve(frame);
 	cap.release();
 
-	uint32_t num_pixels = 0;
-	in_range(frame, &is_green, &num_pixels);
+	uint32_t num_green_pixels = 0;
+	in_range(frame, &is_green, &num_green_pixels);
 
-	if(num_pixels > 1500) {
+	if(num_green_pixels > 1500) {
 		// Found exit
 		robot->m(100, 100, 500);
 		std::cout << "Found exit" << std::endl;
