@@ -1,10 +1,12 @@
 Important TODOs:
-- rewrite find_black_corner()
 - rewrite find_exit()
+- proper params for houghCircles function
 - detect and collect rescuekit
 - detect red stripe 
+- be able to grab victims near the wall (check front distance)
 - implement proper silver detection
 - distinguish between living and dead victims
+- find_black_corner() needs to cope with exits better (green stripe detection not working currently)
 - "speedboost" on ramps (check gyroscope in seperate thread)
 
 

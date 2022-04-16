@@ -47,10 +47,20 @@ void Rescue::rescue() {
 	robot->beep(100, BUZZER);
 	robot->m(100, 100, 300);
 	find_black_corner(); // 1)
-	
-	robot->m(-100, -100, 600);
+
+	// drop rescue kit:		
+	robot->m(-100, -100, 1000);
+	robot->turn(RAD_180);
+	robot->m(-100, -100, 1200);
+	robot->servo(SERVO_1, ARM_DROP, 500);
+	robot->servo(SERVO_2, GRAB_OPEN, 500);
+	robot->servo(SERVO_2, GRAB_CLOSED, 500);
+	robot->servo(SERVO_1, ARM_UP, 500);
+	robot->m(100, 100, 500);
+	robot->turn(RAD_180);
+
 	//float heading = robot->get_heading(); // 3)
-	robot->turn(deg_to_rad(60));
+	robot->turn(deg_to_rad(90));
 	uint8_t turn_counter = 0;
 
 	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
@@ -113,7 +123,11 @@ void Rescue::find_black_corner() {
 				isWall = true; 
 				break;
 			} else {
-				// unlikely, but there could be no front wall due to exit ahead				
+
+				// TODO:
+
+				// unlikely, but there could be no front wall due to exit ahead	
+				/*			
 				cv::VideoCapture cap;
 
 				cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
@@ -137,11 +151,12 @@ void Rescue::find_black_corner() {
 					robot->beep(1000);
 					isGreen = true;
 					break;
-				}
+				}*/
+				delay(0);
 			}
-			if (dist < 120) {
-				robot->m(100, 100, (pow((dist - 33.0f), 1.6f) + 10.0f)); // checking intervals increase non linear depending on distance to front wall
-			} else { // there must be the exit since there is no wall. Robot must drive slowly to be able to detect green
+			if (dist < 120.0f) {
+				robot->m(100, 100, (pow((dist - 34.0f), 1.7f) + 20.0f)); // checking intervals increase non linear depending on distance to front wall
+			} else { // in case of wrong measurement:
 				robot->m(100, 100, 25);
 			}
 			
