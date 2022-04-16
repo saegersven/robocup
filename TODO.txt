@@ -1,16 +1,18 @@
 Important TODOs:
 - rewrite find_black_corner()
-- test green
-- implement proper silver detection
-- "speedboost" on ramps (check gyroscope in seperate thread)
 - rewrite find_exit()
+- detect and collect rescuekit
+- detect red stripe 
+- implement proper silver detection
+- distinguish between living and dead victims
+- "speedboost" on ramps (check gyroscope in seperate thread)
 
 
-- improve accuracy when detecting silver (include front distance sensor, make sure there are no black contours, check side distance)
+
+- improve accuracy when detecting silver (include front distance sensor, make sure there are no black contours, check side distance) maybe even NN
 - NN for intersections
 - global variable for movement on/off which is changed whenever the button on the robot is pressed
 - calibration scripts (silver, ...)
 - timout when waiting for gyroscope heading, entering "savetymode" after timout 
-- find_black_corner can't cope with exits
 - savetymode for detecting silver
-- rewrite black_pixel_threshold_under()
+- intersection redundancy using additional NN
