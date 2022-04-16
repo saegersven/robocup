@@ -1,7 +1,7 @@
 #include "silver_ml.h"
  
 SilverML::SilverML() { 
-    model = std::make_unique<fdeep::model>(fdeep::load_model("../runtime_data/silver.json"));
+    model = std::make_unique<fdeep::model>(fdeep::load_model("/home/pi/robocup/runtime_data/silver.json"));
 }
 
 bool SilverML::predict_silver(cv::Mat p_image) {

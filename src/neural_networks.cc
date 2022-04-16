@@ -44,7 +44,7 @@ int NeuralNetworks::infere(int id, cv::Mat& in, float& confidence) {
 	tflite::StderrReporter error_reporter;
 
 	std::unique_ptr<tflite::FlatBufferModel> model =
-		tflite::FlatBufferModel::BuildFromFile("../ml/green/model.tflite", &error_reporter);
+		tflite::FlatBufferModel::BuildFromFile("/home/pi/robocup/ml/green/model.tflite", &error_reporter);
 
 	tflite::ops::builtin::BuiltinOpResolver resolver;
 	std::unique_ptr<tflite::Interpreter> interpreter;
