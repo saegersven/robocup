@@ -1,6 +1,5 @@
 Important TODOs:
 - rewrite find_exit()
-- detect red stripe 
 - be able to grab victims near the wall (check front distance)
 - implement proper silver detection
 - distinguish between living and dead victims

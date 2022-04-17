@@ -52,7 +52,7 @@ private:
 	void find_exit();
 
 	bool get_largest_circle(cv::Mat roi, cv::Vec3f& out);
-	bool find_victim();
+	bool find_victim(bool ignore_dead);
 
 public:
 	std::atomic<bool> finished;

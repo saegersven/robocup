@@ -688,14 +688,14 @@ float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
 	delayMicroseconds(10);
 	digitalWrite(trig, LOW);
 
-	long start_time = micros();
+	uint64_t start_time = micros();
 
 	while (digitalRead(echo) == LOW && micros() - start_time < timeout);
-	volatile long startTimeUsec = micros();
+	volatile uint64_t startTimeUsec = micros();
 	while (digitalRead(echo) == HIGH);
-	volatile long endTimeUsec = micros();
+	volatile uint64_t endTimeUsec = micros();
 
-	long travelTimeUsec = endTimeUsec - startTimeUsec;
+	uint64_t travelTimeUsec = endTimeUsec - startTimeUsec;
 
 	// convert distance to cm, multiply with speed of sound (0,0343 cm/us) and divide by 2 to get one-way distance
 	return ((travelTimeUsec / 10000.0f) * 340.29f * 0.5f);

@@ -66,7 +66,7 @@ void Rescue::rescue() {
 	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
 		bool searching_victim = true;
 		while (searching_victim) {
-			if (find_victim()) {
+			if (find_victim(rescued_victims_cnt < 2)) {
 				searching_victim = false;
 			} else {
 				std::cout << "looking for victim" << std::endl;
@@ -285,9 +285,9 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 	// for finding perfect params refer to /scripts/ml/find_perfect_houghCircles_params.py
 	cv::HoughCircles(roi, circles, cv::HOUGH_GRADIENT, 1,
 		60, // minDist
-		54, // param1
-		27, // param2
-		2,  // minRadius
+		34, // param1
+		40, // param2
+		30,  // minRadius
 		300 // maxRadius
 	);
 
@@ -313,7 +313,7 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 	return true;
 }
 
-bool Rescue::find_victim() {
+bool Rescue::find_victim(bool ignore_dead) {
 	// Capture one frame from camera
 	cap.release();
 	cap.open("/dev/cams/back", cv::CAP_V4L2);
@@ -332,6 +332,12 @@ bool Rescue::find_victim() {
 
 	cv::Vec3f victim;
 	if(!get_largest_circle(roi, victim)) return false;
+	if(ignore_dead) {
+		cv::Vec3b average_color = average_circle_color(roi, victim[0], victim[1], victim[2]);
+		uint8_t avg_color_value = average_color[0] + average_color[1] + average_color[2];
+		std::cout << "avg_color_value: " << avg_color_value << std::endl;
+		if (avg_color_value < 150) return false;
+	}
 	int victim_x = victim[0] - 640 / 2;	
 
 	// Turn to victim based on horizontal pixel coordinate
@@ -387,17 +393,15 @@ bool Rescue::find_victim() {
 			robot->servo(SERVO_1, ARM_DOWN, 670);
 			robot->servo(SERVO_2, GRAB_CLOSED, 750);
 			robot->servo(SERVO_1, ARM_UP, 750);
-			//robot->turn(RAD_180);
-			delay(100);
-			robot->m(-60, -60, 600);
-			delay(100);
+
+			//robot->m(-60, -60, 650);
 
 			// Turn back
 			robot->turn(-angle2);
 
 			// Drive back
 			uint32_t search_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-				search_end_time - search_start_time).count();
+				search_end_time - search_start_time).count() - 1000;
 
 			std::cout << search_time << std::endl;
 
@@ -414,6 +418,20 @@ bool Rescue::find_victim() {
 	}
 }
 
+bool check_green_stripe(cv::Mat frame) {
+	uint32_t num_green_pixels = 0;
+	in_range(frame, &is_green, &num_green_pixels);
+
+	/*if(num_green_pixels > 1500) {
+		// Found exit
+		robot->m(100, 100, 500);
+		std::cout << "Found exit" << std::endl;
+		save_img("/home/pi/Desktop/exit_images/", frame);
+		return;
+	}*/
+	return num_green_pixels > 1500;
+}
+
 void Rescue::find_exit() {
 	robot->m(-100, -100, 650);
 	robot->turn(-RAD_90);
@@ -421,26 +439,6 @@ void Rescue::find_exit() {
 	robot->m(100, 100, -300);
 	robot->turn(-RAD_90);
 	robot->beep(100);
-
-	// Drive while there is a side wall
-	while(robot->single_distance(DIST_2) < 30.0f || robot->distance_avg(DIST_2, 10, 0.2f) < 30.0f) {
-		if(robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 10.0f) {
-			robot->turn(-RAD_45);
-			robot->m(100, 100, 500);
-			robot->turn(-RAD_45);
-			robot->m(-100, -100, 500);
-		}
-		robot->m(100, 100);
-	}
-	robot->m(100, 100, 150);
-
-	std::cout << "Check for green" << std::endl;
-
-	// Turn right and check for green strip
-	robot->stop();
-
-	robot->turn(RAD_90);
-	robot->m(100, 100, 350);
 
 	cv::VideoCapture cap;
 
@@ -453,18 +451,41 @@ void Rescue::find_exit() {
 	if(!cap.isOpened()) {
 		std::cout << "Front cam not opened" << std::endl;
 	}
-	cap.grab();
-	cap.retrieve(frame);
-	cap.release();
+	while(1) {
+		// Drive while there is a side wall
+		while(robot->single_distance(DIST_2) < 30.0f || robot->distance_avg(DIST_2, 10, 0.2f) < 30.0f) {
+			if(robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 10.0f) {
+				robot->turn(-RAD_45);
+				robot->m(100, 100, 500);
+				robot->turn(-RAD_45);
+				robot->m(-100, -100, 500);
+			}
+			cap.grab();
+			cap.retrieve(frame);
 
-	uint32_t num_green_pixels = 0;
-	in_range(frame, &is_green, &num_green_pixels);
+			if(check_green_stripe(frame)) {
+				robot->m(100, 100, 300);
+				return;
+			}
 
-	if(num_green_pixels > 1500) {
-		// Found exit
-		robot->m(100, 100, 500);
-		std::cout << "Found exit" << std::endl;
-		save_img("/home/pi/Desktop/exit_images/", frame);
-		return;
+			robot->m(100, 100);
+		}
+		robot->m(100, 100, 150);
+
+		std::cout << "Check for green" << std::endl;
+
+		// Turn right and check for green strip
+		robot->stop();
+
+		robot->turn(RAD_90);
+		robot->m(100, 100, 350);
+		
+		cap.grab();
+		cap.retrieve(frame);
+		if(check_green_stripe(frame)) {
+			robot->m(100, 100, 300);
+			return;
+		}
 	}
+	cap.release();
 }

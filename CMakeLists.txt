@@ -10,10 +10,10 @@ include_directories(${WIRINGPI_INCLUDE_DIRS})
 find_package(Threads REQUIRED) 
 
 set(ENABLE_ML)
-add_subdirectory("libs/tensorflow/tensorflow/lite"
-#	"libs/tflite_build/tensorflow-lite" EXCLUDE_FROM_ALL)
+add_subdirectory("libs/tensorflow_src/tensorflow/lite"
+	"libs/tflite_build/tensorflow-lite" EXCLUDE_FROM_ALL)
 
-include_directories("libs/tensorflow")
+include_directories("libs/tensorflow_src")
 include_directories("libs/tflite_build/flatbuffers/include")
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
@@ -28,7 +28,7 @@ add_executable(robocup src/main.cc src/robot.cc src/utils.cc src/vision.cc src/l
 target_link_libraries(robocup atomic)
 
 target_link_libraries(robocup ${OpenCV_LIBS})
-# target_link_libraries(robocup tensorflow-lite)
+target_link_libraries(robocup tensorflow-lite)
 
 target_link_libraries(robocup ${WIRINGPI_LIBRARIES})
 target_link_libraries(robocup ${CMAKE_THREAD_LIBS_INIT})
