@@ -281,10 +281,12 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 	cv::cvtColor(roi, roi, cv::COLOR_BGR2GRAY);
 	cv::GaussianBlur(roi, roi, cv::Size(7, 7), 0, 0);
 	std::vector<cv::Vec3f> circles;
+
+	// for finding perfect params refer to /scripts/ml/find_perfect_houghCircles_params.py
 	cv::HoughCircles(roi, circles, cv::HOUGH_GRADIENT, 1,
 		60, // minDist
-		34, // param1
-		40, // param2
+		54, // param1
+		27, // param2
 		2,  // minRadius
 		300 // maxRadius
 	);

@@ -13,6 +13,9 @@
 #define BLUE_RATIO_THRESHOLD 1.7f
 #define BLUE_MIN_VALUE 50
 
+#define RED_RATIO_THRESHOLD 1.3f
+#define RED_MIN_VALUE 40
+
 #define GREEN_RESULT_NO_INTERSECTION 0
 #define GREEN_RESULT_LEFT 1
 #define GREEN_RESULT_RIGHT 2
@@ -47,13 +50,15 @@
 #define DEBUG
 //#define FPS_COUNTER
 //#define DEBUG_RESIZE
-#define MOVEMENT_OFF
+//#define MOVEMENT_OFF
 
 bool is_black(uint8_t b, uint8_t g, uint8_t r);
 
 bool is_green(uint8_t b, uint8_t g, uint8_t r);
 
 bool is_blue(uint8_t b, uint8_t g, uint8_t r);
+
+bool is_red(uint8_t b, uint8_t g, uint8_t r);
 
 // A group of pixels,
 // x and y are the average coordinates
@@ -113,6 +118,8 @@ private:
 	void follow(cv::Mat& frame, cv::Mat black);
 
 	void rescue_kit(cv::Mat& frame);
+
+	void check_red_stripe(cv::Mat frame);
 
 public:
 	Line(int front_cam_id, std::shared_ptr<Robot> robot);

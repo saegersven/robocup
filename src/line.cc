@@ -25,6 +25,10 @@ bool is_blue(uint8_t b, uint8_t g, uint8_t r) {
 	return 1.0f / BLUE_RATIO_THRESHOLD * b > g + r && b > BLUE_MIN_VALUE;
 }
 
+bool is_red(uint8_t b, uint8_t g, uint8_t r) {
+	return 1.0f / RED_RATIO_THRESHOLD * r > b + g && r > RED_MIN_VALUE;
+}
+
 Line::Line(int front_cam_id, std::shared_ptr<Robot> robot)
 	: obstacle_active(0), running(false), last_frame_t(std::chrono::high_resolution_clock::now()) {
 	this->front_cam_id = front_cam_id;
@@ -111,9 +115,9 @@ bool Line::check_silver(cv::Mat& frame) {
 		}
 	}
 	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
-	std::cout << dot_prod << std::endl;
+	// std::cout << dot_prod << std::endl;
 
-	if (dot_prod > 0.80f) {		
+	if (dot_prod > 0.92f) {		
 		#ifdef DEBUG
 			save_img("/home/pi/Desktop/silver_rois/", roi);
 		#endif
@@ -316,8 +320,8 @@ bool Line::line(cv::Mat& frame) {
 
 		follow(frame, black);
 
-		//rescue_kit(frame);
-
+		rescue_kit(frame);
+		check_red_stripe(frame);
 		green(frame, black);
 		/*
 		// capture silver ml data:
@@ -717,7 +721,6 @@ void Line::rescue_kit(cv::Mat& frame) {
 	std::vector<Group> groups = find_groups(frame, blue, &is_blue);
 
 #ifdef DEBUG
-	cv::imshow("Blue", blue);
 #endif
 
 	if(groups.size() > 0) {
@@ -731,6 +734,9 @@ void Line::rescue_kit(cv::Mat& frame) {
 				}
 			}
 		}
+
+		if (group.num_pixels < 100) return;
+
 		// Position robot
 		float center_x = frame.cols / 2.0f;
 		float center_y = frame.rows + 20;
@@ -788,4 +794,27 @@ void Line::rescue_kit(cv::Mat& frame) {
 
 bool Line::black_pixel_threshold_under(int threshold) {
 	return true;
+}
+
+
+void Line::check_red_stripe(cv::Mat frame) {
+	// checks for red stripe aka end of parcours
+	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
+
+	uint32_t num_pixels = 0;
+	in_range(roi, &is_red, &num_pixels);
+	if (num_pixels > 500) {
+		robot->stop();
+		robot->stop_video();
+		delay(8000);
+		robot->m(100, 100, 200);
+		robot->start_video(front_cam_id);
+	}
+
+	
+/*
+#ifdef DEBUG
+	cv::imshow("Red", red);
+#endif
+*/
 }
