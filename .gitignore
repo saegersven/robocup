@@ -37,12 +37,6 @@ simple-ftp-deploy.json
 sftp-config.json
 sftp-config-alt.json
 
-# (Live) Machine Learning datasets
-ml/**/data
-ml/**/original_data
-ml/**/model
-ml
-
 # CMake junk
 **/CMakeFiles
 **/CMakeCache.txt
