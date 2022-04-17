@@ -736,6 +736,7 @@ void Line::rescue_kit(cv::Mat& frame) {
 		}
 
 		if (group.num_pixels < 100) return;
+		save_img("/home/pi/Desktop/rescue_kit/", frame);
 
 		// Position robot
 		float center_x = frame.cols / 2.0f;
@@ -804,13 +805,16 @@ void Line::check_red_stripe(cv::Mat frame) {
 	uint32_t num_pixels = 0;
 	in_range(roi, &is_red, &num_pixels);
 	if (num_pixels > 500) {
+		save_img("/home/pi/Desktop/red_stripe/", frame);
+		robot->m(100, 100, 400);
+
+		// wait for at least 5s
 		robot->stop();
-		robot->stop_video();
+		robot->stop_video(front_cam_id);
 		delay(8000);
 		robot->m(100, 100, 200);
 		robot->start_video(front_cam_id);
 	}
-
 	
 /*
 #ifdef DEBUG
