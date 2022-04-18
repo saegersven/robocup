@@ -2,12 +2,13 @@
 
 #include <memory>
 
-#include <fdeep/fdeep.hpp>
-#include <opencv2/opencv.hpp>
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/model.h"
 
 class SilverML {
 private:
-	std::unique_ptr<fdeep::model> model;
+	std::unique_ptr<tflite::FlatBufferModel> model;
+	std::unique_ptr<tflite::Interpreter> interpreter;
 
 public:
 	SilverML();

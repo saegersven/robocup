@@ -1,7 +1,11 @@
 #include "silver_ml.h"
  
 SilverML::SilverML() { 
-    model = std::make_unique<fdeep::model>(fdeep::load_model("/home/pi/robocup/runtime_data/silver.json"));
+    model = tflite::FlatBufferModel::BuildFromFile("/home/pi/robocup/runtime_data/silver.tflite");
+    tflite::ops::builtin::BuiltinOpResolver resolver;
+    tflite::InterpreterBuilder builder(*model, resolver);
+    builder(&interpreter);
+    interpreter->AllocateTensors();
 }
 
 bool SilverML::predict_silver(cv::Mat p_image) {
@@ -11,18 +15,17 @@ bool SilverML::predict_silver(cv::Mat p_image) {
     cv::Mat image;
     byte_image.convertTo(image, CV_32FC3, 1.0f/255.0f);
 
-    std::cout << image.at<cv::Vec3f>(10, 10)[0] << std::endl;
-
     assert(image.isContinuous());
 
-    cv::imshow("NN food", image);
+    float* input_layer = interpreter->typed_input_tensor<float>(0);
+    float* output_layer = interpreter->typed_output_tensor<float>(0);
 
-    // Use the correct scaling, i.e., low and high.
-    const auto input = fdeep::tensor_from_bytes(image.ptr(),
-        static_cast<std::size_t>(image.rows),
-        static_cast<std::size_t>(image.cols),
-        static_cast<std::size_t>(image.channels()),
-        0.0f, 1.0f);
-    const auto result = model->predict_class_with_confidence({input});
-    std::cout << result.first << "\t" << result.second << std::endl;
+    float* img_ptr = image.ptr<float>(0);
+    memcpy(input_layer, img_ptr.ptr<float>(0),
+        in.cols * in.rows * in.channels() * sizeof(float));
+
+    interpreter->Invoke();
+
+    std::cout << "NN says: " << output_layer[0] << "\t" << output_layer[1] << std::endl;
+    return output_layer[0] < output_layer[1];
 }
