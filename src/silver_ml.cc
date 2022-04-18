@@ -10,7 +10,7 @@ SilverML::SilverML() {
 
 bool SilverML::predict_silver(cv::Mat p_image) {
     cv::Mat byte_image = p_image.clone();
-    cv::cvtColor(byte_image, byte_image, cv::COLOR_BGR2RGB);
+    //cv::cvtColor(byte_image, byte_image, cv::COLOR_BGR2RGB);
 
     cv::Mat image;
     byte_image.convertTo(image, CV_32FC3, 1.0f/255.0f);
@@ -21,8 +21,8 @@ bool SilverML::predict_silver(cv::Mat p_image) {
     float* output_layer = interpreter->typed_output_tensor<float>(0);
 
     float* img_ptr = image.ptr<float>(0);
-    memcpy(input_layer, img_ptr.ptr<float>(0),
-        in.cols * in.rows * in.channels() * sizeof(float));
+    memcpy(input_layer, img_ptr,
+        image.cols * image.rows * image.channels() * sizeof(float));
 
     interpreter->Invoke();
 

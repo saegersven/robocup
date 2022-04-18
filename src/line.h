@@ -47,8 +47,8 @@
 
 #define TURN_100_90 330
 
-#define DEBUG
-//#define FPS_COUNTER
+//#define DEBUG
+#define FPS_COUNTER
 //#define DEBUG_RESIZE
 //#define MOVEMENT_OFF
 

@@ -1,5 +1,8 @@
 #include "vision.h"
 
+#include <chrono>
+#include <thread>
+
 #include <opencv2/opencv.hpp>
 
 #include "errcodes.h"
@@ -101,6 +104,7 @@ cv::Mat Camera::retrieve_video_frame(bool undist) {
 
 cv::Mat Camera::single_capture(bool undist) {
 	open_video();
+	delay(50);
 	cv::Mat image = retrieve_video_frame(undist);
 	stop_video();
 	return image;

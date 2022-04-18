@@ -89,10 +89,10 @@ float Line::get_redness(cv::Mat& in) {
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
 
-	// silver_ml.predict_silver(roi);
+	silver_ml.predict_silver(roi);
 
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
-	//return false;
+	return false;
 
 	uint8_t* ptr;
 	uint8_t* ptr_s;

@@ -384,6 +384,10 @@ bool Rescue::find_victim(bool ignore_dead) {
 				(PI / 2.0f);
 			robot->turn(angle2);
 
+			bool near_wall = robot->distance_avg(DIST_1, 0.2f, 10) < 15.0f;
+			
+			if(near_wall) robot->m(-60, -60, 300);
+
 			// Turn around, pick up and turn back
 			robot->m(-60, -60, 650);
 			delay(100);
@@ -391,6 +395,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 
 			robot->servo(SERVO_2, GRAB_OPEN, 750);
 			robot->servo(SERVO_1, ARM_DOWN, 670);
+			if(near_wall) robot->m(-100, -100, 200);
 			robot->servo(SERVO_2, GRAB_CLOSED, 750);
 			robot->servo(SERVO_1, ARM_UP, 750);
 
