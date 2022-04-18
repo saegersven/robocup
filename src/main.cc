@@ -43,7 +43,7 @@ int main() {
 		if (waiting_for_heading_cnt > 50) robot->beep(3000);
 	}
 
-	std::cout << "Heading not zer" << std::endl;
+	std::cout << "Heading not zero" << std::endl;
 	std::cout << "\n/dev/cams/:" << std::endl;
    	system("ls /dev/cams/");
 

@@ -51,6 +51,8 @@ void Line::start() {
 	obstacle_thread.detach();
 	obstacle_active = 0;
 	micros_start = micros();
+
+	silver_ml.start();
 }
 
 void Line::stop() {
@@ -59,6 +61,9 @@ void Line::stop() {
 
 	robot->stop_video(front_cam_id);
 	obstacle_active = 0;
+
+	silver_ml.stop();
+
 	// Setting running to false will notify obstacle thread to stop
 	running = false;
 }
@@ -89,10 +94,9 @@ float Line::get_redness(cv::Mat& in) {
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
 
-	silver_ml.predict_silver(roi);
 
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
-	return false;
+	return silver_ml.predict_silver(roi);
 
 	uint8_t* ptr;
 	uint8_t* ptr_s;
@@ -338,25 +342,19 @@ bool Line::line(cv::Mat& frame) {
 			robot->m(50, 50, 10);
 		}*/
 		if(check_silver(frame)) {
-			float dist = robot->distance_avg(DIST_2, 20, 0.2f);
-			std::cout << "Distance: " << dist << std::endl;
-
-			// if ((dist > 80.0 && dist < 100.0) || (dist > 110.0 && dist < 130.0))
-			std::cout << "Silver" << std::endl;
 			#ifdef DEBUG
 				save_img("/home/pi/Desktop/silver_images/", frame);
 			#endif
 			std::cout << "cam detected silver!\nchecking distance..." << std::endl;
-			robot->m(100, 100, 750);
+			robot->m(100, 100, 850);
 			robot->stop();
 			delay(100);
 
-			float dist_front = robot->distance_avg(DIST_1, 100, 0.3f);
-			float dist_side = robot->distance_avg(DIST_2, 100, 0.3f);
+			float dist_front = robot->distance_avg(DIST_1, 10, 0.2f);
+			float dist_side = robot->distance_avg(DIST_2, 10, 0.2f);
 
 			std::cout << "Front distance: " << dist_front << std::endl;
 			std::cout << "Side distance: " << dist_side << std::endl;
-
 
 			// check front distance < foo and side distance < foo and black pixels in frame < foo
 			// increase rescue_cnt for each
@@ -371,7 +369,7 @@ bool Line::line(cv::Mat& frame) {
 			if (rescue_cnt >= 2) {
 				return true;
 			} else {
-				robot->m(-100, -100, 1350); // return to previous position (a bit further to avoid another false positive)
+				robot->m(-100, -100, 830); // return to previous position (a bit further to avoid another false positive)
 			}
 		}
 	}

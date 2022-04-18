@@ -45,7 +45,7 @@ void Rescue::rescue() {
 
 	robot->stop();
 	robot->beep(100, BUZZER);
-	robot->m(100, 100, 300);
+	robot->m(100, 100, 270);
 	find_black_corner(); // 1)
 
 	// drop rescue kit:		
@@ -287,7 +287,7 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 		60, // minDist
 		34, // param1
 		40, // param2
-		30,  // minRadius
+		10,  // minRadius
 		300 // maxRadius
 	);
 
@@ -335,8 +335,8 @@ bool Rescue::find_victim(bool ignore_dead) {
 	if(ignore_dead) {
 		cv::Vec3b average_color = average_circle_color(roi, victim[0], victim[1], victim[2]);
 		uint8_t avg_color_value = average_color[0] + average_color[1] + average_color[2];
-		std::cout << "avg_color_value: " << avg_color_value << std::endl;
-		if (avg_color_value < 150) return false;
+		std::cout << "avg_color_value: " << std::to_string(avg_color_value) << std::endl;
+		if (avg_color_value < 60) return false;
 	}
 	int victim_x = victim[0] - 640 / 2;	
 
@@ -456,20 +456,30 @@ void Rescue::find_exit() {
 	if(!cap.isOpened()) {
 		std::cout << "Front cam not opened" << std::endl;
 	}
+
+	//SilverML s;
+	//s.start();
+
 	while(1) {
 		// Drive while there is a side wall
 		while(robot->single_distance(DIST_2) < 30.0f || robot->distance_avg(DIST_2, 10, 0.2f) < 30.0f) {
-			if(robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 10.0f) {
+			cap.grab();
+			cap.retrieve(frame);
+			//bool silver = s.predict_silver(frame);
+			//if(silver) {
+			//	robot->m(-100, -100, 200);
+			//}
+			if((robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 10.0f)) {
 				robot->turn(-RAD_45);
 				robot->m(100, 100, 500);
 				robot->turn(-RAD_45);
 				robot->m(-100, -100, 500);
 			}
-			cap.grab();
-			cap.retrieve(frame);
 
 			if(check_green_stripe(frame)) {
 				robot->m(100, 100, 300);
+				//s.stop();
+				cap.release();
 				return;
 			}
 
@@ -489,8 +499,9 @@ void Rescue::find_exit() {
 		cap.retrieve(frame);
 		if(check_green_stripe(frame)) {
 			robot->m(100, 100, 300);
+			//s.stop();
+			cap.release();
 			return;
 		}
 	}
-	cap.release();
 }
