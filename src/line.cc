@@ -93,10 +93,11 @@ float Line::get_redness(cv::Mat& in) {
 
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
-
+	save_img("/home/pi/Desktop/linefollowing_rois/", roi);
+	return false;
 
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
-	return silver_ml.predict_silver(roi);
+	//return silver_ml.predict_silver(roi);
 
 	uint8_t* ptr;
 	uint8_t* ptr_s;
@@ -121,7 +122,7 @@ bool Line::check_silver(cv::Mat& frame) {
 	dot_prod /= std::sqrt(mag) * std::sqrt(mag_s);
 	// std::cout << dot_prod << std::endl;
 
-	if (dot_prod > 0.80f) {		
+	if (dot_prod > 0.90f) {		
 		#ifdef DEBUG
 			save_img("/home/pi/Desktop/silver_rois/", roi);
 		#endif
@@ -322,13 +323,16 @@ bool Line::line(cv::Mat& frame) {
 
 		cv::Mat black = in_range(frame, &is_black);
 
-		follow(frame, black);
+		//follow(frame, black);
 
-		rescue_kit(frame);
-		check_red_stripe(frame);
-		green(frame, black);
-		/*
+		//rescue_kit(frame);
+		//check_red_stripe(frame);
+		//green(frame, black);
 		// capture silver ml data:
+		check_silver(frame);
+		robot->beep(50);
+		delay(15);
+		/*
 		if (check_silver(frame)) {
 			robot->m(-50, -50, 50);
   			int max = 5;
@@ -340,7 +344,8 @@ bool Line::line(cv::Mat& frame) {
    			}
 		} else {
 			robot->m(50, 50, 10);
-		}*/
+		}
+		
 		if(check_silver(frame)) {
 			#ifdef DEBUG
 				save_img("/home/pi/Desktop/silver_images/", frame);
@@ -371,7 +376,7 @@ bool Line::line(cv::Mat& frame) {
 			} else {
 				robot->m(-100, -100, 830); // return to previous position (a bit further to avoid another false positive)
 			}
-		}
+		}*/
 	}
 #ifdef DEBUG
 #ifdef DEBUG_RESIZE

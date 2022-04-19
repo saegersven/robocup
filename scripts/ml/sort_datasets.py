@@ -5,8 +5,8 @@ import os
 from os import listdir
 import random
 
-path = "/mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup/ml_data/silver/silver_rois/"
-new_path = "/home/lukas/Desktop/testdir/"
+path = "/home/lukas/Desktop/data_unsorted/silver_rois/"
+new_path = "/home/lukas/Desktop/data_sorted/silver_rois/"
 img_paths = []
 for images in os.listdir(path): 
     if (images.endswith(".png")):

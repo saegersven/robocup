@@ -70,7 +70,7 @@ model = Sequential([
 	#layers.MaxPooling2D(),
 	layers.Flatten(),
 	#layers.Dense(256, activation="relu"), # 128
-	layers.Dense(32, activation="relu"), # 128
+	layers.Dense(8, activation="relu"), # 128
 	#layers.Dense(32, activation="relu"),
 	layers.Dense(num_classes, activation="softmax")
 ])

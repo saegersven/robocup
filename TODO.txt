@@ -1,7 +1,6 @@
 Important TODOs:
 - rewrite find_exit()
 - be able to grab victims near the wall (check front distance)
-- implement proper silver detection
 - distinguish between living and dead victims
 - find_black_corner() needs to cope with exits better (green stripe detection not working currently)
 - "speedboost" on ramps (check gyroscope in seperate thread)
