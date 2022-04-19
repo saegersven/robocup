@@ -10,7 +10,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 
-data_dir = pathlib.Path("../../ml_data/silver/data")
+data_dir = pathlib.Path("../../ml_data/silver_cropped")
 
 image_count = len(list(data_dir.glob("*/*.png")))
 print(f"Image count = {image_count}")
@@ -20,8 +20,8 @@ left = list(data_dir.glob("silver/*"))
 right = list(data_dir.glob("no_silver/*"))
 
 batch_size = 32
-img_height = 19
-img_width = 52
+img_height = 10
+img_width = 42
 
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
 	data_dir,
@@ -88,6 +88,13 @@ history = model.fit(
 	epochs=epochs)
 
 model.save("model.h5", save_format='h5')
+
+print("Saving Tensorflow Lite model as 'silver.tflite'")
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+
+with open("silver.tflite", "wb") as f:
+	f.write(tflite_model)
 
 acc = history.history["accuracy"]
 val_acc = history.history["val_accuracy"]

@@ -92,12 +92,11 @@ float Line::get_redness(cv::Mat& in) {
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
-	save_img("/home/pi/Desktop/linefollowing_rois/", roi);
-	return false;
-
+	cv::Mat roi = frame(cv::Range(28, 38), cv::Range(20, 62));
+	//save_img("/home/pi/Desktop/linefollowing_rois/", roi);
+	
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
-	//return silver_ml.predict_silver(roi);
+	return silver_ml.predict_silver(roi);
 
 	uint8_t* ptr;
 	uint8_t* ptr_s;
