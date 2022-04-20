@@ -26,7 +26,7 @@ void SilverML::internal_loop() {
         frame_swap_lock.lock();
         cv::Mat byte_image = current_frame.clone();
         frame_swap_lock.unlock();
-        //cv::cvtColor(byte_image, byte_image, cv::COLOR_BGR2RGB);
+        cv::cvtColor(byte_image, byte_image, cv::COLOR_BGR2RGB);
 
         cv::Mat image;
         byte_image.convertTo(image, CV_32FC3, 1.0f/255.0f);
