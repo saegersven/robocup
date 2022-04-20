@@ -77,9 +77,9 @@ void Rescue::rescue() {
 					abort = true;
 					break;
 				} else {
-					robot->turn(-RAD_90);
-					robot->m(-100, -100, 1500);
-					robot->turn(-RAD_90);
+					robot->turn(deg_to_rad(70));
+					robot->m(-100, -100, 800);
+					robot->turn(RAD_90);
 					turn_counter = 0;
 					is_in_center = true;
 				}
@@ -117,6 +117,8 @@ void Rescue::rescue() {
 		robot->turn(deg_to_rad(-120));
 		turn_counter = 0;
 	}
+
+	exit(0);
 
 	find_exit();
 	finished = true;
@@ -365,19 +367,30 @@ bool Rescue::find_victim(bool ignore_dead) {
 	cv::Vec3f victim;
 	if(!get_largest_circle(roi.clone(), victim)) return false;
 
+	cv::Vec3b average_victim_color = average_circle_color(roi, victim[0], victim[1], victim[2]);
+	uint8_t avg_color_value = average_victim_color[0] + average_victim_color[1] + average_victim_color[2];
+
+	bool black = avg_color_value < 60;
+/*
 	// Check if background around circle is very white
-	cv::Vec3b avg_background = average_color(roi);
+	uint16_t roi_circle_y = victim[1] >= 40 ? victim[1]-40 : 0;
+	uint16_t roi_circle_x = victim[0] >= 40 ? victim[0]-40 : 0;
+	uint16_t roi_circle_height = roi_circle_y + 80 >= ROI_HEIGHT ? ROI_HEIGHT - roi_circle_y - 1 : 80;
+	uint16_t roi_circle_width = roi_circle_x + 80 >= ROI_WIDTH ? ROI_WIDTH - roi_circle_y - 1 : 80;
+	std::cout << roi_circle_y << "\n" << roi_circle_x << "\n" << roi_circle_height << "\n" << roi_circle_width << "\n";
+	cv::Rect rect_roi_circle(roi_circle_x, roi_circle_y, roi_circle_width, roi_circle_height);
+	std::cout << roi.cols << "\n" << roi.rows << "\n";
+	cv::Mat roi_circle = roi(rect_roi_circle);
+	cv::Vec3b avg_background = average_color(roi_circle);
 	uint16_t background_color_gray = avg_background[0] + avg_background[1] + avg_background[2];
-	if(background_color_gray < 180*3) {
+	if((black && background_color_gray < 150*3) || (!black && background_color_gray < 180*3)) {
 		std::cout << "Ignoring because of dark background (" << background_color_gray << ")" << std::endl;
 		return false;
-	}
+	}*/
 
 	if(ignore_dead) {
-		cv::Vec3b average_color = average_circle_color(roi, victim[0], victim[1], victim[2]);
-		uint8_t avg_color_value = average_color[0] + average_color[1] + average_color[2];
 		std::cout << "avg_color_value: " << std::to_string(avg_color_value) << std::endl;
-		if (avg_color_value < 60) return false;
+		if (black) return false;
 	}
 	int victim_x = victim[0] - 640 / 2;	
 
