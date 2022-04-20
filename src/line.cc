@@ -321,7 +321,7 @@ bool Line::line(cv::Mat& frame) {
 
 		cv::Mat black = in_range(frame, &is_black);
 
-		//follow(frame, black);
+		follow(frame, black);
 
 		rescue_kit(frame);
 		check_red_stripe(frame);
@@ -375,7 +375,7 @@ bool Line::line(cv::Mat& frame) {
 	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(end_t - last_frame_t).count();
 	float l_fps = 1.0 / ((float)us / 1'000'000);
 	fps = fps * 0.9f + l_fps * 0.1f;
-	std::cout << fps << " fps, " << us << "us" << std::endl;
+	std::cout << fps << " fps (smoothed), " << l_fps << " fps, " << us << "us" << std::endl;
 	last_frame_t = end_t;
 #endif
 	return false;
