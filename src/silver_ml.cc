@@ -12,6 +12,9 @@ void SilverML::start() {
     builder(&interpreter);
     interpreter->AllocateTensors();
 
+    input_layer = interpreter->typed_input_tensor<float>(0);
+    output_layer = interpreter->typed_output_tensor<float>(0);
+
     std::thread t([this]() { this->internal_loop(); });
     t.detach();
 }
@@ -26,25 +29,23 @@ void SilverML::internal_loop() {
         frame_swap_lock.lock();
         cv::Mat byte_image = current_frame.clone();
         frame_swap_lock.unlock();
-        cv::cvtColor(byte_image, byte_image, cv::COLOR_BGR2RGB);
+        
+        //cv::cvtColor(byte_image, byte_image, cv::COLOR_BGR2RGB);
+        // Converting to BGR is done in for loop
 
         cv::Mat image;
         byte_image.convertTo(image, CV_32FC3, 1.0f/255.0f);
 
-        //assert(image.isContinuous());
-
-        float* input_layer = interpreter->typed_input_tensor<float>(0);
-        float* output_layer = interpreter->typed_output_tensor<float>(0);
-
-        float* img_ptr = image.ptr<float>(0);
+        uint32_t channels = image.channels();
+        uint32_t width = image.cols * image.channels();
 
         cv::Vec3f* p;
         int i, j;
         for(i = 0; i < image.rows; ++i) {
             p = image.ptr<cv::Vec3f>(i);
             for(j = 0; j < image.cols; ++j) {
-                for(int k = 0; k < image.channels(); ++k) {
-                    input_layer[i * image.cols * image.channels() + image.channels() * j + k] = p[j][k];
+                for(int k = 0; k < channels; ++k) {
+                    input_layer[i * width + j * channels + k] = p[j][channels - k - 1];
                 }
             }
         }

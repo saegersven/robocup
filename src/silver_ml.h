@@ -17,6 +17,9 @@ private:
 	std::unique_ptr<tflite::FlatBufferModel> model;
 	std::unique_ptr<tflite::Interpreter> interpreter;
 
+	float* input_layer;
+	float* output_layer;
+
 	std::atomic<bool> running;
 	std::atomic<bool> status;
 	std::atomic<bool> has_frame;
