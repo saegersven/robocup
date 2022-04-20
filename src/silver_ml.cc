@@ -5,6 +5,7 @@ SilverML::SilverML() {}
 void SilverML::start() {
     running = true;
     has_frame = false;
+    status = false;
     model = tflite::FlatBufferModel::BuildFromFile("/home/pi/robocup/runtime_data/silver.tflite");
     tflite::ops::builtin::BuiltinOpResolver resolver;
     tflite::InterpreterBuilder builder(*model, resolver);
@@ -51,7 +52,10 @@ void SilverML::internal_loop() {
         interpreter->Invoke();
 
         //std::cout << "NN says: " << output_layer[0] << "\t" << output_layer[1] << std::endl;
-        status = output_layer[1] > 0.9f;
+        status = output_layer[1] > output_layer[0];
+        if(status) {
+            std::cout << "NN detected silver [" << output_layer[1] << "]" << std::endl;
+        }
     }
 }
 
