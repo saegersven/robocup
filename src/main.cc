@@ -43,7 +43,7 @@ int main() {
 		if (waiting_for_heading_cnt > 50) robot->beep(3000);
 	}
 
-	std::cout << "Heading not zero" << std::endl;
+	std::cout << "Heading not zeroo" << std::endl;
 	std::cout << "\n/dev/cams/:" << std::endl;
    	system("ls /dev/cams/");
 
@@ -59,6 +59,26 @@ int main() {
 	// CAMERA SETUP
 	const int FRONT_CAM = robot->init_camera("/dev/cams/front", false, 80, 48, 60, SUB_MASK_PATH);	// Front camera
 
+	while (1) {
+		cv::VideoCapture cap;
+		cap.open("/dev/cams/back", cv::CAP_V4L2);
+		if(!cap.isOpened()) {
+			std::cout << "Back cam not opened" << std::endl;
+		}
+		cv::Mat frame;
+		cap.grab();
+		cap.retrieve(frame);
+		cap.release();
+
+		cv::flip(frame, frame, -1);
+
+		// Cut out horizontal region of interest
+		cv::Rect rect_roi(0, 170, 639, 309);
+		cv::Mat roi = frame(rect_roi);
+		cv::imshow("Frame", roi);
+		if (cv::waitKey(1) != -1) save_img("/home/pi/Desktop/victims_rois_back_cam/", roi);
+		std::cout << "Continue" << std::endl;
+	}
 	Line line(FRONT_CAM, robot);
 	line.start();
 

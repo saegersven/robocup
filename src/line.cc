@@ -93,11 +93,10 @@ float Line::get_redness(cv::Mat& in) {
 
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat roi = frame(cv::Range(28, 38), cv::Range(20, 62));
-	//save_img("/home/pi/Desktop/linefollowing_rois/", roi);
 	
-	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
 	return silver_ml.predict_silver(roi);
 
+	/*
 	uint8_t* ptr;
 	uint8_t* ptr_s;
 
@@ -127,7 +126,7 @@ bool Line::check_silver(cv::Mat& frame) {
 		#endif
 		return true;
 	}
-	return false;
+	return false;*/
 /*
 	uint8_t* ptr;
 	uint8_t* ptr_s;
@@ -324,34 +323,17 @@ bool Line::line(cv::Mat& frame) {
 
 		//follow(frame, black);
 
-		//rescue_kit(frame);
-		//check_red_stripe(frame);
-		//green(frame, black);
-		// capture silver ml data:
-		check_silver(frame);
-		robot->beep(50);
-		delay(15);
-		/*
-		if (check_silver(frame)) {
-			robot->m(-50, -50, 50);
-  			int max = 5;
-   			srand(time(0));
-   			if ((rand()%max) % 2) {
-   				robot->turn(deg_to_rad(rand()%max));
-   			} else {   				
-   				robot->turn(-deg_to_rad(rand()%max));
-   			}
-		} else {
-			robot->m(50, 50, 10);
-		}
+		rescue_kit(frame);
+		check_red_stripe(frame);
+		green(frame, black);
 		
 		if(check_silver(frame)) {
 			#ifdef DEBUG
 				save_img("/home/pi/Desktop/silver_images/", frame);
 			#endif
 			std::cout << "cam detected silver!\nchecking distance..." << std::endl;
-			robot->m(100, 100, 850);
 			robot->stop();
+			robot->m(100, 100, 850);
 			delay(100);
 
 			float dist_front = robot->distance_avg(DIST_1, 10, 0.2f);
@@ -375,7 +357,7 @@ bool Line::line(cv::Mat& frame) {
 			} else {
 				robot->m(-100, -100, 830); // return to previous position (a bit further to avoid another false positive)
 			}
-		}*/
+		}
 	}
 #ifdef DEBUG
 #ifdef DEBUG_RESIZE

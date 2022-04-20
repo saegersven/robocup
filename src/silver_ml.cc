@@ -44,15 +44,16 @@ void SilverML::internal_loop() {
             for(j = 0; j < image.cols; ++j) {
                 for(int k = 0; k < image.channels(); ++k) {
                     input_layer[i * image.cols * image.channels() + image.channels() * j + k] = p[j][k];
+                
                 }
             }
-        }
+        }       
 
         interpreter->Invoke();
 
-        //std::cout << "NN says: " << output_layer[0] << "\t" << output_layer[1] << std::endl;
+        std::cout << "NN says: " << output_layer[0] << "\t" << output_layer[1] << std::endl;
         status = output_layer[1] > 0.9f;
-    }
+    }   
 }
 
 bool SilverML::predict_silver(cv::Mat frame) {

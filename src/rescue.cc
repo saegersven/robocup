@@ -56,11 +56,10 @@ void Rescue::rescue() {
 	robot->servo(SERVO_2, GRAB_OPEN, 500);
 	robot->servo(SERVO_2, GRAB_CLOSED, 500);
 	robot->servo(SERVO_1, ARM_UP, 500);
-	robot->m(100, 100, 500);
-	robot->turn(RAD_180);
+	robot->m(100, 100, 1000);
+	robot->turn(-RAD_90);
 
 	//float heading = robot->get_heading(); // 3)
-	robot->turn(deg_to_rad(90));
 	uint8_t turn_counter = 0;
 
 	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
@@ -85,7 +84,7 @@ void Rescue::rescue() {
 		robot->m(100, 100, 1000);
 		robot->m(-100, -100, 500);
 		robot->turn(RAD_180);
-		robot->m(-100, -100, 1400);
+		robot->m(-100, -100, 2500);
 
 		// unload victim
 		robot->servo(SERVO_1, ARM_DROP, 500);

@@ -1,4 +1,5 @@
 Important TODOs:
+- test silver
 - rewrite find_exit()
 - be able to grab victims near the wall (check front distance)
 - distinguish between living and dead victims
