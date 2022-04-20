@@ -70,7 +70,7 @@ void Rescue::rescue() {
 			} else {
 				std::cout << "looking for victim" << std::endl;
 				robot->turn(deg_to_rad(-30));
-				delay(100);
+				delay(50);
 				++turn_counter;
 			}
 		}
@@ -278,14 +278,14 @@ void Rescue::find_black_corner() {
 
 bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 	cv::cvtColor(roi, roi, cv::COLOR_BGR2GRAY);
-	cv::GaussianBlur(roi, roi, cv::Size(7, 7), 0, 0);
+	cv::GaussianBlur(roi, roi, cv::Size(3, 3), 0, 0);
 	std::vector<cv::Vec3f> circles;
 
 	// for finding perfect params refer to /scripts/ml/find_perfect_houghCircles_params.py
-	cv::HoughCircles(roi, circles, cv::HOUGH_GRADIENT, 1,
+	cv::HoughCircles(roi, circles, cv::HOUGH_GRADIENT, 0.8f,
 		60, // minDist
-		34, // param1
-		40, // param2
+		37, // param1
+		30, // param2
 		10,  // minRadius
 		300 // maxRadius
 	);

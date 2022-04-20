@@ -513,8 +513,8 @@ std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<b
 	for(int y = 0; y < ir.rows; ++y) {
 		uint8_t* p = ir.ptr<uint8_t>(y);
 		for(int x = 0; x < ir.cols; ++x) {
-			// Don't check for non-zero, as found pixels are set to 0xFE instead
-			// so information does not get lost, when using matrix later,
+			// Don't check for non-zero, as found pixels are set to 0x7F
+			// This way, information does not get lost
 			// check for non-zero pixels
 			if(p[x] == 0xFF) {
 				//std::cout << "Creating group at " << x << ", " << y << std::endl;

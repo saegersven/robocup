@@ -10,14 +10,14 @@ import cv2
 from tensorflow import keras
 from keras.preprocessing import image
 
-data_test_dir = "../../ml_data/silver/data_test/no_silver"
+data_test_dir = "../../ml_data/silver/data_test/silver"
 
 test_images = []
 for img in os.listdir(data_test_dir):
 	img = image.load_img(data_test_dir + "/" + img, target_size=(19, 52)
 	#color_mode="grayscale"
 	)
-	img = image.img_to_array(img)
+	img = image.img_to_array(img)[4:14, 5:47]
 	img = np.expand_dims(img, axis=0)
 	test_images.append(img)
 test_images = np.vstack(test_images)
