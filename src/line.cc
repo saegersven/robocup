@@ -98,6 +98,7 @@ bool Line::check_silver(cv::Mat& frame) {
 	//cv::imwrite(RUNTIME_AVERAGE_SILVER_PATH, roi);
 	return silver_ml.predict_silver(roi);
 
+	/*
 	uint8_t* ptr;
 	uint8_t* ptr_s;
 
@@ -328,7 +329,7 @@ bool Line::line(cv::Mat& frame) {
 		//check_red_stripe(frame);
 		//green(frame, black);
 		// capture silver ml data:
-		check_silver(frame);
+		//check_silver(frame);
 		robot->beep(50);
 		delay(15);
 		/*
@@ -344,7 +345,7 @@ bool Line::line(cv::Mat& frame) {
 		} else {
 			robot->m(50, 50, 10);
 		}
-		
+		*/
 		if(check_silver(frame)) {
 			#ifdef DEBUG
 				save_img("/home/pi/Desktop/silver_images/", frame);
@@ -375,7 +376,7 @@ bool Line::line(cv::Mat& frame) {
 			} else {
 				robot->m(-100, -100, 830); // return to previous position (a bit further to avoid another false positive)
 			}
-		}*/
+		}
 	}
 #ifdef DEBUG
 #ifdef DEBUG_RESIZE
@@ -393,7 +394,7 @@ bool Line::line(cv::Mat& frame) {
 	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(end_t - last_frame_t).count();
 	float l_fps = 1.0 / ((float)us / 1'000'000);
 	fps = fps * 0.9f + l_fps * 0.1f;
-	std::cout << fps << " fps, " << us << "us" << std::endl;
+	std::cout << fps << " fps (smoothed), " << l_fps << " fps, " << us << "us" << std::endl;
 	last_frame_t = end_t;
 #endif
 	return false;
