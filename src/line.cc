@@ -233,6 +233,7 @@ void Line::obstacle() {
 			robot->set_gpio(LED_1, false);
 			robot->block(false);
 		}
+		delay(15);
 	}
 }
 
@@ -288,13 +289,14 @@ bool Line::line(cv::Mat& frame) {
 			robot->m(-80, -80, 100);
 
 			robot->turn(RAD_90);
-			robot->m(80, 80, 200);
+			robot->m(80, 80, 750);
+			robot->turn(-RAD_90);
 
 			robot->stop_video(front_cam_id);
 			delay(50);
 			robot->start_video(front_cam_id);
 
-			const uint32_t durations[] = {550, 1450, 1250, 1250, 450};
+			const uint32_t durations[] = {1450, 1250, 1250, 450};
 
 			for(int i = 0; i < 42; ++i) {
 				if(obstacle_straight_line(durations[i])) break;

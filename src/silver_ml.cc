@@ -4,7 +4,7 @@ SilverML::SilverML() {}
 
 void SilverML::start() {
     running = true;
-    has_frame = false;
+    has_new_frame = false;
     status = false;
     model = tflite::FlatBufferModel::BuildFromFile("/home/pi/robocup/runtime_data/silver.tflite");
     tflite::ops::builtin::BuiltinOpResolver resolver;
@@ -25,7 +25,7 @@ void SilverML::stop() {
 
 void SilverML::internal_loop() {
     while(running) {
-        if(!has_frame) continue;
+        if(!has_new_frame) continue;
         frame_swap_lock.lock();
         cv::Mat image = current_frame.clone();
         frame_swap_lock.unlock();
@@ -53,10 +53,11 @@ void SilverML::internal_loop() {
         interpreter->Invoke();
 
         //std::cout << "NN says: " << output_layer[0] << "\t" << output_layer[1] << std::endl;
-        status = output_layer[1] > output_layer[0];
+        status = output_layer[1] > 0.9f;
         if(status) {
             std::cout << "NN detected silver [" << output_layer[1] << "]" << std::endl;
         }
+        has_new_frame = false;
     }
 }
 
@@ -64,6 +65,6 @@ bool SilverML::predict_silver(cv::Mat frame) {
     frame_swap_lock.lock();
     current_frame = frame;
     frame_swap_lock.unlock();
-    has_frame = true;
+    has_new_frame = true;
     return status;
 }

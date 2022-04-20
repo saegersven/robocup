@@ -56,7 +56,7 @@ void Rescue::rescue() {
 	robot->servo(SERVO_2, GRAB_OPEN, 500);
 	robot->servo(SERVO_2, GRAB_CLOSED, 500);
 	robot->servo(SERVO_1, ARM_UP, 500);
-	robot->m(100, 100, 1000);
+	robot->m(100, 100, 500);
 	robot->turn(-RAD_90);
 
 	//float heading = robot->get_heading(); // 3)
@@ -64,7 +64,27 @@ void Rescue::rescue() {
 
 	for (int rescued_victims_cnt = 0; rescued_victims_cnt < 3; rescued_victims_cnt++) {
 		bool searching_victim = true;
+		bool is_in_center = false;
+		bool abort = false;
 		while (searching_victim) {
+			if(turn_counter == 6) {
+				if(is_in_center) {
+					// Go to corner and find exit
+					robot->turn(RAD_90);
+					robot->m(100, 100, 2200);
+					robot->m(-80, -80, 200);
+					robot->turn(deg_to_rad(60));
+					abort = true;
+					break;
+				} else {
+					robot->turn(-RAD_90);
+					robot->m(-100, -100, 1500);
+					robot->turn(-RAD_90);
+					turn_counter = 0;
+					is_in_center = true;
+				}
+			}
+
 			if (find_victim(rescued_victims_cnt < 2)) {
 				searching_victim = false;
 			} else {
@@ -74,6 +94,7 @@ void Rescue::rescue() {
 				++turn_counter;
 			}
 		}
+		if(abort) break;
 
 		std::cout << "Rescuing victim..." << std::endl;
 
@@ -84,7 +105,7 @@ void Rescue::rescue() {
 		robot->m(100, 100, 1000);
 		robot->m(-100, -100, 500);
 		robot->turn(RAD_180);
-		robot->m(-100, -100, 2500);
+		robot->m(-100, -100, is_in_center ? 4000 : 2500);
 
 		// unload victim
 		robot->servo(SERVO_1, ARM_DROP, 500);
@@ -196,7 +217,7 @@ void Rescue::find_black_corner() {
 			} 
 			robot->turn(RAD_45);
 			robot->m(-100, -100, 300);
-			robot->turn(deg_to_rad(-185));
+			robot->turn(deg_to_rad(-182));
 			robot->m(-100, -100, 1500);
 		} 
 		// no need to check for corner since there is the exit
@@ -223,7 +244,7 @@ void Rescue::find_black_corner() {
 	} else {
 		robot->turn(RAD_90);
 	}
-	robot->m(100, 100, error * 50);
+	robot->m(100, 100, error * 50);	
 	*/
 
 	/*
@@ -290,11 +311,21 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 		300 // maxRadius
 	);
 
+#ifdef DEBUG
+	cv::Mat debug_roi = roi.clone();
+	for(int i = 0; i < circles.size(); ++i) {
+		cv::circle(debug_roi, cv::Point2f(circles[i][0], circles[i][1]), circles[i][2], cv::Scalar(0, 0, 0), 4);
+	}
+#endif
+
 	std::cout << circles.size() << std::endl;
 	if(circles.size() == 0) return false; // No circles
 
 	if(circles.size() == 1) {
 		out = circles[0];
+#ifdef DEBUG
+		save_img("/home/pi/Desktop/runtime_debug/", debug_roi);
+#endif
 		return true;
 	}
 
@@ -303,12 +334,14 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 	int max_index = 0;
 	for(int i = 0; i < circles.size(); ++i) {
 		cv::Vec3f c = circles[i];
-
 		if(c[2] > max_r) {
 			out = c;
 			max_r = c[2];
 		}
 	}
+#ifdef DEBUG
+		save_img("/home/pi/Desktop/runtime_debug/", debug_roi);
+#endif
 	return true;
 }
 
@@ -330,7 +363,16 @@ bool Rescue::find_victim(bool ignore_dead) {
 	cv::Mat roi = frame(rect_roi);
 
 	cv::Vec3f victim;
-	if(!get_largest_circle(roi, victim)) return false;
+	if(!get_largest_circle(roi.clone(), victim)) return false;
+
+	// Check if background around circle is very white
+	cv::Vec3b avg_background = average_color(roi);
+	uint16_t background_color_gray = avg_background[0] + avg_background[1] + avg_background[2];
+	if(background_color_gray < 180*3) {
+		std::cout << "Ignoring because of dark background (" << background_color_gray << ")" << std::endl;
+		return false;
+	}
+
 	if(ignore_dead) {
 		cv::Vec3b average_color = average_circle_color(roi, victim[0], victim[1], victim[2]);
 		uint8_t avg_color_value = average_color[0] + average_color[1] + average_color[2];

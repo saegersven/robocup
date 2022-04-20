@@ -22,7 +22,7 @@ private:
 
 	std::atomic<bool> running;
 	std::atomic<bool> status;
-	std::atomic<bool> has_frame;
+	std::atomic<bool> has_new_frame;
 	cv::Mat current_frame;
 	cv::Mat internal_frame;
 	std::mutex frame_swap_lock;
