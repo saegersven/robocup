@@ -1,6 +1,3 @@
 # recompiles all source files
-cd build
-ninja -t clean
-ninja 
-cd ..
+rm -r build/CMakeFiles/robocup.dir
 sh run.sh
