@@ -118,8 +118,6 @@ void Rescue::rescue() {
 		turn_counter = 0;
 	}
 
-	exit(0);
-
 	find_exit();
 	finished = true;
 }
@@ -390,7 +388,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 
 	if(ignore_dead) {
 		std::cout << "avg_color_value: " << std::to_string(avg_color_value) << std::endl;
-		if (black) return false;
+		//if (black) return false;
 	}
 	int victim_x = victim[0] - 640 / 2;	
 
@@ -453,16 +451,16 @@ bool Rescue::find_victim(bool ignore_dead) {
 			robot->servo(SERVO_2, GRAB_CLOSED, 750);
 			robot->servo(SERVO_1, ARM_UP, 750);
 
-			//robot->m(-60, -60, 650);
+			robot->m(-60, -60, 600);
 
 			// Turn back
 			robot->turn(-angle2);
 
 			// Drive back
 			uint32_t search_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-				search_end_time - search_start_time).count() - 1000;
+				search_end_time - search_start_time).count();
 
-			std::cout << search_time << std::endl;
+			//std::cout << search_time << std::endl;
 
 			robot->m(35, 35, search_time);
 
@@ -511,29 +509,33 @@ void Rescue::find_exit() {
 		std::cout << "Front cam not opened" << std::endl;
 	}
 
-	//SilverML s;
-	//s.start();
+	SilverML s;
+	s.start();
 
 	while(1) {
 		// Drive while there is a side wall
 		while(robot->single_distance(DIST_2) < 30.0f || robot->distance_avg(DIST_2, 10, 0.2f) < 30.0f) {
 			cap.grab();
 			cap.retrieve(frame);
-			//bool silver = s.predict_silver(frame);
-			//if(silver) {
-			//	robot->m(-100, -100, 200);
-			//}
-			if((robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 10.0f)) {
+			cv::Mat silver_roi = frame(cv::Range(28, 38), cv::Range(20, 62));
+			bool silver = s.predict_silver(silver_roi);
+			if(silver) {
+				cap.release();
+				robot->m(-100, -100, 200);
+			}
+			if(silver || (robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 10.0f)) {
+				if(!silver) cap.release();
 				robot->turn(-RAD_45);
 				robot->m(100, 100, 500);
 				robot->turn(-RAD_45);
 				robot->m(-100, -100, 500);
+				cap.open("/dev/cams/front", cv::CAP_V4L2);
 			}
 
 			if(check_green_stripe(frame)) {
-				robot->m(100, 100, 300);
-				//s.stop();
 				cap.release();
+				robot->m(100, 100, 300);
+				s.stop();
 				return;
 			}
 

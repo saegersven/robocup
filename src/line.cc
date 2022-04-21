@@ -327,9 +327,10 @@ bool Line::line(cv::Mat& frame) {
 
 			robot->set_gpio(LED_2, false);
 			robot->m(-40, -40, 150);
-			robot->m(-40, 40, 250);
-			robot->m(80, 80, 350);
+			robot->m(-40, 40, 200);
+			robot->m(80, 80, 400);
 			robot->m(-80, 80, 250);
+			robot->m(-40, -40, 200);
 		}
 
 		obstacle_active = 0;
@@ -354,6 +355,7 @@ bool Line::line(cv::Mat& frame) {
 			#endif
 			std::cout << "cam detected silver!\nchecking distance..." << std::endl;
 			robot->stop();
+			robot->stop_video(front_cam_id);
 			robot->m(100, 100, 850);
 			delay(50);
 
@@ -367,12 +369,17 @@ bool Line::line(cv::Mat& frame) {
 			// increase rescue_cnt for each
 			// #redundancy
 			int rescue_cnt = 0;
-			if (dist_front > 50.0f && dist_front < 130.0f) rescue_cnt++;
-			if (dist_side > 3.0f && dist_side < 120.0f) rescue_cnt++;
-			if (black_pixel_threshold_under(1000)) rescue_cnt++;
-			
-			std::cout << "Rescue_cnt: " << rescue_cnt << std::endl;
+			if (dist_front > 50.0f && dist_front < 130.0f) ++rescue_cnt;
+			if (dist_side > 3.0f && dist_side < 120.0f) ++rescue_cnt;
 
+			// count number of black pixels in image, if low -> rescue
+			robot->start_video(front_cam_id);
+			cv::Mat check_frame = robot->capture(front_cam_id);
+			uint32_t num_black_pixels = 0;
+			in_range(check_frame, &is_black, &num_black_pixels);
+
+			if (num_black_pixels < 200) ++rescue_cnt;
+			std::cout << "Rescue_cnt: " << rescue_cnt << std::endl;
 			if (rescue_cnt >= 2) {
 				return true;
 			} else {
@@ -683,7 +690,7 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 		robot->stop();
 
 		robot->turn(angle);
-		delay(70);
+		delay(50);
 
 		robot->m(100, 100, DISTANCE_FACTOR * (distance - 45));
 		
@@ -805,11 +812,6 @@ void Line::rescue_kit(cv::Mat& frame) {
 		obstacle_enabled = true;
 	}
 }
-
-bool Line::black_pixel_threshold_under(int threshold) {
-	return true;
-}
-
 
 void Line::check_red_stripe(cv::Mat frame) {
 	// checks for red stripe aka end of parcours

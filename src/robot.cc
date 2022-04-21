@@ -381,7 +381,7 @@ void Robot::turn(float rad) {
 
 	bool clockwise = rad > 0.0;
 
-	if(to_turn < 0.3) {
+	if(to_turn < 0.15) {
 		m(clockwise ? -30 : 30, clockwise ? 30 : -30, TURN_DURATION_FACTOR * std::abs(rad_to_deg(rad)));
 		return;
 	}
@@ -410,7 +410,7 @@ void Robot::turn(float rad) {
 
 		uint32_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
 
-		if((ms > min_time && std::abs(d_heading) >= to_turn - deg_to_rad(10.0f))) break;
+		if(ms > max_time || (ms > min_time && std::abs(d_heading) >= to_turn - deg_to_rad(10.0f))) break;
 	}
 	stop();
 
