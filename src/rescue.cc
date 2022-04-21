@@ -127,7 +127,7 @@ void Rescue::rescue() {
 // see 1)
 void Rescue::find_black_corner() {
 	// check if there's a wall next to the robot (right side):
-	if (robot->distance_avg(DIST_2, 10, 0.2f) > 10.0f) {
+	if (robot->distance_avg(DIST_2, 10, 0.2f) > 12.0f) {
 		// if not drive so that there is one:
 		robot->turn(-RAD_90);
 		robot->m(-100, -100, 400);

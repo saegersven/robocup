@@ -30,7 +30,7 @@ bool is_red(uint8_t b, uint8_t g, uint8_t r) {
 }
 
 Line::Line(int front_cam_id, std::shared_ptr<Robot> robot)
-	: obstacle_active(0), running(false), last_frame_t(std::chrono::high_resolution_clock::now()) {
+	: obstacle_active(0), obstacle_enabled(true), running(false), last_frame_t(std::chrono::high_resolution_clock::now()) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
 
@@ -94,7 +94,26 @@ float Line::get_redness(cv::Mat& in) {
 bool Line::check_silver(cv::Mat& frame) {
 	cv::Mat roi = frame(cv::Range(28, 38), cv::Range(20, 62));
 	
-	return silver_ml.predict_silver(roi);
+	/*if(robot->button(BTN_DEBUG)) {
+		std::cout << "Detected silver ölkjdsafkjsadk f" << std::endl;
+		save_img("/home/pi/Desktop/silver_rois/", roi);
+		delay(500);
+	}
+	return false;*/
+
+
+
+	bool s = silver_ml.predict_silver(roi);
+
+	if(s) {
+		save_img("/home/pi/Desktop/silver_rois/", roi);
+	}
+
+	if(frame_counter % 100 == 0) {
+		save_img("/home/pi/Desktop/linefollowing_rois/", roi);
+	}
+
+	return s;
 
 	/*
 	uint8_t* ptr;
@@ -218,7 +237,7 @@ bool Line::abort_obstacle(cv::Mat frame) {
 // ASYNC
 void Line::obstacle() {
 	while(running) {
-		if(obstacle_active != 1) continue;
+		if(obstacle_active != 1 || !obstacle_enabled) continue;
 		if(robot->single_distance(DIST_1, 1000) < 9.0f) {
 			robot->set_gpio(LED_1, true);
 			robot->stop();
@@ -289,7 +308,7 @@ bool Line::line(cv::Mat& frame) {
 			robot->m(-80, -80, 100);
 
 			robot->turn(RAD_90);
-			robot->m(80, 80, 750);
+			robot->m(80, 80, 700);
 			robot->turn(-RAD_90);
 
 			robot->stop_video(front_cam_id);
@@ -336,7 +355,7 @@ bool Line::line(cv::Mat& frame) {
 			std::cout << "cam detected silver!\nchecking distance..." << std::endl;
 			robot->stop();
 			robot->m(100, 100, 850);
-			delay(100);
+			delay(50);
 
 			float dist_front = robot->distance_avg(DIST_1, 10, 0.2f);
 			float dist_side = robot->distance_avg(DIST_2, 10, 0.2f);
@@ -372,6 +391,7 @@ bool Line::line(cv::Mat& frame) {
 	cv::imshow("Frame", frame);
 	cv::waitKey(1);
 
+	++frame_counter;
 #ifdef FPS_COUNTER
 	auto end_t = std::chrono::high_resolution_clock::now();
 	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(end_t - last_frame_t).count();
@@ -655,6 +675,8 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 		// std::cout << angle << std::endl;
 		// std::cout << distance << std::endl;
 
+		obstacle_enabled = false;
+
 		// Stop video to keep camera from freezing
 		robot->stop_video(front_cam_id);
 
@@ -698,6 +720,7 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 		}
 		robot->m(60, 60, 130);
 		robot->start_video(front_cam_id);
+		obstacle_enabled = true;
 	}
 #endif
 }
@@ -723,6 +746,8 @@ void Line::rescue_kit(cv::Mat& frame) {
 
 		if (group.num_pixels < 100) return;
 		save_img("/home/pi/Desktop/rescue_kit/", frame);
+
+		obstacle_enabled = false;
 
 		// Position robot
 		float center_x = frame.cols / 2.0f;
@@ -776,6 +801,8 @@ void Line::rescue_kit(cv::Mat& frame) {
 
 		// Restart video to continue
 		robot->start_video(front_cam_id);
+
+		obstacle_enabled = true;
 	}
 }
 
@@ -786,13 +813,16 @@ bool Line::black_pixel_threshold_under(int threshold) {
 
 void Line::check_red_stripe(cv::Mat frame) {
 	// checks for red stripe aka end of parcours
-	cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
+	cv::Mat roi_left = frame(cv::Range(2, 26), cv::Range(3, 77));
 
 	uint32_t num_pixels = 0;
-	in_range(roi, &is_red, &num_pixels);
-	if (num_pixels > 500) {
+	in_range(roi_left, &is_red, &num_pixels);
+	//std::cout << num_pixels << std::endl;
+	if (num_pixels > 600 && num_pixels < 1500) {
+		std::cout << "RED STRIPE" << std::endl;
+		obstacle_enabled = false;
 		save_img("/home/pi/Desktop/red_stripe/", frame);
-		robot->m(100, 100, 400);
+		robot->m(100, 100, 550);
 
 		// wait for at least 5s
 		robot->stop();
@@ -800,6 +830,7 @@ void Line::check_red_stripe(cv::Mat frame) {
 		delay(8000);
 		robot->m(100, 100, 200);
 		robot->start_video(front_cam_id);
+		obstacle_enabled = true;
 	}
 	
 /*

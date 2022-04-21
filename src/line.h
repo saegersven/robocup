@@ -14,7 +14,7 @@
 #define BLUE_MIN_VALUE 50
 
 #define RED_RATIO_THRESHOLD 1.3f
-#define RED_MIN_VALUE 40
+#define RED_MIN_VALUE 20
 
 #define GREEN_RESULT_NO_INTERSECTION 0
 #define GREEN_RESULT_LEFT 1
@@ -48,7 +48,7 @@
 #define TURN_100_90 330
 
 #define DEBUG
-#define FPS_COUNTER
+//#define FPS_COUNTER
 //#define DEBUG_RESIZE
 //#define MOVEMENT_OFF
 
@@ -71,6 +71,7 @@ struct Group {
 
 class Line {
 private:
+	uint64_t frame_counter = 0;
 	float fps = 0.0f;
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
 	int front_cam_id;
@@ -80,6 +81,7 @@ private:
 	cv::Mat distance_weight_map;
 
 	std::atomic<bool> running;
+	std::atomic<bool> obstacle_enabled;
 
 	std::atomic<int> obstacle_active;
 
