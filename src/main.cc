@@ -70,12 +70,12 @@ int main() {
 	robot->beep(100, BUZZER);
 	delay(200);
 
-	cv::VideoCapture cap("/dev/cams/back", cv::CAP_V4L2);
+	/*cv::VideoCapture cap("/dev/cams/back", cv::CAP_V4L2);
 	if(!cap.isOpened()) {
 		std::cout << "Back cam not opened" << std::endl;
 	}
 
-	/*cv::Mat frame;
+	cv::Mat frame;
 	while (1) {
 		cap.grab();
 		cap.retrieve(frame);

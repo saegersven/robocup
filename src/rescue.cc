@@ -56,8 +56,8 @@ void Rescue::rescue() {
 	robot->servo(SERVO_2, GRAB_OPEN, 500);
 	robot->servo(SERVO_2, GRAB_CLOSED, 500);
 	robot->servo(SERVO_1, ARM_UP, 500);
-	robot->m(100, 100, 500);
-	robot->turn(-RAD_90);
+	robot->m(100, 100, 700);
+	robot->turn(RAD_90);
 
 	//float heading = robot->get_heading(); // 3)
 	uint8_t turn_counter = 0;
@@ -101,8 +101,8 @@ void Rescue::rescue() {
 		robot->servo(SERVO_2, GRAB_CLOSED, 500);
 		robot->servo(SERVO_1, ARM_UP, 500);
 
-		robot->m(100, 100, 130);
-		robot->turn(deg_to_rad(-120));
+		robot->m(100, 100, 180);
+		robot->turn(deg_to_rad(60));
 		turn_counter = 0;
 	}
 
@@ -344,12 +344,14 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 bool Rescue::find_victim(bool ignore_dead) {
 	// Capture one frame from camera
 	cap.release();
+	delay(100);
 	cap.open("/dev/cams/back", cv::CAP_V4L2);
 	if(!cap.isOpened()) {
 		std::cout << "Back cam not opened" << std::endl;
 	}
 	cap.grab();
 	cap.retrieve(frame);
+	delay(100);
 	cap.release();
 
 	cv::flip(frame, frame, -1);
@@ -391,15 +393,15 @@ bool Rescue::find_victim(bool ignore_dead) {
 	// Turn to victim based on horizontal pixel coordinate
 	const float pixel_angle = deg_to_rad(65.0f) / 640;
 	float angle1 = pixel_angle * victim_x;
-	robot->turn(angle1);
+	robot->turn(-angle1);
 	delay(100);
 	save_img("/home/pi/Desktop/victims_images_back_cam/", frame);
 
 
 	// Turn around and search with front camera
-	robot->m(-30, -30, 300);
-	robot->turn(RAD_180);
-	delay(100);
+	//robot->m(-30, -30, 300);
+	//robot->turn(RAD_180);
+	//delay(100);
 
 	cap.open("/dev/cams/front", cv::CAP_V4L2);
 	cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
@@ -461,11 +463,8 @@ bool Rescue::find_victim(bool ignore_dead) {
 			robot->m(35, 35, search_time);
 
 			// Turn initial angle
-			robot->turn(-angle1);
+			robot->turn(angle1);
 			delay(150);
-
-			// Now the robot is back in the position it started when
-			// this method was called, hand back to the rescue() method
 			return true;
 		}
 	}
@@ -488,7 +487,7 @@ bool check_green_stripe(cv::Mat frame) {
 
 void Rescue::find_exit() {
 	robot->m(-100, -100, 650);
-	robot->turn(-deg_to_rad(120));
+	robot->turn(deg_to_rad(60));
 	robot->m(100, 100, 1000);
 	robot->m(100, 100, -450);
 	robot->turn(-RAD_90);
