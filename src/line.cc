@@ -237,8 +237,9 @@ bool Line::abort_obstacle(cv::Mat frame) {
 // ASYNC
 void Line::obstacle() {
 	while(running) {
-		if(obstacle_active != 1 || !obstacle_enabled) continue;
-		if(robot->single_distance(DIST_1, 1000) < 9.0f) {
+		if(obstacle_active != 1) continue;
+		float d = 42.0f;
+		if(obstacle_enabled && (d = robot->single_distance(DIST_1, 1000)) < 9.0f) {
 			robot->set_gpio(LED_1, true);
 			robot->stop();
 			robot->block();
@@ -252,6 +253,7 @@ void Line::obstacle() {
 			robot->set_gpio(LED_1, false);
 			robot->block(false);
 		}
+		//std::cout << "DIST: " << d << std::endl;
 		delay(15);
 	}
 }
@@ -305,17 +307,17 @@ bool Line::line(cv::Mat& frame) {
 		if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 5000) < 9.0f) {
 			std::cout << "Obstacle!" << std::endl;
 			robot->set_gpio(LED_2, true);				
-			robot->m(-80, -80, 100);
+			robot->m(-80, -80, 140);
 
 			robot->turn(RAD_90);
-			robot->m(80, 80, 700);
+			robot->m(80, 80, 750);
 			robot->turn(-RAD_90);
 
 			robot->stop_video(front_cam_id);
 			delay(50);
 			robot->start_video(front_cam_id);
 
-			const uint32_t durations[] = {1450, 1250, 1250, 450};
+			const uint32_t durations[] = {1470, 1250, 1250, 450};
 
 			for(int i = 0; i < 42; ++i) {
 				if(obstacle_straight_line(durations[i])) break;
@@ -341,14 +343,20 @@ bool Line::line(cv::Mat& frame) {
 		debug_frame = frame.clone();
 #endif
 
-		float diff = average_difference(frame, last_frame);
+		if(!last_frame.empty()) {
+			float diff = average_difference(frame, last_frame);
 
-		if(diff < 10) {
-			++no_difference_counter;
-			if(no_difference_counter == 20) {
+			if(diff < 2.1f) {
+				++no_difference_counter;
+				if(no_difference_counter == 100) {
+					no_difference_counter = 0;
+					std::cout << "No difference, moving a bit" << std::endl;
+					robot->m(-50, 100, 180);
+					robot->m(100, -50, 180);
+					robot->m(-100, -100, 250);
+				}
+			} else {
 				no_difference_counter = 0;
-				std::cout << "No difference, moving a bit" << std::endl;
-				robot->m(-100, -80, 110);
 			}
 		}
 

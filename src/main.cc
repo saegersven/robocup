@@ -69,6 +69,26 @@ int main() {
 	robot->set_gpio(LED_2, false);
 	robot->beep(100, BUZZER);
 	delay(200);
+
+	cv::VideoCapture cap("/dev/cams/back", cv::CAP_V4L2);
+	if(!cap.isOpened()) {
+		std::cout << "Back cam not opened" << std::endl;
+	}
+
+	/*cv::Mat frame;
+	while (1) {
+		cap.grab();
+		cap.retrieve(frame);
+		//cv::flip(frame, frame, -1);
+		cv::imshow("Back cam frame", frame);
+		cv::waitKey(1);
+
+		if(robot->button(BTN_DEBUG)) {
+			save_img("/home/pi/Desktop/back_cam_calibration/", frame);
+			delay(1000);
+		}
+	}
+	cap.release();*/
 	
 	// MAIN LOOP
 	while(1) {
