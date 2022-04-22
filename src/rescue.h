@@ -1,7 +1,8 @@
 #pragma once
 
 #define ARM_UP 75
-#define ARM_DOWN -88
+#define ARM_DOWN -90
+#define ARM_ALMOST_DOWN -81
 #define ARM_DROP -10
 
 #define GRAB_OPEN -20
@@ -33,8 +34,8 @@ class Rescue {
 private:
 	const int ROI_X = 0;
 	const int ROI_WIDTH = 639;
-	const int ROI_Y = 170;
-	const int ROI_HEIGHT = 309;
+	const int ROI_Y = 0;
+	const int ROI_HEIGHT = 479;
 
 	std::mutex rescue_mutex;
 
