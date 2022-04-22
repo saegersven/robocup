@@ -430,13 +430,12 @@ bool Rescue::find_victim(bool ignore_dead) {
 			// Turn to victim
 			const float center_x = frame.cols / 2.0f;
 			const float center_y = frame.rows + 20;
-			float angle2 = std::atan2(c[1] - center_y, c[0] - center_x) +
-				(PI / 2.0f);
+			float angle2 = std::atan2(c[1] - center_y, c[0] - center_x) + (PI / 2.0f);
 			robot->turn(angle2);
 
 			bool near_wall = robot->distance_avg(DIST_1, 0.2f, 10) < 15.0f;
 			
-			robot->m(-60, -60, 300);
+			if(near_wall) robot->m(-60, -60, 500);
 
 			// Turn around, pick up and turn back
 			robot->m(-50, -50, 350);
@@ -445,7 +444,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 
 			robot->servo(SERVO_2, GRAB_OPEN, 750);
 			robot->servo(SERVO_1, ARM_DOWN, 670);
-			robot->m(-50, -50, 350);
+			if(near_wall) robot->m(-100, -100, 300);
 			robot->servo(SERVO_2, GRAB_CLOSED, 750);
 			robot->servo(SERVO_1, ARM_UP, 750);
 
