@@ -85,6 +85,9 @@ private:
 
 	std::atomic<int> obstacle_active;
 
+	uint32_t no_difference_counter = 0;
+
+	cv::Mat last_frame;
 	cv::Mat debug_frame;
 	uint64_t micros_start;
 

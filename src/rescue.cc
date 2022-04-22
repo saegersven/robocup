@@ -49,9 +49,9 @@ void Rescue::rescue() {
 	find_black_corner(); // 1)
 
 	// drop rescue kit:		
-	robot->m(-100, -100, 1000);
+	robot->m(-100, -100, 600);
 	robot->turn(RAD_180);
-	robot->m(-100, -100, 1200);
+	robot->m(-100, -100, 800);
 	robot->servo(SERVO_1, ARM_DROP, 500);
 	robot->servo(SERVO_2, GRAB_OPEN, 500);
 	robot->servo(SERVO_2, GRAB_CLOSED, 500);
@@ -68,21 +68,9 @@ void Rescue::rescue() {
 		bool abort = false;
 		while (searching_victim) {
 			if(turn_counter == 6) {
-				if(is_in_center) {
-					// Go to corner and find exit
-					robot->turn(RAD_90);
-					robot->m(100, 100, 2200);
-					robot->m(-80, -80, 200);
-					robot->turn(deg_to_rad(60));
-					abort = true;
-					break;
-				} else {
-					robot->turn(deg_to_rad(70));
-					robot->m(-100, -100, 800);
-					robot->turn(RAD_90);
-					turn_counter = 0;
-					is_in_center = true;
-				}
+				robot->turn(RAD_180);
+				abort = true;
+				break;
 			}
 
 			if (find_victim(rescued_victims_cnt < 2)) {
@@ -125,12 +113,17 @@ void Rescue::rescue() {
 // see 1)
 void Rescue::find_black_corner() {
 	// check if there's a wall next to the robot (right side):
-	if (robot->distance_avg(DIST_2, 10, 0.2f) > 12.0f) {
+	if (robot->distance_avg(DIST_2, 10, 0.2f) > 20.0f) {
 		// if not drive so that there is one:
 		robot->turn(-RAD_90);
 		robot->m(-100, -100, 400);
 		robot->turn(-RAD_180);
 		robot->m(-100, -100, 800);
+	} else {
+		robot->turn(RAD_90);
+		robot->m(50, 50, 1000);
+		robot->m(-50, -50, 480);
+		robot->turn(-RAD_90);
 	}
 	while (1) { 
 		bool isWall = false; // is robot < 35cm away from front wall
@@ -139,7 +132,7 @@ void Rescue::find_black_corner() {
 		// repeat until black corner is found:
 		while (!isWall && !isGreen) {
 			float dist = robot->single_distance(DIST_1);
-			if (dist < 35.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 35.0f) {
+			if (dist < 33.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 33.0f) {
 				isWall = true; 
 				break;
 			} else {
@@ -216,9 +209,12 @@ void Rescue::find_black_corner() {
 				return;
 			} 
 			robot->turn(RAD_45);
-			robot->m(-100, -100, 300);
-			robot->turn(deg_to_rad(-182));
-			robot->m(-100, -100, 1500);
+			robot->m(-100, -100, 200);
+			robot->turn(-RAD_90);
+			robot->m(100, 100, 800);
+			robot->m(-100, -100, 480);
+			robot->turn(-RAD_90);
+			//robot->m(-100, -100, 1100);
 		} 
 		// no need to check for corner since there is the exit
 		else if (isGreen) {
@@ -486,14 +482,15 @@ bool check_green_stripe(cv::Mat frame) {
 		save_img("/home/pi/Desktop/exit_images/", frame);
 		return;
 	}*/
-	return num_green_pixels > 1500;
+	std::cout << num_green_pixels << std::endl;
+	return num_green_pixels > 300;
 }
 
 void Rescue::find_exit() {
 	robot->m(-100, -100, 650);
-	robot->turn(-RAD_90);
-	robot->m(100, 100, 1400);
-	robot->m(100, 100, -300);
+	robot->turn(-deg_to_rad(120));
+	robot->m(100, 100, 1000);
+	robot->m(100, 100, -450);
 	robot->turn(-RAD_90);
 	robot->beep(100);
 
@@ -512,9 +509,14 @@ void Rescue::find_exit() {
 	SilverML s;
 	s.start();
 
+	bool disable_side = false;
+
 	while(1) {
+		float last_side_distance = 0.0f;
 		// Drive while there is a side wall
-		while(robot->single_distance(DIST_2) < 30.0f || robot->distance_avg(DIST_2, 10, 0.2f) < 30.0f) {
+		float side_distance = robot->single_distance(DIST_2);
+		while(disable_side || side_distance < 30.0f || robot->distance_avg(DIST_2, 10, 0.2f) < 30.0f) {
+			last_side_distance = side_distance;
 			cap.grab();
 			cap.retrieve(frame);
 			cv::Mat silver_roi = frame(cv::Range(28, 38), cv::Range(20, 62));
@@ -525,11 +527,13 @@ void Rescue::find_exit() {
 			}
 			if(silver || (robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 10.0f)) {
 				if(!silver) cap.release();
-				robot->turn(-RAD_45);
-				robot->m(100, 100, 500);
-				robot->turn(-RAD_45);
+				robot->m(-100, -100, 300);
+				robot->turn(RAD_90);
 				robot->m(-100, -100, 500);
+				robot->turn(-RAD_180);
+				robot->m(-100, -100, 1000);
 				cap.open("/dev/cams/front", cv::CAP_V4L2);
+				disable_side = false;
 			}
 
 			if(check_green_stripe(frame)) {
@@ -540,6 +544,8 @@ void Rescue::find_exit() {
 			}
 
 			robot->m(100, 100);
+
+			side_distance = robot->single_distance(DIST_2);
 		}
 		robot->m(100, 100, 150);
 
@@ -547,17 +553,27 @@ void Rescue::find_exit() {
 
 		// Turn right and check for green strip
 		robot->stop();
+		robot->m(-50, -50, 150);
 
 		robot->turn(RAD_90);
-		robot->m(100, 100, 350);
+		robot->m(100, 100, 30 * last_side_distance + 100);
 		
+		cap.release();
+		delay(100);
+
+		cap.open("/dev/cams/front", cv::CAP_V4L2);
+		delay(100);
 		cap.grab();
 		cap.retrieve(frame);
 		if(check_green_stripe(frame)) {
-			robot->m(100, 100, 300);
+			robot->m(100, 100, 500);
 			//s.stop();
 			cap.release();
 			return;
 		}
+		robot->m(-100, -100, 200);
+		robot->turn(-RAD_90);
+		robot->m(50, 50, 150);
+		disable_side = true;
 	}
 }

@@ -341,6 +341,19 @@ bool Line::line(cv::Mat& frame) {
 		debug_frame = frame.clone();
 #endif
 
+		float diff = average_difference(frame, last_frame);
+
+		if(diff < 10) {
+			++no_difference_counter;
+			if(no_difference_counter == 20) {
+				no_difference_counter = 0;
+				std::cout << "No difference, moving a bit" << std::endl;
+				robot->m(-100, -80, 110);
+			}
+		}
+
+		last_frame = frame.clone();
+
 		cv::Mat black = in_range(frame, &is_black);
 
 		follow(frame, black);
@@ -783,7 +796,7 @@ void Line::rescue_kit(cv::Mat& frame) {
 
 		robot->m(-60, -60, 720);
 		delay(200);
-		robot->turn(RAD_180);
+		robot->turn(-RAD_180);
 
 		//delay(1000);
 		robot->servo(SERVO_2, GRAB_OPEN, 750);
@@ -801,7 +814,7 @@ void Line::rescue_kit(cv::Mat& frame) {
 
 		delay(200);
 		// Reposition to continue
-		robot->turn(deg_to_rad(180.0f));
+		robot->turn(RAD_180);
 		delay(200);
 		robot->m(60, 60, 500);
 		delay(1000);

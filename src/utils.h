@@ -31,5 +31,7 @@ cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f,
 void clipped_difference(cv::Mat a, cv::Mat b, cv::Mat out);
 void save_img(std::string path, cv::Mat frame);
 
+float average_difference(cv::Mat a, cv::Mat b);
+
 cv::Vec3b average_color(cv::Mat in);
 cv::Vec3b average_circle_color(cv::Mat in, float center_x, float center_y, float radius);
