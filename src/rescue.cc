@@ -198,9 +198,9 @@ void Rescue::find_black_corner() {
 			cv::GaussianBlur(frame, frame, cv::Size(7, 7), 0, 0);
 			cv::Mat black;
 			cv::threshold(frame, black, 60, 255, 1);
-			cv::imshow("B", black);
-			cv::waitKey(1000);
-			std::cout << "black Pixels: " << cv::countNonZero(black) << std::endl;
+			//cv::imshow("B", black);
+			//cv::waitKey(1000);
+			std::cout << "Black Pixels: " << cv::countNonZero(black) << std::endl;
 			if (cv::countNonZero(black) > 15000) {
 				std::cout << "Found corner" << std::endl;
 				robot->beep(400);
@@ -354,7 +354,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 	delay(100);
 	cap.release();
 
-	cv::flip(frame, frame, -1);
+	//cv::flip(frame, frame, -1);
 
 	// Cut out horizontal region of interest
 	cv::Rect rect_roi(ROI_X, ROI_Y, ROI_WIDTH, ROI_HEIGHT);
@@ -393,7 +393,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 	// Turn to victim based on horizontal pixel coordinate
 	const float pixel_angle = deg_to_rad(65.0f) / 640;
 	float angle1 = pixel_angle * victim_x;
-	robot->turn(-angle1);
+	robot->turn(angle1);
 	delay(100);
 	save_img("/home/pi/Desktop/victims_images_back_cam/", frame);
 
@@ -436,16 +436,16 @@ bool Rescue::find_victim(bool ignore_dead) {
 
 			bool near_wall = robot->distance_avg(DIST_1, 0.2f, 10) < 15.0f;
 			
-			if(near_wall) robot->m(-60, -60, 300);
+			robot->m(-60, -60, 300);
 
 			// Turn around, pick up and turn back
-			robot->m(-60, -60, 650);
+			robot->m(-50, -50, 350);
 			delay(100);
 			robot->turn(RAD_180);
 
 			robot->servo(SERVO_2, GRAB_OPEN, 750);
 			robot->servo(SERVO_1, ARM_DOWN, 670);
-			if(near_wall) robot->m(-100, -100, 200);
+			robot->m(-50, -50, 350);
 			robot->servo(SERVO_2, GRAB_CLOSED, 750);
 			robot->servo(SERVO_1, ARM_UP, 750);
 
@@ -463,7 +463,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 			robot->m(35, 35, search_time);
 
 			// Turn initial angle
-			robot->turn(angle1);
+			robot->turn(-angle1);
 			delay(150);
 			return true;
 		}
@@ -486,10 +486,14 @@ bool check_green_stripe(cv::Mat frame) {
 }
 
 void Rescue::find_exit() {
-	robot->m(-100, -100, 650);
-	robot->turn(deg_to_rad(60));
-	robot->m(100, 100, 1000);
-	robot->m(100, 100, -450);
+	robot->turn(RAD_90);
+	robot->m(100, 100, 1500);
+	robot->m(-100, -100, 450);
+	robot->turn(RAD_45);
+	robot->m(-100, -100, 550);
+	robot->turn(-RAD_90);
+	robot->m(100, 100, 1500);
+	robot->m(-100, -100, 450);
 	robot->turn(-RAD_90);
 	robot->beep(100);
 
