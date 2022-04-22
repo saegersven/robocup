@@ -575,3 +575,19 @@ void Rescue::find_exit() {
 		disable_side = true;
 	}
 }
+
+void Rescue::to_wall(uint16_t dist) {
+	// aligns robot sidewards to dist
+	robot->turn(RAD_90);
+	while(1) {
+		float curr_dist = robot->distance_avg(DIST_1, 5, 0.2f);
+		if(dist + 1.0f > curr_dist) {
+			robot->m(-100, -100, 20)
+		} 
+		else if (dist - 1.0f < curr_dist) {
+			robot->m(100, 100, 20);
+		} else {
+			
+		}
+	}
+}
