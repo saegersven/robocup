@@ -34,4 +34,6 @@ void save_img(std::string path, cv::Mat frame);
 float average_difference(cv::Mat a, cv::Mat b);
 
 cv::Vec3b average_color(cv::Mat in);
-cv::Vec3b average_circle_color(cv::Mat in, float center_x, float center_y, float radius);
+float average_circle_color(cv::Mat in, float center_x, float center_y, float radius);
+
+uint32_t count_circle_in_range(cv::Mat in, float center_x, float center_y, float radius, std::function<bool (uint8_t, uint8_t, uint8_t)> f);
