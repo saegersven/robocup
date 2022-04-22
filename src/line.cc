@@ -323,15 +323,15 @@ bool Line::line(cv::Mat& frame) {
 				if(obstacle_straight_line(durations[i])) break;
 
 				robot->stop_video(front_cam_id);
-				robot->turn(-RAD_90);
+				robot->turn(NIF(obstacle_direction, -RAD_90));
 				robot->start_video(front_cam_id);
 			}
 
 			robot->set_gpio(LED_2, false);
 			robot->m(-40, -40, 150);
-			robot->m(-40, 40, 200);
+			robot->m(-40, 40, NIF(obstacle_direction, 200));
 			robot->m(80, 80, 400);
-			robot->m(-80, 80, 250);
+			robot->m(-80, 80, NIF(obstacle_direction, 250));
 			robot->m(-40, -40, 200);
 		}
 

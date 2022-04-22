@@ -47,6 +47,8 @@
 
 #define TURN_100_90 330
 
+#define NIF(a, b) (a ? (b) : -(b))
+
 #define DEBUG
 //#define FPS_COUNTER
 //#define DEBUG_RESIZE
@@ -82,6 +84,8 @@ private:
 
 	std::atomic<bool> running;
 	std::atomic<bool> obstacle_enabled;
+
+	bool obstacle_direction = true; // true = right, false = left
 
 	std::atomic<int> obstacle_active;
 
