@@ -87,6 +87,7 @@ private:
 	bool enable_no_difference = true;;
 
 	bool obstacle_direction = true; // true = right, false = left
+	bool checked_silver_start = false;
 
 	std::atomic<int> obstacle_active;
 

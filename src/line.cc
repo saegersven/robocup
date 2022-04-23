@@ -53,6 +53,8 @@ void Line::start() {
 	micros_start = micros();
 
 	silver_ml.start();
+
+	checked_silver_start = false;
 }
 
 void Line::stop() {
@@ -92,7 +94,7 @@ float Line::get_redness(cv::Mat& in) {
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	cv::Mat roi = frame(cv::Range(28, 38), cv::Range(20, 62));
+	cv::Mat roi = frame(cv::Range(28, 38), cv::Range(18, 60));
 	
 	/*if(robot->button(BTN_DEBUG)) {
 		std::cout << "Detected silver ölkjdsafkjsadk f" << std::endl;
@@ -362,15 +364,47 @@ bool Line::line(cv::Mat& frame) {
 
 		last_frame = frame.clone();
 
-		cv::Mat black = in_range(frame, &is_black);
+		bool silver_start = false;
 
-		follow(frame, black);
+		// Check for silver
+		if(!checked_silver_start) {
+			cv::VideoCapture cap("/dev/cams/back", cv::CAP_V4L2);
+			cap.grab();
+			cv::Mat back_frame;
+			cap.retrieve(back_frame);
+			cap.release();
 
-		rescue_kit(frame);
-		check_red_stripe(frame);
-		green(frame, black);
-		
-		if(check_silver(frame)) {
+			back_frame = back_frame(cv::Range(200, 480), cv::Range(0, 640));
+
+			uint32_t num_black_pixels = 0;
+			cv::Mat b = in_range(back_frame, &is_black, &num_black_pixels);
+
+			std::cout << num_black_pixels << std::endl;
+
+			//cv::imshow("B", b);
+			//cv::waitKey(100);
+
+			if(num_black_pixels < 7500) {
+				std::cout << "SILVER" << std::endl;
+				//robot->beep(200);
+				//exit(0);
+				silver_start = true;
+			} else {
+				checked_silver_start = true;
+			}
+		}
+
+		if(!silver_start) {
+			cv::Mat black = in_range(frame, &is_black);
+
+			follow(frame, black);
+
+			rescue_kit(frame);
+			check_red_stripe(frame);
+			green(frame, black);
+		}
+
+		if(silver_start || check_silver(frame)) {
 			#ifdef DEBUG
 				save_img("/home/pi/Desktop/silver_images/", frame);
 			#endif
@@ -755,7 +789,7 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 			delay(70);
 			robot->m(50, 50, 150);
 			*/
-			robot->m(50, 0, 30);
+			//robot->m(50, 0, 30);
 			robot->turn(deg_to_rad(180.0f));
 			delay(70);
 			robot->m(60, 60, 150);

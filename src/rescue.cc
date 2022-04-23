@@ -76,7 +76,8 @@ void Rescue::rescue() {
 					abort = true;
 					break;
 				} else {
-					robot->m(-100, -100, 1200);
+					robot->m(100, 100, 500);
+					robot->m(-100, -100, 1400);
 					is_in_center = true;
 					//robot->turn(-RAD_90);
 					robot->beep(100);
@@ -145,6 +146,7 @@ bool check_green_stripe(cv::Mat frame) {
 
 // see 1)
 void Rescue::find_black_corner() {
+	std::cout << "find_black_corner" << std::endl;
 	// check if there's a wall next to the robot (right side):
 	if (robot->distance_avg(DIST_2, 10, 0.2f) > 20.0f) {
 		// if not drive so that there is one:
@@ -160,6 +162,7 @@ void Rescue::find_black_corner() {
 	}
 
 
+	std::cout << "Opening front camera" << std::endl;
 	cv::VideoCapture cap;
 	cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
 	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 96);
@@ -170,6 +173,8 @@ void Rescue::find_black_corner() {
 	if(!cap.isOpened()) {
 		std::cout << "Front cam not opened" << std::endl;
 	}
+
+	std::cout << "Opened front camera" << std::endl;
 
 	while (1) { 
 		bool isWall = false; // is robot < 35cm away from front wall
@@ -345,7 +350,7 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out, bool ignore_dead) {
 		34, // param1
 		40, // param2
 		10,  // minRadius
-		300 // maxRadius
+		200 // maxRadius
 	);
 
 #ifdef DEBUG
@@ -650,7 +655,7 @@ void Rescue::to_wall(uint16_t dist) {
 	while(1) {
 		float curr_dist = robot->distance_avg(DIST_1, 5, 0.2f);
 		if(dist + 1.0f > curr_dist) {
-			robot->m(-100, -100, 20)
+			robot->m(-100, -100, 20);
 		} 
 		else if (dist - 1.0f < curr_dist) {
 			robot->m(100, 100, 20);
