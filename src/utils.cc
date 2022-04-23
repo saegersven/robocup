@@ -150,7 +150,7 @@ float average_circle_color(cv::Mat in, float center_x, float center_y, float rad
 				continue;
 			}
 			for(int k = 0; k < in.channels(); ++k) {
-				total += (float)ptr[j + k];
+				total += (float)ptr[j*in.channels() + k];
 			}
 			++num_circle_pixels;
 		}

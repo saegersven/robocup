@@ -244,8 +244,8 @@ void Line::obstacle() {
 			robot->stop();
 			robot->block();
 			delay(10);
-			if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 3000) < 9.5f) {
-				if(robot->distance_avg(DIST_1, 30, 0.2f, 500, 10000) < 9.5f) {				
+			if(robot->distance_avg(DIST_1, 10, 0.4f, 500, 3000) < 9.5f) {
+				if(robot->distance_avg(DIST_1, 30, 0.4f, 500, 10000) < 9.5f) {				
 					std::cout << "Obstacle" << std::endl;
 					obstacle_active = 2;
 				}
@@ -309,30 +309,30 @@ bool Line::line(cv::Mat& frame) {
 			robot->set_gpio(LED_2, true);				
 			robot->m(-80, -80, 140);
 
-			robot->turn(RAD_90);
-			robot->m(80, 80, 750);
 			robot->turn(-RAD_90);
+			robot->m(80, 80, 750);
+			robot->turn(RAD_90);
 
 			robot->stop_video(front_cam_id);
 			delay(50);
 			robot->start_video(front_cam_id);
 
-			const uint32_t durations[] = {1470, 1250, 1250, 450};
+			const uint32_t durations[] = {1250, 1250, 1250, 450};
 
 			for(int i = 0; i < 42; ++i) {
 				if(obstacle_straight_line(durations[i])) break;
 
 				robot->stop_video(front_cam_id);
-				robot->turn(NIF(obstacle_direction, -RAD_90));
+				robot->turn(NIF(obstacle_direction, RAD_90));
 				robot->start_video(front_cam_id);
 			}
 
 			robot->set_gpio(LED_2, false);
 			robot->m(-40, -40, 150);
-			robot->m(-40, 40, NIF(obstacle_direction, 200));
+			robot->m(-40, 40, NIF(obstacle_direction, -200));
 			robot->m(80, 80, 400);
-			robot->m(-80, 80, NIF(obstacle_direction, 250));
-			robot->m(-40, -40, 200);
+			robot->m(-80, 80, NIF(obstacle_direction, -280));
+			robot->m(-40, -40, 250);
 		}
 
 		obstacle_active = 0;
@@ -346,14 +346,14 @@ bool Line::line(cv::Mat& frame) {
 		if(!last_frame.empty()) {
 			float diff = average_difference(frame, last_frame);
 
-			if(diff < 2.1f) {
+			if(enable_no_difference && diff < 2.1f) {
 				++no_difference_counter;
 				if(no_difference_counter == 100) {
 					no_difference_counter = 0;
 					std::cout << "No difference, moving a bit" << std::endl;
 					robot->m(-50, 100, 180);
 					robot->m(100, -50, 180);
-					robot->m(-100, -100, 250);
+					robot->m(100, 100, 250);
 				}
 			} else {
 				no_difference_counter = 0;
@@ -521,7 +521,17 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 	/* + line_angle_integral * FOLLOW_I_FACTOR; */
 
 #ifndef MOVEMENT_OFF
-	robot->m(FOLLOW_MOTOR_SPEED - error, FOLLOW_MOTOR_SPEED + error);
+	float pitch = robot->get_pitch();
+
+	if(pitch > deg_to_rad(16.0f) && pitch < deg_to_rad(40.0f)) {
+		robot->set_gpio(LED_1, true);
+		robot->m(FOLLOW_MOTOR_SPEED + 30 - error / 2, FOLLOW_MOTOR_SPEED + 30 + error / 2);
+		enable_no_difference = false;
+	} else {
+		robot->m(FOLLOW_MOTOR_SPEED - error, FOLLOW_MOTOR_SPEED + error);
+		robot->set_gpio(LED_1, false);
+		enable_no_difference = true;
+	}
 #endif
 }
 
@@ -734,6 +744,18 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 		if(new_green_result == GREEN_RESULT_DEAD_END ||
 			green_result == GREEN_RESULT_DEAD_END) {
 			std::cout << "DEAD-END" << std::endl;
+
+			/*robot->m(-50, -50, 180);
+			delay(70);
+			robot->turn(deg_to_rad(30.0f));
+			delay(70);
+			robot->m(50, 50, 200);
+			delay(70);
+			robot->turn(RAD_180 - deg_to_rad(30.0f));
+			delay(70);
+			robot->m(50, 50, 150);
+			*/
+			robot->m(50, 0, 30);
 			robot->turn(deg_to_rad(180.0f));
 			delay(70);
 			robot->m(60, 60, 150);

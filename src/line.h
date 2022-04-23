@@ -84,6 +84,7 @@ private:
 
 	std::atomic<bool> running;
 	std::atomic<bool> obstacle_enabled;
+	bool enable_no_difference = true;;
 
 	bool obstacle_direction = true; // true = right, false = left
 

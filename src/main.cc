@@ -68,7 +68,12 @@ int main() {
 	while(robot->button(BTN_RESTART));
 	robot->set_gpio(LED_2, false);
 	robot->beep(100, BUZZER);
-	delay(200);
+	delay(100);
+
+	/*while(1) {
+		std::cout << robot->get_pitch() << std::endl;
+		delay(10);
+	}*/
 
 	/*cv::VideoCapture cap("/dev/cams/back", cv::CAP_V4L2);
 	if(!cap.isOpened()) {

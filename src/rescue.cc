@@ -68,12 +68,20 @@ void Rescue::rescue() {
 		bool searching_victim = true;
 		bool is_in_center = false;
 		bool abort = false;
+
 		while (searching_victim) {
 			if(turn_counter == 12) {
-				//robot->turn(-RAD_90);
-				robot->beep(100);
-				abort = true;
-				break;
+				if(is_in_center) {
+					robot->m(100, 100, 1200);
+					abort = true;
+					break;
+				} else {
+					robot->m(-100, -100, 1200);
+					is_in_center = true;
+					//robot->turn(-RAD_90);
+					robot->beep(100);
+					turn_counter = 0;
+				}
 			}
 
 			if (find_victim(rescued_victims_cnt < 2)) {
@@ -91,12 +99,12 @@ void Rescue::rescue() {
 
 		// align with black corner
 		//robot->turn_to_heading(heading);
-		robot->turn(turn_counter * deg_to_rad(30) - RAD_180);
+		robot->turn(turn_counter * deg_to_rad(30) - RAD_180 + deg_to_rad(4.2f));
 
 		robot->m(100, 100, 1000);
 		robot->m(-100, -100, 500);
 		robot->turn(RAD_180);
-		robot->m(-100, -100, is_in_center ? 4000 : 1500);
+		robot->m(-100, -100, is_in_center ? 2600 : 1500);
 
 		// unload victim
 		robot->servo(SERVO_1, ARM_DROP, 500);
@@ -105,7 +113,8 @@ void Rescue::rescue() {
 		robot->servo(SERVO_1, ARM_UP, 500);
 
 		robot->m(100, 100, 450);
-		
+
+		is_in_center = false;
 
 		if(rescued_victims_cnt == num_victims - 1) {
 			robot->turn(-RAD_180);
@@ -142,7 +151,7 @@ void Rescue::find_black_corner() {
 		robot->turn(-RAD_90);
 		robot->m(-100, -100, 350);
 		robot->turn(-RAD_180);
-		robot->m(-100, -100, 800);
+		robot->m(-100, -100, 650);
 	} else {
 		robot->turn(RAD_90);
 		robot->m(50, 50, 900);
@@ -172,13 +181,15 @@ void Rescue::find_black_corner() {
 			cap.grab();
 			cap.retrieve(frame);
 
-			if(check_green_stripe(frame)) {
+			/*if(check_green_stripe(frame)) {
+				std::cout << "Green stripe" << std::endl;
 				isGreen = true;
 				break;
-			}
+			}*/
 
 			float dist = robot->single_distance(DIST_1);
 			if (dist < 33.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 33.0f) {
+				std::cout << "Wall" << std::endl;
 				isWall = true; 
 				break;
 			}
@@ -218,7 +229,7 @@ void Rescue::find_black_corner() {
 			//cv::imshow("B", black);
 			//cv::waitKey(1000);
 			std::cout << "Black Pixels: " << cv::countNonZero(black) << std::endl;
-			if (cv::countNonZero(black) > 15000) {
+			if (cv::countNonZero(black) > 20000) {
 				std::cout << "Found corner" << std::endl;
 				robot->beep(400);
 				cap.release();
@@ -315,7 +326,7 @@ void Rescue::find_black_corner() {
 	
 }
 
-bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
+bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out, bool ignore_dead) {
 	cv::cvtColor(roi, roi, cv::COLOR_BGR2GRAY);
 	cv::GaussianBlur(roi, roi, cv::Size(3, 3), 0, 0);
 	std::vector<cv::Vec3f> circles;
@@ -348,20 +359,35 @@ bool Rescue::get_largest_circle(cv::Mat roi, cv::Vec3f& out) {
 
 	//std::cout << circles.size() << std::endl;
 	if(circles.size() == 0) return false; // No circles
-
-	if(circles.size() == 1) {
+	if(circles.size() > 3) {
+		std::cout << "More than 3" << std::endl;
+		return false;
+	}
+	/*if(circles.size() == 1) {
 		out = circles[0];
 #ifdef DEBUG
 	save_img("/home/pi/Desktop/runtime_debug/", debug_roi);
 #endif
 		return true;
-	}
+	}*/
 
 	// Select largest circle (maximum radius)
 	float max_r = 0.0f;
 	int max_index = 0;
 	for(int i = 0; i < circles.size(); ++i) {
 		cv::Vec3f c = circles[i];
+
+		float average_victim_color = average_circle_color(roi, c[0], c[1], c[2]);
+		bool black = average_victim_color < 45.0f;
+
+		std::cout << average_victim_color << std::endl;
+
+		if(ignore_dead && black) {
+			std::cout << "Dead victim" << std::endl;
+			if(circles.size() == 1) return false;
+			else continue;
+		}
+
 		if(c[2] > max_r) {
 			out = c;
 			max_r = c[2];
@@ -391,9 +417,9 @@ bool Rescue::find_victim(bool ignore_dead) {
 	cv::Mat roi = frame(rect_roi);
 
 	cv::Vec3f victim;
-	if(!get_largest_circle(roi.clone(), victim)) return false;
+	if(!get_largest_circle(roi.clone(), victim, ignore_dead)) return false;
 
-	float area = victim[2] * victim[2] * PI;
+	/*float area = victim[2] * victim[2] * PI;
 	uint32_t num_circle_pixels = count_circle_in_range(roi, victim[0], victim[1], victim[2], &is_black);
 	float black_fraction = (float)num_circle_pixels / area;
 
@@ -401,12 +427,8 @@ bool Rescue::find_victim(bool ignore_dead) {
 	std::cout << victim[0] << "\t" << victim[1] << "\t" << victim[2] << std::endl;
 	cv::imshow("CIRCLE_ROI", roi);
 	cv::waitKey(500);
-	std::cout << num_circle_pixels << "\t" << black_fraction << std::endl;
-	
-	if(ignore_dead && black) {
-		std::cout << "Racism" << std::endl;
-		return false;
-	}
+	std::cout << num_circle_pixels << "\t" << black_fraction << std::endl;*/
+
 /*
 	// Check if background around circle is very white
 	uint16_t roi_circle_y = victim[1] >= 40 ? victim[1]-40 : 0;
@@ -430,6 +452,14 @@ bool Rescue::find_victim(bool ignore_dead) {
 	const float pixel_angle = deg_to_rad(65.0f) / 640;
 	float angle1 = pixel_angle * victim_x;
 	robot->turn(angle1);
+
+	float dist = robot->distance_avg(DIST_1, 20, 0.4f);
+	if(dist > 100.0f) {
+		std::cout << "Hopefully just silver" << std::endl;
+		robot->turn(-angle1);
+		return false;
+	}
+
 	delay(100);
 	save_img("/home/pi/Desktop/victims_images_back_cam/", frame);
 
@@ -457,7 +487,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 		cap.retrieve(frame);
 
 		cv::Vec3f c;
-		if(get_largest_circle(frame, c)) {
+		if(get_largest_circle(frame, c, ignore_dead)) {
 			save_img("/home/pi/Desktop/victims_images_front_cam/", frame);
 			cap.release();
 			robot->stop();
@@ -481,7 +511,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 
 			robot->servo(SERVO_2, GRAB_OPEN, 750);
 			robot->servo(SERVO_1, ARM_ALMOST_DOWN, 650);
-			robot->m(-50, -50, 300);
+			robot->m(-50, -50, 340);
 			robot->servo(SERVO_1, ARM_DOWN, 250);
 			robot->servo(SERVO_2, GRAB_CLOSED, 750);
 			robot->m(50, 50, 100);
@@ -516,7 +546,7 @@ void Rescue::find_exit() {
 	robot->m(-100, -100, 550);
 	robot->turn(-RAD_90);
 	robot->m(100, 100, 1500);
-	robot->m(-100, -100, 350);
+	robot->m(-100, -100, 320);
 	robot->turn(-RAD_90);
 	robot->beep(100);
 
@@ -543,26 +573,36 @@ void Rescue::find_exit() {
 		float side_distance = robot->single_distance(DIST_2);
 		while(disable_side || side_distance < 30.0f || robot->distance_avg(DIST_2, 10, 0.2f) < 30.0f) {
 			last_side_distance = side_distance;
+			std::cout << side_distance << std::endl;
+			if(side_distance < 30.0f) {
+				std::cout << "disable_side = false" << std::endl;
+				disable_side = false;
+			}
 			cap.grab();
 			cap.retrieve(frame);
 			cv::Mat silver_roi = frame(cv::Range(28, 38), cv::Range(20, 62));
-			bool silver = s.predict_silver(silver_roi);
+			bool silver = false;//s.predict_silver(silver_roi);
 			if(silver) {
+				std::cout << "Detected silver";
 				cap.release();
 				robot->m(-100, -100, 200);
 			}
 			if(silver || (robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 10.0f)) {
+				float s_dist = robot->distance_avg(DIST_2, 10, 0.2f);
+				if(s_dist > 30.0f) break;
 				if(!silver) cap.release();
-				robot->m(-100, -100, silver ? 200 : 100);
+				std::cout << "Corner, turning" << std::endl;
+				robot->m(-100, -100, silver ? 200 : 150);
 				robot->turn(RAD_90);
 				robot->m(-100, -100, 500);
 				robot->turn(-RAD_180);
 				robot->m(-100, -100, 1200);
 				cap.open("/dev/cams/front", cv::CAP_V4L2);
-				disable_side = false;
+				disable_side = true;
 			}
 
 			if(check_green_stripe(frame)) {
+				std::cout << "Detected green stripe, turning" << std::endl;
 				cap.release();
 				robot->m(100, 100, 300);
 				s.stop();

@@ -276,6 +276,43 @@ float Robot::get_heading() {
 	return fl_euler_data_h;
 }
 
+float Robot::get_pitch() {
+	int16_t euler_data_h, euler_data_r, euler_data_p;
+	euler_data_h = euler_data_r = euler_data_p = 0;
+
+	double f_euler_data_h;
+	float fl_euler_data_h;
+
+	// bno_comres += bno055_read_euler_h(&euler_data_h);
+	// bno_comres += bno055_read_euler_r(&euler_data_r);
+	// bno_comres += bno055_read_euler_p(&euler_data_p);
+
+	//bno_comres = 0;
+	//auto start_time = std::chrono::high_resolution_clock::now();
+
+	//bno_comres += bno055_convert_double_euler_h_rad(&f_euler_data_h);
+	int16_t temp = 0;
+	API_I2C_bus_read(bno_fd, 28, (uint8_t*)&temp, 2);
+
+	fl_euler_data_h = (float)temp / 16.0f * PI / 180.0f;
+
+	//std::cout << fl_euler_data_h << std::endl;
+
+	//auto end_time = std::chrono::high_resolution_clock::now();
+
+	//std::cout << "Reading took " <<
+	//  std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms" << std::endl;
+
+	// bno_comres += bno055_convert_float_euler_r_rad(&f_euler_data_r);
+	// bno_comres += bno055_convert_float_euler_p_rad(&f_euler_data_p);
+
+	//std::cout << "X: " << std::to_string(rad_to_deg(f_euler_data_h)) << std::endl;
+	//if (fl_euler_data_h < 0) return last_heading;
+	//last_heading = fl_euler_data_h;
+
+	return fl_euler_data_h;
+}
+
 // void Robot::delay_c(uint32_t ms, int id) {
 //  if(!cams[id].cap.isOpened()) {
 //      delay(ms);
