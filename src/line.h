@@ -88,6 +88,7 @@ private:
 
 	bool obstacle_direction = true; // true = right, false = left
 	bool checked_silver_start = false;
+	std::atomic<bool> silver_distance;
 
 	std::atomic<int> obstacle_active;
 

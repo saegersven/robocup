@@ -1,0 +1,24 @@
+Script started on 2022-04-23 14:47:43+02:00 [TERM="xterm-256color" TTY="/dev/pts/169" COLUMNS="80" LINES="24"]
+]0;lukas@lukas-ThinkPad-E15-Gen-2: /mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[01;32mlukas@lukas-ThinkPad-E15-Gen-2[00m:[01;34m/mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[00m$ ca[K[Khello
+
+Command 'hello' not found, but can be installed with:
+
+sudo snap install hello              # version 2.10, or
+sudo apt  install hello              # version 2.10-2ubuntu2
+sudo apt  install hello-traditional  # version 2.10-5
+
+See 'snap info hello' for additional versions.
+
+]0;lukas@lukas-ThinkPad-E15-Gen-2: /mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[01;32mlukas@lukas-ThinkPad-E15-Gen-2[00m:[01;34m/mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[00m$ cat .
+cat: .: Is a directory
+]0;lukas@lukas-ThinkPad-E15-Gen-2: /mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[01;32mlukas@lukas-ThinkPad-E15-Gen-2[00m:[01;34m/mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[00m$ cat s[Kout.txt
+]0;lukas@lukas-ThinkPad-E15-Gen-2: /mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[01;32mlukas@lukas-ThinkPad-E15-Gen-2[00m:[01;34m/mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[00m$ ls
+[0m[01;32mCMakeLists.txt[0m  [34;42mml_data[0m    [01;32mrecompile.sh[0m  [34;42mscripts[0m               [34;42msrc[0m
+[34;42mfiles[0m           [01;32mout.txt[0m    [01;32mrun.sh[0m        [01;32msftp-config-alt.json[0m  [34;42mtests[0m
+[01;32mLICENSE[0m         [01;32mREADME.md[0m  [34;42mruntime_data[0m  [01;32msftp-config.json[0m      [01;32mTODO.txt[0m
+]0;lukas@lukas-ThinkPad-E15-Gen-2: /mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[01;32mlukas@lukas-ThinkPad-E15-Gen-2[00m:[01;34m/mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[00m$ lscat out.txt
+]0;lukas@lukas-ThinkPad-E15-Gen-2: /mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[01;32mlukas@lukas-ThinkPad-E15-Gen-2[00m:[01;34m/mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[00m$ nna[K[Kano out.txt
+[?2004h[?1049h[22;0;0t[1;24r(B[m[4l[?7h[39;49m[?1h=[?1h=[?25l[39;49m(B[m[H[2J[22;34H(B[0;7m[ Reading... ](B[m[22;33H(B[0;7m[ Read 0 lines ](B[m[H(B[0;7m  GNU nano 4.8                        out.txt                                   [1;79H(B[m[23d(B[0;7m^G(B[m Get Help  (B[0;7m^O(B[m Write Out (B[0;7m^W(B[m Where Is  (B[0;7m^K(B[m Cut Text  (B[0;7m^J(B[m Justify   (B[0;7m^C(B[m Cur Pos[24d(B[0;7m^X(B[m Exit[14G(B[0;7m^R(B[m Read File (B[0;7m^\(B[m Replace   (B[0;7m^U(B[m Paste Text(B[0;7m^T(B[m To Spell  (B[0;7m^_(B[m Go To Line[22d[2d[39;49m(B[m[?12l[?25h[?25l[22d[J[24d[?12l[?25h[24;1H[?1049l[23;0;0t[?1l>[?2004l]0;lukas@lukas-ThinkPad-E15-Gen-2: /mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[01;32mlukas@lukas-ThinkPad-E15-Gen-2[00m:[01;34m/mnt/D2F891CDF891AFE9/Programmieren/Robocup/2022/Main Repo 2022/robocup[00m$ nano out.txt[Knano out.txt[1Pcat[C[C[C[C[C[C[C[Cls[Kcat out.txtls[Kcat out.txt[1@nano[C[C[C[C[C[C[C[C[Kexit
+exit
+
+Script done on 2022-04-23 14:48:12+02:00 [COMMAND_EXIT_CODE="0"]

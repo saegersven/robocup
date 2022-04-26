@@ -30,7 +30,7 @@ bool is_red(uint8_t b, uint8_t g, uint8_t r) {
 }
 
 Line::Line(int front_cam_id, std::shared_ptr<Robot> robot)
-	: obstacle_active(0), obstacle_enabled(true), running(false), last_frame_t(std::chrono::high_resolution_clock::now()) {
+	: obstacle_active(0), obstacle_enabled(true), running(false), silver_distance(false), last_frame_t(std::chrono::high_resolution_clock::now()) {
 	this->front_cam_id = front_cam_id;
 	this->robot = robot;
 
@@ -55,6 +55,7 @@ void Line::start() {
 	silver_ml.start();
 
 	checked_silver_start = false;
+	silver_distance = false;
 }
 
 void Line::stop() {
@@ -94,7 +95,7 @@ float Line::get_redness(cv::Mat& in) {
 }
 
 bool Line::check_silver(cv::Mat& frame) {
-	cv::Mat roi = frame(cv::Range(28, 38), cv::Range(18, 60));
+	cv::Mat roi = frame(cv::Range(27, 37), cv::Range(19, 61));
 	
 	/*if(robot->button(BTN_DEBUG)) {
 		std::cout << "Detected silver ölkjdsafkjsadk f" << std::endl;
@@ -239,9 +240,20 @@ bool Line::abort_obstacle(cv::Mat frame) {
 // ASYNC
 void Line::obstacle() {
 	while(running) {
-		if(obstacle_active != 1) continue;
 		float d = 42.0f;
-		if(obstacle_enabled && (d = robot->single_distance(DIST_1, 1000)) < 9.0f) {
+		d = robot->single_distance(DIST_1, 1000);
+		//std::cout << d << std::endl;
+		if(d > 85.0f && d < 95.0f) {
+			std::cout << "Checking for silver with front distance" << std::endl;
+			// Check for black line
+			d = robot->distance_avg(DIST_1, 20, 0.3f);
+			if(d > 80.0f && d < 110.0f) {
+				silver_distance = true;
+			}
+		}
+
+		if(obstacle_active != 1) continue;
+		if(obstacle_enabled && d < 9.0f) {
 			robot->set_gpio(LED_1, true);
 			robot->stop();
 			robot->block();
@@ -365,9 +377,13 @@ bool Line::line(cv::Mat& frame) {
 		last_frame = frame.clone();
 
 		bool silver_start = false;
+		uint32_t num_black_pixels = 0;
+		cv::Mat black = in_range(frame, &is_black, &num_black_pixels);
 
 		// Check for silver
-		if(!checked_silver_start) {
+		if(num_black_pixels < 300 && silver_distance) {
+			robot->stop();
+			delay(100);
 			cv::VideoCapture cap("/dev/cams/back", cv::CAP_V4L2);
 			cap.grab();
 			cv::Mat back_frame;
@@ -384,19 +400,18 @@ bool Line::line(cv::Mat& frame) {
 			//cv::imshow("B", b);
 			//cv::waitKey(100);
 
-			if(num_black_pixels < 7500) {
+			if(num_black_pixels < 3000) {
 				std::cout << "SILVER" << std::endl;
 				//robot->beep(200);
 				//exit(0);
 				silver_start = true;
 			} else {
-				checked_silver_start = true;
+				silver_distance = false;
+				std::cout << "NO SILVER" << std::endl;
 			}
 		}
 
 		if(!silver_start) {
-			cv::Mat black = in_range(frame, &is_black);
-
 			follow(frame, black);
 
 			rescue_kit(frame);
@@ -404,7 +419,7 @@ bool Line::line(cv::Mat& frame) {
 			green(frame, black);
 		}
 
-		if(silver_start || check_silver(frame)) {
+		if(silver_start || (check_silver(frame))) {
 			#ifdef DEBUG
 				save_img("/home/pi/Desktop/silver_images/", frame);
 			#endif
