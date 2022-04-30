@@ -393,6 +393,10 @@ void Robot::m(int8_t left, int8_t right, int32_t duration, uint8_t brake_duty_cy
 	io_mutex.unlock();
 }
 
+void Robot::m_straigth(int8_t left, int8_t right, int32_t duration, float distance) {
+	
+}
+
 void Robot::block(bool val) {
 	block_m = val;
 }

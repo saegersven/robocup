@@ -649,19 +649,11 @@ void Rescue::find_exit() {
 	}
 }
 
-void Rescue::to_wall(uint16_t dist) {
-	// aligns robot sidewards to dist
-	robot->turn(RAD_90);
-	while(1) {
-		float curr_dist = robot->distance_avg(DIST_1, 5, 0.2f);
-		if(dist + 1.0f > curr_dist) {
-			robot->m(-100, -100, 20);
-		} 
-		else if (dist - 1.0f < curr_dist) {
-			robot->m(100, 100, 20);
-		} else {
-			robot->turn(-RAD_90);
-			return;
-		}
-	}
+void Rescue::align_to_wall() {
+	// aligns robot sidewards using wall
+	float dist1 = 0.0f; // add proper sensor measurement
+	float dist2 = 0.0f; // add proper sensor measurement
+
+	float angle = std::atan((dist1 - dist2) / 0.0f); // replace 0.0 trough proper distance between sensors
+	robot->turn(deg_to_rad(angle));
 }

@@ -54,7 +54,7 @@ private:
 
 	bool get_largest_circle(cv::Mat roi, cv::Vec3f& out, bool ignore_dead);
 	bool find_victim(bool ignore_dead);
-	void to_wall(uint16_t dist);
+	void align_to_wall();
 
 public:
 	std::atomic<bool> finished;
