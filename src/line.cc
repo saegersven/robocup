@@ -375,15 +375,6 @@ bool Line::line(cv::Mat& frame) {
 		}
 
 		last_frame = frame.clone();
-		while(!robot->button(BTN_DEBUG));
-		while(robot->button(BTN_DEBUG));
-			robot->set_gpio(LED_1, true);
-			robot->set_gpio(LED_2, true);
-			delay(500);
-			robot->set_gpio(LED_1, false);
-			robot->set_gpio(LED_2, false);
-
-			save_img("/home/pi/Desktop/silver_images/", frame);
 
 		bool silver_start = false;
 		uint32_t num_black_pixels = 0;
