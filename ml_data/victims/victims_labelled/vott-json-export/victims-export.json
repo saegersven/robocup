@@ -1,0 +1,75 @@
+{
+    "name": "victims",
+    "securityToken": "victims Token",
+    "videoSettings": {
+        "frameExtractionRate": 15
+    },
+    "tags": [
+        {
+            "name": "living",
+            "color": "#5db300"
+        },
+        {
+            "name": "dead",
+            "color": "#e81123"
+        }
+    ],
+    "id": "Suk0TjHUl",
+    "activeLearningSettings": {
+        "autoDetect": false,
+        "predictTag": true,
+        "modelPathType": "coco"
+    },
+    "version": "2.2.0",
+    "lastVisitedAssetId": "7756c922c3c8283e70dcceedb9c29919",
+    "assets": {
+        "7756c922c3c8283e70dcceedb9c29919": {
+            "asset": {
+                "format": "png",
+                "id": "7756c922c3c8283e70dcceedb9c29919",
+                "name": "1651946284.400168.png",
+                "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651946284.400168.png",
+                "size": {
+                    "width": 640,
+                    "height": 480
+                },
+                "state": 2,
+                "type": 1
+            },
+            "regions": [
+                {
+                    "id": "zIU9DyQaE",
+                    "type": "RECTANGLE",
+                    "tags": [
+                        "living"
+                    ],
+                    "boundingBox": {
+                        "height": 69.6103896103896,
+                        "width": 64.93506493506493,
+                        "left": 390.38961038961037,
+                        "top": 55.06493506493506
+                    },
+                    "points": [
+                        {
+                            "x": 390.38961038961037,
+                            "y": 55.06493506493506
+                        },
+                        {
+                            "x": 455.3246753246753,
+                            "y": 55.06493506493506
+                        },
+                        {
+                            "x": 455.3246753246753,
+                            "y": 124.67532467532466
+                        },
+                        {
+                            "x": 390.38961038961037,
+                            "y": 124.67532467532466
+                        }
+                    ]
+                }
+            ],
+            "version": "2.2.0"
+        }
+    }
+}
