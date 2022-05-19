@@ -12,6 +12,7 @@
 
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
+#include <VL53L0X.hpp>
 #include <opencv2/opencv.hpp>
 
 #include "utils.h"
@@ -43,6 +44,14 @@
 
 #define SERVO_1 21
 #define SERVO_2 26
+
+// VL53L0X Sensor IDs and I2C addresses
+#define DIST_FORWARD 0
+#define VL53L0X_FORWARD_ADDR 0x20
+#define DIST_SIDE_FRONT 1
+#define VL53L0X_SIDE_FRONT_ADDR 0x21
+#define DIST_SIDE_BACK 2
+#define VL53L0X_SIDE_BACK_ADDR 0x22
 
 // Servo parameters
 #define SERVO_MIN_PULSE 1000
@@ -78,8 +87,8 @@
 
 
 // I2C API
-int8_t API_I2C_bus_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
-int8_t API_I2C_bus_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
+int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
+int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
 void API_delay_msek(uint32_t msek);
 #define API_I2C_ADDR1 0x28
 #define _BNO055_I2C_ADDR 0x28
@@ -92,6 +101,9 @@ private:
 	std::mutex dist_mutex;
 	// List of all initialized cameras
 	std::vector<Camera> cams;
+
+	// VL53L0X objects
+	std::vector<VL53L0X> vl53l0x_vec;
 
 	// Async speed control thread
 	//std::thread motor_update_thread;
@@ -162,4 +174,6 @@ public:
 	float get_heading();
 	float get_pitch();
 	void set_gpio(int pin, bool state);
+
+	float get_vl53l0x_distance(uint8_t sensor_id);
 };

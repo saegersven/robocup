@@ -72,6 +72,15 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 		exit(ERRCODE_BOT_SETUP_PWM);
 	}
 
+	// Setup VL53L0X distance sensors
+	vl53l0x_vec.push_back(VL53L0X(-1, true, VL53L0X_FRONT_ADDR));
+	vl53l0x_vec.push_back(VL53L0X(-1, true, VL53L0X_SIDE_FRONT_ADDR));
+	vl53l0x_vec.push_back(VL53L0X(-1, true, VL53L0X_SIDE_BACK_ADDR));
+	for(int i = 0; i < 3; ++i) {
+		vl53l0x_vec[i].initialize();
+		vl53l0x_vec[i].setTimeout(200);
+	}
+
 	// Setup Servo motor pins
 	// 50Hz has a period of 20ms, so multiply value by 100 to get period in microseconds
 	// if(softPwmCreate(SERVO_1, 0, 200)) {
@@ -95,7 +104,7 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	motor_update_thread.detach();
 }
 
-int8_t API_I2C_bus_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
+int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
 	//std::cout << "W\t" << std::to_string(reg_addr) << "\t" << std::to_string(reg_data[0]) << std::endl;
 
 	uint8_t write_buf[1 + len];
@@ -119,13 +128,13 @@ int8_t API_I2C_bus_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, 
 	return 0;
 }
 
-int8_t API_I2C_bus_write8(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data) {
+int8_t i2c_write8(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data) {
 	//uint8_t write_buf[1] = {reg_data};
-	//return API_I2C_bus_write(dev_addr, reg_addr, write_buf, 1);
+	//return i2c_write(dev_addr, reg_addr, write_buf, 1);
 	wiringPiI2CWriteReg8(dev_addr, reg_addr, reg_data);
 }
 
-int8_t API_I2C_bus_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
+int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
 	//std::cout << "R\t" << std::to_string(reg_addr) << std::endl;
 	uint8_t write_buf[1] = {reg_addr};
 	if(write(dev_addr, write_buf, 1) != 1) {
@@ -156,8 +165,8 @@ void Robot::init_bno055() {
 		exit(ERRCODE_BOT_SETUP_I2C);
 	}
 
-	// bno055.bus_write = &API_I2C_bus_write;
-	// bno055.bus_read = &API_I2C_bus_read;
+	// bno055.bus_write = &i2c_write;
+	// bno055.bus_read = &i2c_read;
 	// bno055.delay_msec = &API_delay_msek;
 	// bno055.dev_addr = bno_fd;
 
@@ -212,28 +221,28 @@ void Robot::init_bno055() {
 
 
 	uint8_t chip_id[1] = {0};
-	API_I2C_bus_read(bno_fd, 0, chip_id, 1);
+	i2c_read(bno_fd, 0, chip_id, 1);
 
-	API_I2C_bus_write8(bno_fd, 61, 0);
+	i2c_write8(bno_fd, 61, 0);
 	delay(30);
-	API_I2C_bus_write8(bno_fd, 63, 32); // SYS_TRIGGER bit 5: Reset
+	i2c_write8(bno_fd, 63, 32); // SYS_TRIGGER bit 5: Reset
 	delay(700);
-	API_I2C_bus_write8(bno_fd, 62, 0); // PWR_MODE: Set power mode to 0 (Normal)
-	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
-	API_I2C_bus_write8(bno_fd, 63, 0); // Reset system triggers to 0
-	API_I2C_bus_write8(bno_fd, 7, 1); // Set page id to 1
-	API_I2C_bus_write8(bno_fd, 8, 13); // Set accel range 4G and bandwidth 62_5HZ
-	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
-	API_I2C_bus_write8(bno_fd, 7, 1); // Set page id to 1
-	API_I2C_bus_write8(bno_fd, 10, 56); // Gyro config
-	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
-	API_I2C_bus_write8(bno_fd, 7, 1); // Set page id to 1
-	API_I2C_bus_write8(bno_fd, 9, 13); // Mag config
-	API_I2C_bus_write8(bno_fd, 7, 0); // Set page id to 0
+	i2c_write8(bno_fd, 62, 0); // PWR_MODE: Set power mode to 0 (Normal)
+	i2c_write8(bno_fd, 7, 0); // Set page id to 0
+	i2c_write8(bno_fd, 63, 0); // Reset system triggers to 0
+	i2c_write8(bno_fd, 7, 1); // Set page id to 1
+	i2c_write8(bno_fd, 8, 13); // Set accel range 4G and bandwidth 62_5HZ
+	i2c_write8(bno_fd, 7, 0); // Set page id to 0
+	i2c_write8(bno_fd, 7, 1); // Set page id to 1
+	i2c_write8(bno_fd, 10, 56); // Gyro config
+	i2c_write8(bno_fd, 7, 0); // Set page id to 0
+	i2c_write8(bno_fd, 7, 1); // Set page id to 1
+	i2c_write8(bno_fd, 9, 13); // Mag config
+	i2c_write8(bno_fd, 7, 0); // Set page id to 0
 	delay(10);
-	API_I2C_bus_write8(bno_fd, 61, 0); // Enter config mode
+	i2c_write8(bno_fd, 61, 0); // Enter config mode
 	delay(20);
-	API_I2C_bus_write8(bno_fd, 61, 12); // Enter NDOF operation mode
+	i2c_write8(bno_fd, 61, 12); // Enter NDOF operation mode
 	delay(10);
 
 	std::cout << "Init complete" << std::endl;
@@ -255,7 +264,7 @@ float Robot::get_heading() {
 
 	//bno_comres += bno055_convert_double_euler_h_rad(&f_euler_data_h);
 	int16_t temp = 0;
-	API_I2C_bus_read(bno_fd, 26, (uint8_t*)&temp, 2);
+	i2c_read(bno_fd, 26, (uint8_t*)&temp, 2);
 
 	fl_euler_data_h = (float)temp / 16.0f * PI / 180.0f;
 
@@ -292,7 +301,7 @@ float Robot::get_pitch() {
 
 	//bno_comres += bno055_convert_double_euler_h_rad(&f_euler_data_h);
 	int16_t temp = 0;
-	API_I2C_bus_read(bno_fd, 28, (uint8_t*)&temp, 2);
+	i2c_read(bno_fd, 28, (uint8_t*)&temp, 2);
 
 	fl_euler_data_h = (float)temp / 16.0f * PI / 180.0f;
 
@@ -311,6 +320,15 @@ float Robot::get_pitch() {
 	//last_heading = fl_euler_data_h;
 
 	return fl_euler_data_h;
+}
+
+float Robot::get_vl53l0x_distance(uint8_t sensor_id) {
+	uint16_t distance = vl53l0x_vec[sensor_id].readRangeSingleMillimeters();
+	if(vl53l0x_vec[sensor_id].timeoutOccured()) {
+		std::cout << "VL53L0X (" << std::to_string(sensor_id) << ") timeout!" << std::endl;
+		return 4000.0f;
+	}
+	return (float)distance;
 }
 
 // void Robot::delay_c(uint32_t ms, int id) {
