@@ -43,6 +43,7 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 		std::cout << "Error setting up I2C for Encoder board" << std::endl;
 		exit(ERRCODE_BOT_SETUP_I2C);
 	}*/
+	mcp_fd = 0;
 
 	// Setup Drive motor pins
 	pinMode(M1_1, OUTPUT);
@@ -104,7 +105,7 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	motor_update_thread.detach();
 }
 
-int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
+int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, const uint8_t* reg_data, uint8_t len) {
 	//std::cout << "W\t" << std::to_string(reg_addr) << "\t" << std::to_string(reg_data[0]) << std::endl;
 
 	uint8_t write_buf[1 + len];
@@ -249,10 +250,6 @@ void Robot::init_bno055() {
 }
 
 float Robot::get_heading() {
-	int16_t euler_data_h, euler_data_r, euler_data_p;
-	euler_data_h = euler_data_r = euler_data_p = 0;
-
-	double f_euler_data_h;
 	float fl_euler_data_h;
 
 	// bno_comres += bno055_read_euler_h(&euler_data_h);
@@ -286,11 +283,7 @@ float Robot::get_heading() {
 }
 
 float Robot::get_pitch() {
-	int16_t euler_data_h, euler_data_r, euler_data_p;
-	euler_data_h = euler_data_r = euler_data_p = 0;
-
-	double f_euler_data_h;
-	float fl_euler_data_h;
+	float fl_euler_data_p;
 
 	// bno_comres += bno055_read_euler_h(&euler_data_h);
 	// bno_comres += bno055_read_euler_r(&euler_data_r);
@@ -303,7 +296,7 @@ float Robot::get_pitch() {
 	int16_t temp = 0;
 	i2c_read(bno_fd, 28, (uint8_t*)&temp, 2);
 
-	fl_euler_data_h = (float)temp / 16.0f * PI / 180.0f;
+	fl_euler_data_p = (float)temp / 16.0f * PI / 180.0f;
 
 	//std::cout << fl_euler_data_h << std::endl;
 
@@ -319,7 +312,7 @@ float Robot::get_pitch() {
 	//if (fl_euler_data_h < 0) return last_heading;
 	//last_heading = fl_euler_data_h;
 
-	return fl_euler_data_h;
+	return fl_euler_data_p;
 }
 
 float Robot::get_vl53l0x_distance(uint8_t sensor_id) {
@@ -443,7 +436,7 @@ void Robot::turn(float rad) {
 
 	auto start_time = std::chrono::high_resolution_clock::now();
 	uint32_t min_time = TURN_MIN_DURATION_FACTOR * std::abs(rad);
-	uint32_t max_time = TURN_MAX_DURATION_FACTOR * std::abs(rad);
+	//uint32_t max_time = TURN_MAX_DURATION_FACTOR * std::abs(rad);
 
 	//std::cout << to_turn << " " << min_time << " " << max_time << std::endl;
 	m(clockwise ? -30 : 30, clockwise ? 30 : -30);
@@ -475,7 +468,7 @@ void Robot::turn(float rad) {
 // dir: true = clockwise, false = counterclockwise
 void Robot::turn_to_heading_last(float heading, float speed, bool dir) {
 	float last_heading = get_heading();
-	float curr_heading = last_heading;
+	//float curr_heading = last_heading;
 
 	const float CORRECTION_DURATION = 70;
 
@@ -508,7 +501,7 @@ void Robot::turn_to_heading(float heading) {
 	if (heading == 0) heading = 0.01f;
 	if (heading == curr_heading) turn(deg_to_rad(3));
 	int SPEED = 30;
-	int CORRECTION = 50; // nice comment
+	//int CORRECTION = 50; // nice comment
 
 	if (curr_heading < heading && heading - PI < curr_heading) {
 		std::cout << "Case 1" << std::endl;

@@ -36,14 +36,12 @@ cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f,
 	int rows = in.rows;
 	int cols = in.cols;
 
-	cv::Vec3b* p;
-	uint8_t* p_out;
 	cv::Mat out(rows, cols, CV_8UC1);
 
 	int i, j;
 	for(i = 0; i < rows; ++i) {
-		p = in.ptr<cv::Vec3b>(i);
-		p_out = out.ptr<uint8_t>(i);
+		cv::Vec3b* p = in.ptr<cv::Vec3b>(i);
+		uint8_t* p_out = out.ptr<uint8_t>(i);
 		for(j = 0; j < cols; j++) {
 			if(f(p[j][0], p[j][1], p[j][2])) {
 				p_out[j] = 0xFF;
@@ -65,15 +63,11 @@ void clipped_difference(cv::Mat a, cv::Mat b, cv::Mat out) {
 	CV_Assert(a.cols == b.cols);
 	CV_Assert(a.rows == b.rows);
 
-	uint8_t* a_ptr;
-	uint8_t* b_ptr;
-	uint8_t* out_ptr;
-
 	int i, j;
 	for(i = 0; i < a.rows; ++i) {
-		a_ptr = a.ptr<uint8_t>(i);
-		b_ptr = b.ptr<uint8_t>(i);
-		out_ptr = out.ptr<uint8_t>(i);
+		uint8_t* a_ptr = a.ptr<uint8_t>(i);
+		uint8_t* b_ptr = b.ptr<uint8_t>(i);
+		uint8_t* out_ptr = out.ptr<uint8_t>(i);
 		for(j = 0; j < a.cols * a.channels(); j++) {
 			int16_t diff = a_ptr[j] - b_ptr[j];
 			if(diff < 0) diff = 0;
@@ -89,15 +83,12 @@ float average_difference(cv::Mat a, cv::Mat b) {
 	CV_Assert(a.rows == b.rows);
 	CV_Assert(a.channels() == b.channels());
 
-	uint8_t* a_ptr;
-	uint8_t* b_ptr;
-
 	float difference = 0.0f;
 
 	int i, j;
 	for(i = 0; i < a.rows; ++i) {
-		a_ptr = a.ptr<uint8_t>(i);
-		b_ptr = b.ptr<uint8_t>(i);
+		uint8_t* a_ptr = a.ptr<uint8_t>(i);
+		uint8_t* b_ptr = b.ptr<uint8_t>(i);
 		for(j = 0; j < a.cols * a.channels(); j++) {
 			int16_t diff = a_ptr[j] - b_ptr[j];
 			difference += std::abs(diff);
@@ -108,14 +99,13 @@ float average_difference(cv::Mat a, cv::Mat b) {
 
 cv::Vec3b average_color(cv::Mat in) {
 	CV_Assert(in.depth() == CV_8U);
-	uint8_t* ptr;
 	float total_b = 0;
 	float total_g = 0;
 	float total_r = 0;
 
 	int i, j;
 	for(i = 0; i < in.rows; ++i) {
-		ptr = in.ptr<uint8_t>(i);
+		uint8_t* ptr = in.ptr<uint8_t>(i);
 		for(j = 0; j < in.cols; ++j) {
 			total_b += (float)ptr[j];
 			total_g += (float)ptr[j + 1];
@@ -132,7 +122,6 @@ cv::Vec3b average_color(cv::Mat in) {
 
 float average_circle_color(cv::Mat in, float center_x, float center_y, float radius) {
 	CV_Assert(in.depth() == CV_8U);
-	uint8_t* ptr;
 	float total = 0.0f;
 
 	float r2 = radius * radius;
@@ -142,7 +131,7 @@ float average_circle_color(cv::Mat in, float center_x, float center_y, float rad
 	for(i = 0; i < in.rows; ++i) {
 		float y = (float)i - center_y;
 		float y2 = y * y;
-		ptr = in.ptr<uint8_t>(i);
+		uint8_t* ptr = in.ptr<uint8_t>(i);
 		//uint8_t* debug_ptr = debug.ptr<uint8_t>(i);
 		for(j = 0; j < in.cols; ++j) {
 			float x = (float)j - center_x;
@@ -160,10 +149,9 @@ float average_circle_color(cv::Mat in, float center_x, float center_y, float rad
 	return total;
 }
 
-void save_img(std::string path, cv::Mat frame) {
+void save_img(const std::string& path, cv::Mat frame) {
 	auto millisecondsUTC = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 	cv::imwrite(path + std::to_string(millisecondsUTC) + ".png", frame);
-
 }
 
 uint32_t count_circle_in_range(cv::Mat in, float center_x, float center_y, float radius, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {

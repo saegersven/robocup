@@ -23,12 +23,9 @@ cv::Mat VictimML::invoke(cv::Mat image) {
     // INPUT IMAGE IS 640x480 BGR image
     // Convert to 160x120 grayscale and flatten onto input layer
 
-    uint32_t channels = image.channels();
-
-    cv::Vec3b* p;
     int i, j;
     for(i = 0; i < image.rows; i += 4) {
-        p = image.ptr<cv::Vec3b>(i);
+        cv::Vec3b* p = image.ptr<cv::Vec3b>(i);
         for(j = 0; j < image.cols; j += 4) {
             input_layer[i * image.cols + j] = ((float)p[j][0] + p[j][1] + p[j][2]) / 3.0f;
         }
@@ -42,10 +39,9 @@ cv::Mat VictimML::invoke(cv::Mat image) {
     // Map output layer to cv::Mat
     cv::Mat out(OUT_HEIGHT, OUT_WIDTH, CV_32FC1);
 
-    float* p;
     int i, j;
     for(i = 0; i < OUT_HEIGHT; ++i) {
-        p = out.ptr<float>(i);
+        float* p = out.ptr<float>(i);
         for(j = 0; j < OUT_WIDTH; ++j) {
             float val = output_layer[i * OUT_WIDTH + j];
             if(val > 1.0f) val == 1.0f;

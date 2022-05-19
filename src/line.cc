@@ -36,6 +36,11 @@ Line::Line(int front_cam_id, std::shared_ptr<Robot> robot)
 
 	this->average_silver = cv::imread(RUNTIME_AVERAGE_SILVER_PATH);
 	this->distance_weight_map = cv::imread(RUNTIME_DISTANCE_WEIGHT_MAP_PATH, cv::IMREAD_GRAYSCALE);
+
+	this->micros_start = 0;
+	this->last_line_pos = 0.0f;
+	this->last_line_angle = 0.0f;
+	this->line_angle_integral = 0.0f;
 }
 
 void Line::start() {
@@ -73,14 +78,13 @@ void Line::stop() {
 
 float Line::get_redness(cv::Mat& in) {
 	CV_Assert(in.depth() == CV_8U);
-	uint8_t* ptr;
 	float total_b = 0;
 	float total_g = 0;
 	float total_r = 0;
 
 	int i, j;
 	for(i = 0; i < in.rows; ++i) {
-		ptr = in.ptr<uint8_t>(i);
+		uint8_t* ptr = in.ptr<uint8_t>(i);
 		for(j = 0; j < in.cols; ++j) {
 			float r = (float)ptr[j + 2];
 			if(r > 100 && r < 210) {
@@ -94,7 +98,7 @@ float Line::get_redness(cv::Mat& in) {
 	return total_r / (total_g + total_b);
 }
 
-bool Line::check_silver(cv::Mat& frame) {
+bool Line::check_silver(const cv::Mat& frame) {
 	cv::Mat roi = frame(cv::Range(27, 37), cv::Range(19, 61));
 	
 	/*if(robot->button(BTN_DEBUG)) {
@@ -333,7 +337,7 @@ bool Line::line(cv::Mat& frame) {
 
 			const uint32_t durations[] = {1250, 1250, 1250, 450};
 
-			for(int i = 0; i < 42; ++i) {
+			for(int i = 0; i < 4; ++i) {
 				if(obstacle_straight_line(durations[i])) break;
 
 				robot->stop_video(front_cam_id);
@@ -352,7 +356,7 @@ bool Line::line(cv::Mat& frame) {
 		obstacle_active = 0;
 	} else {
 		obstacle_active = 1;
-		auto start_t = std::chrono::high_resolution_clock::now();
+		//auto start_t = std::chrono::high_resolution_clock::now();
 #ifdef DEBUG
 		debug_frame = frame.clone();
 #endif
@@ -495,17 +499,14 @@ float Line::circular_line(cv::Mat& in) {
 
 	//std::vector<std::pair<float, float>> line_angles; // Map of angle and distance
 
-	uint8_t* p;
-	uint8_t* p_dw;
-
 	//cv::Point2f center(in.cols / 2, in.rows); // Bottom center
 	float center_x = in.cols / 2.0f;
 	float center_y = in.rows;
 
 	int i, j;
 	for(i = 0; i < in.rows; ++i) {
-		p = in.ptr<uint8_t>(i);
-		p_dw = distance_weight_map.ptr<uint8_t>(i);
+		uint8_t* p = in.ptr<uint8_t>(i);
+		uint8_t* p_dw = distance_weight_map.ptr<uint8_t>(i);
 		for(j = 0; j < in.cols; ++j) {
 			if(p[j]) {
 				float x = (float)j;
@@ -692,12 +693,10 @@ uint8_t Line::green_direction(cv::Mat& frame, cv::Mat& black, float& global_aver
 
 		uint32_t num_pixels = 0;
 
-		uint8_t* p;
-		uint8_t* p_grn;
 		int y, x;
 		for(y = y_start; y < y_end; ++y) {
-			p = black.ptr<uint8_t>(y);
-			p_grn = green.ptr<uint8_t>(y);
+			uint8_t* p = black.ptr<uint8_t>(y);
+			uint8_t* p_grn = green.ptr<uint8_t>(y);
 			for(x = x_start; x < x_end; ++x) {
 				if(p[x] && !p_grn[x]) {
 					average_x += (float)x;

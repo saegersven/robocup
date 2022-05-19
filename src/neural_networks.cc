@@ -74,19 +74,17 @@ int NeuralNetworks::infere(int id, cv::Mat& in, float& confidence) {
 	switch(in.depth()) {
 		case CV_32F:
 		{
-			float* p;
 			for(int i = 0; i < rows; ++i) {
-				p = in.ptr<float>(i);
+				float* p = in.ptr<float>(i);
 				memcpy(input_layer, p, cols * sizeof(float));
 			}
 			break;
 		}
 		case CV_8U:
 		{
-			uint8_t* p;
 			for(int y = 0; y < rows; ++y) {
 				std::cout << std::to_string(y) << ": ";
-				p = in.ptr<uint8_t>(y);
+				uint8_t* p = in.ptr<uint8_t>(y);
 				memcpy(input_layer, p, cols * sizeof(uint8_t));
 				// for(int x = 0; x < cols; ++x) {
 				// 	std::cout << ".";
