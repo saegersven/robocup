@@ -42,3 +42,5 @@ sftp-config-alt.json
 **/CMakeCache.txt
 
 libs
+
+#scripts/victim_ml/model.h5
