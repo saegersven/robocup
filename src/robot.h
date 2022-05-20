@@ -47,7 +47,7 @@
 
 // VL53L0X Sensor IDs and I2C addresses
 #define DIST_FORWARD 0
-#define VL53L0X_FORWARD_ADDR 0x20
+#define VL53L0X_FORWARD_ADDR 0x29
 #define DIST_SIDE_FRONT 1
 #define VL53L0X_SIDE_FRONT_ADDR 0x21
 #define DIST_SIDE_BACK 2
@@ -103,7 +103,7 @@ private:
 	std::vector<Camera> cams;
 
 	// VL53L0X objects
-	std::vector<VL53L0X> vl53l0x_vec;
+	std::vector<std::unique_ptr<VL53L0X>> vl53l0x_vec;
 
 	// Async speed control thread
 	//std::thread motor_update_thread;

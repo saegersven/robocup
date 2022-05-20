@@ -29,7 +29,7 @@ void draw_rotated_rect(cv::Mat out, cv::RotatedRect r, cv::Scalar color, int thi
 cv::Mat in_range(cv::Mat& in, std::function<bool (uint8_t, uint8_t, uint8_t)> f, uint32_t* num_pixels = nullptr);
 
 void clipped_difference(cv::Mat a, cv::Mat b, cv::Mat out);
-void save_img(std::string path, cv::Mat frame);
+void save_img(const std::string& path, cv::Mat frame);
 
 float average_difference(cv::Mat a, cv::Mat b);
 

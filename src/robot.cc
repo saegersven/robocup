@@ -74,12 +74,12 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	}
 
 	// Setup VL53L0X distance sensors
-	vl53l0x_vec.push_back(VL53L0X(-1, true, VL53L0X_FRONT_ADDR));
-	vl53l0x_vec.push_back(VL53L0X(-1, true, VL53L0X_SIDE_FRONT_ADDR));
-	vl53l0x_vec.push_back(VL53L0X(-1, true, VL53L0X_SIDE_BACK_ADDR));
-	for(int i = 0; i < 3; ++i) {
-		vl53l0x_vec[i].initialize();
-		vl53l0x_vec[i].setTimeout(200);
+	vl53l0x_vec.push_back(std::make_unique<VL53L0X>(-1, true, VL53L0X_FORWARD_ADDR));
+	//vl53l0x_vec.push_back(VL53L0X(-1, true, VL53L0X_SIDE_FRONT_ADDR));
+	//vl53l0x_vec.push_back(VL53L0X(-1, true, VL53L0X_SIDE_BACK_ADDR));
+	for(int i = 0; i < vl53l0x_vec.size(); ++i) {
+		vl53l0x_vec[i]->initialize();
+		vl53l0x_vec[i]->setTimeout(200);
 	}
 
 	// Setup Servo motor pins
@@ -316,12 +316,25 @@ float Robot::get_pitch() {
 }
 
 float Robot::get_vl53l0x_distance(uint8_t sensor_id) {
-	uint16_t distance = vl53l0x_vec[sensor_id].readRangeSingleMillimeters();
-	if(vl53l0x_vec[sensor_id].timeoutOccured()) {
+	uint16_t distance = vl53l0x_vec[sensor_id]->readRangeSingleMillimeters();
+	if(vl53l0x_vec[sensor_id]->timeoutOccurred()) {
 		std::cout << "VL53L0X (" << std::to_string(sensor_id) << ") timeout!" << std::endl;
 		return 4000.0f;
 	}
 	return (float)distance;
+
+	/*
+	vl53l0x_vec[sensor_id]->setMeasurementTimingBudget(20000);
+	vl53l0x_vec[sensor_id]->startContinuous();
+	while(true) {
+		uint64_t start = micros();
+		float dist = vl53l0x_vec[sensor_id]->readRangeContinuousMillimeters();
+		std::cout << dist << "\t" << (micros() - start) << " us\n";
+		if(dist < 100.0f) set_gpio(LED_2, true);
+		else set_gpio(LED_2, false);
+	}
+	vl53l0x_vec[sensor_id]->stopContinuous();
+	*/
 }
 
 // void Robot::delay_c(uint32_t ms, int id) {
@@ -468,7 +481,7 @@ void Robot::turn(float rad) {
 // dir: true = clockwise, false = counterclockwise
 void Robot::turn_to_heading_last(float heading, float speed, bool dir) {
 	float last_heading = get_heading();
-	//float curr_heading = last_heading;
+	float curr_heading = last_heading;
 
 	const float CORRECTION_DURATION = 70;
 
