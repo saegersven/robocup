@@ -59,7 +59,7 @@ cv::Mat VictimML::invoke(cv::Mat image) {
         float* p = out.ptr<float>(i);
         for(int j = 0; j < OUT_WIDTH; ++j) {
             for(int k = 0; k < 3; ++k) {
-                float val = output_layer[i * OUT_WIDTH + j * 3 + k];
+                float val = output_layer[i * OUT_WIDTH * 3 + j * 3 + k];
                 if(val > 1.0f) val == 1.0f;
                 else if(val < 0.0f) val == 0.0f;
                 p[j * 3 + k] = val;
@@ -69,12 +69,12 @@ cv::Mat VictimML::invoke(cv::Mat image) {
     return out;
 }
 
-std::vector<Victim> extract_victims(cv::Mat probability_map) {
+std::vector<Victim> VictimML::extract_victims(cv::Mat probability_map) {
     cv::Mat blurred;
-    cv::GaussianBlur(probability_map, cv::Size(1, 3), 0);
+    cv::GaussianBlur(probability_map, blurred, cv::Size(1, 3), 0);
 
     cv::Mat thresh;
-    cv::inRange(blurred, cv::Scalar(0.32f, 0.0f, 0.0f), cv::Scalar(1.0f, 1.0f, 1.0f), thresh);
+    cv::inRange(blurred, cv::Scalar(0.2f, 0.0f, 0.0f), cv::Scalar(1.0f, 1.0f, 1.0f), thresh);
 
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
@@ -83,7 +83,13 @@ std::vector<Victim> extract_victims(cv::Mat probability_map) {
     std::vector<Victim> victims;
 
     for(int i = 0; i < contours.size(); ++i) {
-        float total_alive = 0.0f;
+        cv::Mat mask(blurred.rows, blurred.cols, CV_8UC1, cv::Scalar(0));
+        cv::drawContours(mask, contours, i, cv::Scalar(255), -1);
+        cv::Scalar mean = cv::mean(blurred, mask);
+
+        bool dead = mean[1] > mean[2];
+
+        /*float total_alive = 0.0f;
         float total_dead = 0.0f;
         for(int y = 0; y < blurred.rows; ++y) {
             cv::Vec3f* p = blurred.ptr<cv::Vec3f>(y);
@@ -95,22 +101,26 @@ std::vector<Victim> extract_victims(cv::Mat probability_map) {
                 }
             }
         }
+        bool dead = total_dead > total_alive;*/
 
-        const float CHUNK_WIDTH = 640 / 40;
-        const float CHUNK_HEIGHT = 480 / 12;
+        std::cout << dead << "\t";
+
+        const float CHUNK_WIDTH = (float)160 / 40;
+        const float CHUNK_HEIGHT = (float)120 / 12;
 
         cv::Rect rect = cv::boundingRect(contours[i]);
 
-        if(rect.height * CHUNK_HEIGHT * rect.width * CHUNK_WIDTH < 400.0f) {
+        if((float)rect.height * CHUNK_HEIGHT * (float)rect.width * CHUNK_WIDTH < 100.0f) {
             continue;
         }
 
         victims.push_back({
-            (total_dead > total_alive),
-            rect.x * CHUNK_WIDTH,
-            rect.y * CHUNK_HEIGHT
+            dead,
+            ((float)rect.x + rect.width / 2.0f) * CHUNK_WIDTH,
+            ((float)rect.y + rect.height / 2.0f) * CHUNK_HEIGHT
         });
     }
+    std::cout << std::endl;
 
     return victims;
 }

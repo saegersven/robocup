@@ -47,11 +47,14 @@
 
 // VL53L0X Sensor IDs and I2C addresses
 #define DIST_FORWARD 0
-#define VL53L0X_FORWARD_ADDR 0x29
+#define VL53L0X_FORWARD_ADDR 0x31
+#define VL53L0X_FORWARD_XSHUT 6
 #define DIST_SIDE_FRONT 1
-#define VL53L0X_SIDE_FRONT_ADDR 0x21
+#define VL53L0X_SIDE_FRONT_ADDR 0x33
+#define VL53L0X_SIDE_FRONT_XSHUT 5
 #define DIST_SIDE_BACK 2
-#define VL53L0X_SIDE_BACK_ADDR 0x22
+#define VL53L0X_SIDE_BACK_ADDR 0x35
+#define VL53L0X_SIDE_BACK_XSHUT 13
 
 // Servo parameters
 #define SERVO_MIN_PULSE 1000
@@ -168,12 +171,12 @@ public:
 	// SENSORS
 	bool button(uint8_t pin);
 	void button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
-	float single_distance(int8_t echo, uint8_t trig, int timeout = 20);
-	float distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements = 1, float remove_percentage = 0.2f, uint32_t timeout_single_measurement = 200, uint32_t timeout = 2000);
+	//float single_distance(int8_t echo, uint8_t trig, int timeout = 20);
+	//float distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements = 1, float remove_percentage = 0.2f, uint32_t timeout_single_measurement = 200, uint32_t timeout = 2000);
 
 	float get_heading();
 	float get_pitch();
 	void set_gpio(int pin, bool state);
 
-	float get_vl53l0x_distance(uint8_t sensor_id);
+	float distance(uint8_t sensor_id);
 };

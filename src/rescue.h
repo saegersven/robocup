@@ -24,11 +24,11 @@ enum VictimType {
 	DEAD
 };
 
-struct Victim {
+/*struct Victim {
 	float screen_size;
 	float x_pos, y_pos;
 	VictimType type;
-};
+};*/
 
 class Rescue {
 private:

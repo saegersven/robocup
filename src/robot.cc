@@ -73,14 +73,34 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 		exit(ERRCODE_BOT_SETUP_PWM);
 	}
 
+	const uint8_t vl53l0x_xshuts[3] = {
+		VL53L0X_FORWARD_XSHUT,
+		VL53L0X_SIDE_FRONT_XSHUT,
+		VL53L0X_SIDE_BACK_XSHUT
+	};
+
+	const uint8_t vl53l0x_addresses[3] = {
+		VL53L0X_FORWARD_ADDR,
+		VL53L0X_SIDE_FRONT_ADDR,
+		VL53L0X_SIDE_BACK_ADDR
+	};
+
 	// Setup VL53L0X distance sensors
-	vl53l0x_vec.push_back(std::make_unique<VL53L0X>(-1, true, VL53L0X_FORWARD_ADDR));
-	//vl53l0x_vec.push_back(VL53L0X(-1, true, VL53L0X_SIDE_FRONT_ADDR));
-	//vl53l0x_vec.push_back(VL53L0X(-1, true, VL53L0X_SIDE_BACK_ADDR));
-	for(int i = 0; i < vl53l0x_vec.size(); ++i) {
+	for(int i = 0; i < 3; ++i) {
+		vl53l0x_vec.push_back(std::make_unique<VL53L0X>(vl53l0x_xshuts[i]));
+		vl53l0x_vec[i]->powerOff();
+	}
+	delay(200);
+
+	for(int i = 0; i < 3; ++i) {
 		vl53l0x_vec[i]->initialize();
 		vl53l0x_vec[i]->setTimeout(200);
+		vl53l0x_vec[i]->setMeasurementTimingBudget(40000);
+		vl53l0x_vec[i]->setAddress(vl53l0x_addresses[i]);
+		delay(100);
 	}
+
+	std::cout << "VL53L0Xs initialized" << std::endl;
 
 	// Setup Servo motor pins
 	// 50Hz has a period of 20ms, so multiply value by 100 to get period in microseconds
@@ -315,7 +335,7 @@ float Robot::get_pitch() {
 	return fl_euler_data_p;
 }
 
-float Robot::get_vl53l0x_distance(uint8_t sensor_id) {
+float Robot::distance(uint8_t sensor_id) {
 	uint16_t distance = vl53l0x_vec[sensor_id]->readRangeSingleMillimeters();
 	if(vl53l0x_vec[sensor_id]->timeoutOccurred()) {
 		std::cout << "VL53L0X (" << std::to_string(sensor_id) << ") timeout!" << std::endl;
@@ -743,7 +763,7 @@ void Robot::button_wait(uint8_t pin, bool state, uint32_t timeout) {
 	io_mutex.unlock();
 }
 
-float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
+/*float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
 	timeout = timeout * 1000; // convert msec to usec for micros() function
 	digitalWrite(trig, HIGH);
 	delayMicroseconds(10);
@@ -760,9 +780,9 @@ float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
 
 	// convert distance to cm, multiply with speed of sound (0,0343 cm/us) and divide by 2 to get one-way distance
 	return ((travelTimeUsec / 10000.0f) * 340.29f * 0.5f);
-}
+}*/
 
-float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, float remove_percentage, uint32_t timeout_single_measurement, uint32_t timeout) {
+/*float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, float remove_percentage, uint32_t timeout_single_measurement, uint32_t timeout) {
 	float arr[measurements];
 
 	// take measurements
@@ -789,7 +809,7 @@ float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, floa
 	//std::cout << "Avg: "<< avg << std::endl;
 	delay(5);
 	return avg;
-}
+}*/
 
 void Robot::set_gpio(int pin, bool state) {
 	digitalWrite(pin, state);

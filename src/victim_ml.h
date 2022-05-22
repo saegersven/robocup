@@ -14,7 +14,8 @@
 
 struct Victim {
 	bool dead;
-	float x, y;
+	float x;
+	float y;
 };
 
 class VictimML {
