@@ -51,7 +51,7 @@ int main() {
 		int dist2 = robot->get_vl53l0x_distance(2);
 		std::cout << dist1 << "\t\t" << dist2 << "\t\t" << dist1 - dist2 << "\t\t" << "Angle: " << rad_to_deg(std::atan((dist2-dist1)/145.0f)) << "\n";
 	}*/
-	
+	/*
 
 	//####################
 	VictimML v;
@@ -93,12 +93,15 @@ int main() {
 
 	exit(0);
 	//####################
+	*/
 
 	int waiting_for_heading_cnt = 0;
 
 	while(robot->get_heading() == 0) {
-		std::cout << "FRONT DISTANCE: " << robot->single_distance(DIST_1, 2000) << std::endl;
-		std::cout << "SIDE DISTANCE: " << robot->single_distance(DIST_2, 2000) << std::endl;
+		std::cout << "FRONT DISTANCE: " << robot->distance(DIST_FORWARD) << std::endl;
+		std::cout << "SIDE_FRONT DISTANCE: " << robot->distance(DIST_SIDE_FRONT) << std::endl;
+		std::cout << "SIDE_BACK DISTANCE: " << robot->distance(DIST_SIDE_BACK) << std::endl;
+
 		robot->m(-30, 30, 20);
 		robot->m(30, -30, 20);
 		waiting_for_heading_cnt++;

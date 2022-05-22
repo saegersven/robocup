@@ -244,22 +244,8 @@ bool Line::abort_obstacle(cv::Mat frame) {
 // ASYNC
 void Line::obstacle() {
 	while(running) {
-		float d = 42.0f;
-		//d = robot->single_distance(DIST_1, 1000);
-		d = robot->distance(DIST_FORWARD);
-		//std::cout << d << std::endl;
-		if(d > 850.0f && d < 950.0f) {
-			std::cout << "Checking for silver with front distance" << std::endl;
-			// Check for black line
-			//d = robot->distance_avg(DIST_1, 20, 0.3f);
-			d = robot->distance(DIST_FORWARD);
-			if(d > 800.0f && d < 1100.0f) {
-				silver_distance = true;
-			}
-		}
-
 		if(obstacle_active != 1) continue;
-		if(obstacle_enabled && d < 9.0f) {
+		if(obstacle_enabled && robot->distance(DIST_FORWARD) < 90.0f) {
 			robot->set_gpio(LED_1, true);
 			robot->stop();
 			robot->block();
