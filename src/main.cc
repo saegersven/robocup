@@ -8,7 +8,7 @@
 #include "robot.h"
 #include "rescue.h"
 #include "utils.h"
-#include "neural_networks.h"
+#include "victim_ml.h"
 
 #define SILVER_NN_ID 1
 #define SILVER_RESULT_NEGATIVE 0
@@ -32,6 +32,40 @@ int main() {
 	robot->set_gpio(LED_2, false);
 	robot->set_gpio(BUZZER, false);
 
+	/*while(true) {
+		float dist = robot->get_vl53l0x_distance(0);
+		std::cout << std::to_string(dist) << std::endl;
+		if (dist < 100.0f) robot->set_gpio(LED_2, true);
+		else robot->set_gpio(LED_2, false);
+	}*/
+
+	//####################
+	VictimML v;
+
+	while(true) {
+		cv::Mat frame;
+
+		cv::VideoCapture cap;
+		cap.open("/dev/cams/back", cv::CAP_V4L2);
+		if(!cap.isOpened()) {
+			std::cout << "Back cam not opened" << std::endl;
+		}
+		cap.grab();
+		cap.retrieve(frame);
+
+		cv::imshow("Frame", frame);
+		cv::waitKey(1);
+
+		cv::Mat out = v.invoke(frame);
+		cv::Mat out_resized;
+		cv::resize(out, out_resized, cv::Size(160 * 4, 120 * 4));
+		cv::imshow("Out", out_resized);
+		cv::waitKey(1);
+	}
+
+	exit(0);
+	//####################
+
 	int waiting_for_heading_cnt = 0;
 
 	while(robot->get_heading() == 0) {
@@ -43,7 +77,7 @@ int main() {
 		if (waiting_for_heading_cnt > 50) robot->beep(3000);
 	}
 
-	std::cout << "Heading not zer" << std::endl;
+	std::cout << "Heading not zero" << std::endl;
 	std::cout << "\n/dev/cams/:" << std::endl;
    	system("ls /dev/cams/");
 

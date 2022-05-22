@@ -116,7 +116,7 @@ private:
 	float circular_line(cv::Mat& in);
 
 	float get_redness(cv::Mat& in);
-	bool check_silver(cv::Mat& frame);
+	bool check_silver(const cv::Mat& frame);
 	bool black_pixel_threshold_under(int threshold);
 
 	//std::vector<cv::Point> find_green_group_centers_old(cv::Mat frame, cv::Mat& green);

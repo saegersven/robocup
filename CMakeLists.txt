@@ -23,12 +23,16 @@ include_directories("libs/json/include")
 include_directories("libs/frugally-deep/include")
 include_directories("libs/FunctionalPlus/include")
 
-add_executable(robocup src/main.cc src/robot.cc src/utils.cc src/vision.cc src/line.cc src/rescue.cc src/silver_ml.cc)
+include_directories("libs/vl53l0x-linux")
+add_library(vl53l0x-linux STATIC libs/vl53l0x-linux/VL53L0X.cpp libs/vl53l0x-linux/I2Cdev.cpp libs/vl53l0x-linux/VL53L0X.hpp libs/vl53l0x-linux/I2Cdev.hpp libs/vl53l0x-linux/VL53L0X_defines.hpp)
+
+add_executable(robocup src/main.cc src/robot.cc src/utils.cc src/vision.cc src/line.cc src/rescue.cc src/silver_ml.cc src/victim_ml.cc)
 
 target_link_libraries(robocup atomic)
 
 target_link_libraries(robocup ${OpenCV_LIBS})
 target_link_libraries(robocup tensorflow-lite)
+target_link_libraries(robocup vl53l0x-linux)
 
 target_link_libraries(robocup ${WIRINGPI_LIBRARIES})
 target_link_libraries(robocup ${CMAKE_THREAD_LIBS_INIT})
