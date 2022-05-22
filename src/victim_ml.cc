@@ -53,16 +53,64 @@ cv::Mat VictimML::invoke(cv::Mat image) {
     const uint32_t OUT_HEIGHT = 12;
 
     // Map output layer to cv::Mat
-    cv::Mat out(OUT_HEIGHT, OUT_WIDTH, CV_32FC1);
+    cv::Mat out(OUT_HEIGHT, OUT_WIDTH, CV_32FC3);
 
     for(int i = 0; i < OUT_HEIGHT; ++i) {
         float* p = out.ptr<float>(i);
         for(int j = 0; j < OUT_WIDTH; ++j) {
-            float val = output_layer[i * OUT_WIDTH + j];
-            if(val > 1.0f) val == 1.0f;
-            else if(val < 0.0f) val == 0.0f;
-            p[j] = val;
+            for(int k = 0; k < 3; ++k) {
+                float val = output_layer[i * OUT_WIDTH + j * 3 + k];
+                if(val > 1.0f) val == 1.0f;
+                else if(val < 0.0f) val == 0.0f;
+                p[j * 3 + k] = val;
+            }
         }
     }
     return out;
+}
+
+std::vector<Victim> extract_victims(cv::Mat probability_map) {
+    cv::Mat blurred;
+    cv::GaussianBlur(probability_map, cv::Size(1, 3), 0);
+
+    cv::Mat thresh;
+    cv::inRange(blurred, cv::Scalar(0.32f, 0.0f, 0.0f), cv::Scalar(1.0f, 1.0f, 1.0f), thresh);
+
+    std::vector<std::vector<cv::Point>> contours;
+    std::vector<cv::Vec4i> hierarchy;
+    cv::findContours(thresh, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+    std::vector<Victim> victims;
+
+    for(int i = 0; i < contours.size(); ++i) {
+        float total_alive = 0.0f;
+        float total_dead = 0.0f;
+        for(int y = 0; y < blurred.rows; ++y) {
+            cv::Vec3f* p = blurred.ptr<cv::Vec3f>(y);
+            uint8_t* p_mask = thresh.ptr<uint8_t>(y);
+            for(int x = 0; x < blurred.cols; ++x) {
+                if(p_mask[x]) {
+                    total_alive += p[x][2];
+                    total_dead += p[x][1];
+                }
+            }
+        }
+
+        const float CHUNK_WIDTH = 640 / 40;
+        const float CHUNK_HEIGHT = 480 / 12;
+
+        cv::Rect rect = cv::boundingRect(contours[i]);
+
+        if(rect.height * CHUNK_HEIGHT * rect.width * CHUNK_WIDTH < 400.0f) {
+            continue;
+        }
+
+        victims.push_back({
+            (total_dead > total_alive),
+            rect.x * CHUNK_WIDTH,
+            rect.y * CHUNK_HEIGHT
+        });
+    }
+
+    return victims;
 }
