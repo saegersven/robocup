@@ -43,4 +43,6 @@ sftp-config-alt.json
 
 libs
 
+ml
+
 #scripts/victim_ml/model.h5
