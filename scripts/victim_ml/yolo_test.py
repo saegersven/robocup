@@ -60,8 +60,9 @@ for i, p in enumerate(predictions):
 			# thickness = int(6 * p[y, x, 4])
 			# print(thickness)
 			
-			confidence = min(max(p[y, x], 0.0), 1.0)
+			confidence = min(max(p[y, x, 0], 0.0), 1.0)
 			confidence_map[y, x] = int(confidence * 255)
+
 
 			# print(xmin)
 
@@ -86,10 +87,15 @@ for i, p in enumerate(predictions):
 	# cv2.imshow("Out", image2)
 	# cv2.imshow("Confidence map", image)
 
-	confidence_map = cv2.GaussianBlur(confidence_map, (1, 3), cv2.BORDER_DEFAULT)
-	cv2.imshow("Probability map", confidence_map)
+	p = np.clip(p, 0.0, 1.0)
 
-	ret, thresh = cv2.threshold(confidence_map, 80, 255, cv2.THRESH_BINARY)
+	p = cv2.GaussianBlur(p, (1, 3), cv2.BORDER_DEFAULT)
+	p_resized = cv2.resize(p, (160, 120))
+	cv2.imshow("Probability map", p_resized)
+	cv2.imshow("Image", debug_image)
+
+
+	thresh = cv2.inRange(p, (0.32, 0.0, 0.0), (1.0, 1.0, 1.0))
 	cv2.imshow("Thresholded", thresh)
 
 	contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -97,14 +103,21 @@ for i, p in enumerate(predictions):
 	victims = []
 
 	for contour in contours:
+		mask = np.zeros(thresh.shape, np.uint8)
+		cv2.drawContours(mask, contour, -1, 255, -1)
+		mean = cv2.mean(p, mask=mask)
+
+		dead = mean[1] > mean[2]
+
 		rect = cv2.boundingRect(contour)
 		x, y, w, h = rect
+
 		x *= chunk_width
 		y *= chunk_height
 		w *= chunk_width
 		h *= chunk_height
 
-		print(w * h)
+		#print(w * h)
 		if(w * h < 400.0):
 			continue
 
@@ -114,15 +127,23 @@ for i, p in enumerate(predictions):
 			pass
 		elif(w / h > 1.5):
 			# Likely two victims
-			victims.append((x+w/4, y+h/2))
-			victims.append((x+w/4*3, y+h/2))
+			victims.append((dead, x+w/4*1, y+h/2, w/2, h))
+			victims.append((dead, x+w/4*3, y+h/2, w/2, h))
 		else:
-			victims.append((x+w/2, y+h/2))
+			victims.append((dead, x+w/2, y+h/2, w, h))
 
 		#cv2.rectangle(debug_image, (x, y), (x+w, y+h), (10), 2)
 
+	# Debug
 	for victim in victims:
-		cv2.circle(debug_image, (int(victim[0]), int(victim[1])), 2, (90), 3)
+		d, x, y, w, h = victim
+		
+		text = "Alive"
+		if d:
+			text = "Dead"
+
+		cv2.putText(debug_image, text, (int(x-15), int(y-8)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (90), 1, cv2.LINE_AA)
+		cv2.circle(debug_image, (int(x), int(y)), 2, (90), 3)
 
 	cv2.imshow("Out", debug_image)
 	cv2.waitKey(0)

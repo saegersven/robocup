@@ -45,12 +45,13 @@ with open(CSV_PATH, "r") as f:
 
 		num_victims = int(cols[1])
 
-		target = np.empty((Ys, Xs), dtype=np.float32)
+		target = np.empty((Ys, Xs, 3), dtype=np.float32)
 
 		for y in range(Ys):
 			for x in range(Xs):
 				v = 0.0
 				d = 0.0
+				l = 0.0
 
 				x_bb = 0.0
 				y_bb = 0.0
@@ -106,8 +107,10 @@ with open(CSV_PATH, "r") as f:
 						if(int(cols[j]) == 1):
 							# Dead victim
 							d = 1.0
+							l = 0.0
 						else:
 							d = 0.0
+							l = 1.0
 
 					# # Check if this chunk is responsible for predicting class
 					# # (Check if bounding box intersects the chunk)
@@ -118,7 +121,9 @@ with open(CSV_PATH, "r") as f:
 					# 	else:
 					# 		# Dead victim
 					# 		d = 1.0
-				target[y, x] = v
+				target[y, x, 0] = v
+				target[y, x, 1] = d
+				target[y, x, 2] = l
 				# target[y, x, 1] = (x_bb - chunk_xmin) / chunk_width
 				# target[y, x, 2] = (y_bb - chunk_ymin) / chunk_height
 				# target[y, x, 3] = w_bb / input_width
@@ -147,7 +152,7 @@ with open(CSV_PATH, "r") as f:
 
 for img in os.listdir(NO_VICTIMS_IN):
 	image = cv2.imread(NO_VICTIMS_IN + "/" + img, cv2.IMREAD_GRAYSCALE)
-	target = np.zeros((Ys, Xs), dtype=np.float32)
+	target = np.zeros((Ys, Xs, 3), dtype=np.float32)
 
 	targets.append(target)
 	images.append(image)
@@ -194,8 +199,8 @@ model = Sequential([
 	layers.Dropout(0.2),
 	layers.Flatten(),
 	#layers.Dense(512, activation='relu'),
-	layers.Dense(Ys * Xs, activation='linear'),
-	layers.Reshape((Ys, Xs))
+	layers.Dense(Ys * Xs * 3, activation='linear'),
+	layers.Reshape((Ys, Xs, 3))
 ])
 
 model.compile(optimizer='adam', loss='mse', metrics=["accuracy"])
