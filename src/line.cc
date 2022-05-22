@@ -245,13 +245,15 @@ bool Line::abort_obstacle(cv::Mat frame) {
 void Line::obstacle() {
 	while(running) {
 		float d = 42.0f;
-		d = robot->single_distance(DIST_1, 1000);
+		//d = robot->single_distance(DIST_1, 1000);
+		d = robot->distance(DIST_FORWARD);
 		//std::cout << d << std::endl;
-		if(d > 85.0f && d < 95.0f) {
+		if(d > 850.0f && d < 950.0f) {
 			std::cout << "Checking for silver with front distance" << std::endl;
 			// Check for black line
-			d = robot->distance_avg(DIST_1, 20, 0.3f);
-			if(d > 80.0f && d < 110.0f) {
+			//d = robot->distance_avg(DIST_1, 20, 0.3f);
+			d = robot->distance(DIST_FORWARD);
+			if(d > 800.0f && d < 1100.0f) {
 				silver_distance = true;
 			}
 		}
@@ -262,8 +264,10 @@ void Line::obstacle() {
 			robot->stop();
 			robot->block();
 			delay(10);
-			if(robot->distance_avg(DIST_1, 10, 0.4f, 500, 3000) < 9.5f) {
-				if(robot->distance_avg(DIST_1, 30, 0.4f, 500, 10000) < 9.5f) {				
+			//if(robot->distance_avg(DIST_1, 10, 0.4f, 500, 3000) < 9.5f) {
+			if(robot->distance(DIST_FORWARD) < 95.0f) {
+				//if(robot->distance_avg(DIST_1, 30, 0.4f, 500, 10000) < 9.5f) {	
+				if(robot->distance(DIST_FORWARD) < 95.0f) {			
 					std::cout << "Obstacle" << std::endl;
 					obstacle_active = 2;
 				}
@@ -322,7 +326,8 @@ bool Line::line(cv::Mat& frame) {
 	// Check if obstacle thread has notified main thread
 	if(obstacle_active == 2) {
 		robot->stop();
-		if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 5000) < 9.0f) {
+		//if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 5000) < 9.0f) {
+		if(robot->distance(DIST_FORWARD) < 90.0f) {
 			std::cout << "Obstacle!" << std::endl;
 			robot->set_gpio(LED_2, true);				
 			robot->m(-80, -80, 140);
@@ -432,8 +437,10 @@ bool Line::line(cv::Mat& frame) {
 			robot->m(100, 100, 850);
 			delay(50);
 
-			float dist_front = robot->distance_avg(DIST_1, 10, 0.2f);
-			float dist_side = robot->distance_avg(DIST_2, 10, 0.2f);
+			//float dist_front = robot->distance_avg(DIST_1, 10, 0.2f);
+			float dist_front = robot->distance(DIST_FORWARD);
+			//float dist_side = robot->distance_avg(DIST_2, 10, 0.2f);
+			float dist_side = robot->distance(DIST_SIDE_FRONT);
 
 			std::cout << "Front distance: " << dist_front << std::endl;
 			std::cout << "Side distance: " << dist_side << std::endl;
@@ -442,8 +449,8 @@ bool Line::line(cv::Mat& frame) {
 			// increase rescue_cnt for each
 			// #redundancy
 			int rescue_cnt = 0;
-			if (dist_front > 50.0f && dist_front < 130.0f) ++rescue_cnt;
-			if (dist_side > 3.0f && dist_side < 120.0f) ++rescue_cnt;
+			if (dist_front > 500.0f && dist_front < 1300.0f) ++rescue_cnt;
+			if (dist_side > 30.0f && dist_side < 1200.0f) ++rescue_cnt;
 
 			// count number of black pixels in image, if low -> rescue
 			robot->start_video(front_cam_id);
