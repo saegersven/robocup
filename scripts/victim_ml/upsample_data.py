@@ -33,19 +33,20 @@ with open(INPUT_CSV, "r") as f:
 			new_row_f += f", {cols[j]}, {new_xmin}, {cols[j + 2]}, {new_xmax}, {cols[j + 4]}"
 
 		rows_to_add.append(new_row_f)
-		rows_to_add.append(new_row_b)
+		#rows_to_add.append(new_row_b)
 
 		image = cv2.imread(INPUT_DIR + "/" + img, cv2.IMREAD_GRAYSCALE)
+		print(img)
 		image1 = np.flip(image, axis=1)
 
-		image_bright = image.copy()
-		for y in range(image.shape[0]):
-			for x in range(image.shape[1]):
-				image_bright[y, x] = np.clip(image_bright[y, x] + 60, 0, 255)
+		# image_bright = image.copy()
+		# for y in range(image.shape[0]):
+		# 	for x in range(image.shape[1]):
+		# 		image_bright[y, x] = np.clip(image_bright[y, x] + 60, 0, 255)
 
 		cv2.imwrite(OUTPUT_DIR + "/" + img, image)
 		cv2.imwrite(OUTPUT_DIR + "/" + filename_f, image1)
-		cv2.imwrite(OUTPUT_DIR + "/" + filename_b, image_bright)
+		#cv2.imwrite(OUTPUT_DIR + "/" + filename_b, image_bright)
 
 with open(OUTPUT_CSV, "w") as f:
 	for row in rows_to_add:

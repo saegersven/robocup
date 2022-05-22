@@ -5,7 +5,7 @@
         "name": "Far cam",
         "providerType": "localFileSystemProxy",
         "providerOptions": {
-            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiOTE3NmQ0MWIyMmY2MDIxMDQwY2JjMmFjYzM2NGFiNWQ5YzAxY2ZiNDIwNmQ5YjljYjNkYWJmNzBkZTYwZmMxMWJmYzllNWRlZWFkZGM1YjQxN2NmZWM2MThhNWQ2NmZiZjg4NDNjODY0ZWI4ZjNjMWU0YmNkMmFmMWQyM2QwNzg3ZjNiMjY2YTY0MGNhYjlkNGMxNmFlZmM3ZmU4NGUwNCIsIml2IjoiYzExM2MyZGI2ZTNiMDAxMjZhM2ZhYTBmYjlmNTMzZjg5NWMwNDcxY2QyNzhiZTQ5In0="
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiZTBkMGMxNTBhNWRmYmIxNGIwM2I3YTM5ZGI3ZDk0ODEwZWNkNWE4YmYxMGMyYjBiODQ4ZTU2ZmVmNDEyNDlkMDNhNDQ0ZDljNzIwNzlhNGRkMDc0YmNhYTE0NGNmMzQ1NzdlMzRjYTVjYWZlMGM1OTgwZWM1YzQwNGM1MDFiNmYzOWIyNGIzYTZhYjU4ZjdkZWYxMjliMjAxZWIwNjkzYyIsIml2IjoiNmRjYTBmMDlhNjZlMjI5N2Q0NjE2ZDg2YjMxOTc5Mzg5ZWZiNzI1NDQxYWFhNjJjIn0="
         },
         "id": "va2Dh3kLP"
     },
@@ -13,7 +13,7 @@
         "name": "Out",
         "providerType": "localFileSystemProxy",
         "providerOptions": {
-            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiZjc0NDFjMjNlYzMxZTIwYTIyODZkYmEyZDIxOTMxZDdlYjBhNDYwMmYwODIxNmY4MTEyZjNjMTc0Yzk0MTY2ZTFjNmQ0ZjFmZjA5N2NmMzUxODU5MjQwN2U0MjFkOWE3OTUxMTZiNjljODY3ZTE3NzBkN2JkNDE2MjM1MzBhNTkzZmYyNDNlMzlhYzZkYzM5ODI5MjIxMDBiMWY4ZDI0YSIsIml2IjoiYmE4Mjk3M2ZjMjc1MjFmYmIxMmJkYmE2YWZhMTBkMDBiMjFmMzc4YzlkYzU2MTAzIn0="
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiMmE1YzEzYTVlMTI5ZWJmODY1Mjg2OWFlNzljNTg1YzgyNjRmMWI4MDRhNDE5MzAzMzUxMWQxODRhZDA2NzAzYzEyMWMyY2Y1ZDJkMWYzODljYzUwMjc3NzQyNDVlNDA0ZGNjNDIxNzdjMGE3OGM0MDg1NTQ4MmNlYTRhZWRiYjU4YjdhZjY5NDA3NGNkNTNlZmZmOGQyOGI3ZmZmNWIwNyIsIml2IjoiNGRmY2Q2M2RiNjkwYTI3MTllYTNhYjJiMmZmY2U1OGQ2MjRiYTE4ZjhmZWJlMTkxIn0="
         },
         "id": "qGAP70gcY"
     },
@@ -39,11 +39,11 @@
     "exportFormat": {
         "providerType": "csv",
         "providerOptions": {
-            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiMTEwOGE0ZTk0YmMzZTUwY2I4NWI5ODU4MWY3YWY1Y2Q2YzkxZjM0ZjllYmY4MzYxNTZlMmVlYWNmMDZkZmEwMjAwNmQzNThjZGYxODc3YTFiNTBjYjNkNWNlNjhkNzhlIiwiaXYiOiIzNGU4NDAzMWNmZDFhYTc5YzIwODgxNjM3MDM3NjJkZGIxMzZhZDA3NDc0ODQzODcifQ=="
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiYjI2YWNlMzIxMmFlZjY3NWQwY2I5YzlhZGU4OWYyMGU4ZWMyN2Y4ZjE3ZjE4ODExNzVkZGFiZmMxODE2NTExYThiYmE0MjU5MDQxOWEwNGY2MTU3YjYyODI0YmRiMTVjIiwiaXYiOiI2NWZiYzNiODk5N2I3NWE5NjRlMzY2YWY5NDQyY2JiNzZjZWQzMjM3NDdmM2U3MTMifQ=="
         }
     },
     "version": "2.2.0",
-    "lastVisitedAssetId": "85fa32ab0e81e1e9c803903a5c215d15",
+    "lastVisitedAssetId": "d62765e8f6882cb062fce76cb13768d4",
     "assets": {
         "7756c922c3c8283e70dcceedb9c29919": {
             "format": "png",
@@ -770,6 +770,3474 @@
             "id": "85fa32ab0e81e1e9c803903a5c215d15",
             "name": "manual_1.png",
             "path": "file:E:/Robocup/robocup/ml_data/victims/victims/manual_1.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "21a3bd02968daf69a4ab1f2d3ee27158": {
+            "format": "png",
+            "id": "21a3bd02968daf69a4ab1f2d3ee27158",
+            "name": "1650304924587.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650304924587.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1a785c961bf18dfcf0790aa2dfe5a4f4": {
+            "format": "png",
+            "id": "1a785c961bf18dfcf0790aa2dfe5a4f4",
+            "name": "1650304936609.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650304936609.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "7da495c209f32ef25d1cb4ee30375213": {
+            "format": "png",
+            "id": "7da495c209f32ef25d1cb4ee30375213",
+            "name": "1650304943893.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650304943893.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "787685c73b47f1561a3f1681a580464b": {
+            "format": "png",
+            "id": "787685c73b47f1561a3f1681a580464b",
+            "name": "1650304957106.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650304957106.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ed2d86a9828b17cc1175b19e79c7e207": {
+            "format": "png",
+            "id": "ed2d86a9828b17cc1175b19e79c7e207",
+            "name": "1650305003926.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305003926.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "9e5c98d76bb2a209bfb0ab232e149bf8": {
+            "format": "png",
+            "id": "9e5c98d76bb2a209bfb0ab232e149bf8",
+            "name": "1650305031801.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305031801.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "47c1b76860a7b3b3c6abf8c3a3529487": {
+            "format": "png",
+            "id": "47c1b76860a7b3b3c6abf8c3a3529487",
+            "name": "1650305044166.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305044166.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f353acbb4f12af4f5301bcb470d4d84c": {
+            "format": "png",
+            "id": "f353acbb4f12af4f5301bcb470d4d84c",
+            "name": "1650305072685.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305072685.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "3b91d399e2d822c0b5b58520bd6160c4": {
+            "format": "png",
+            "id": "3b91d399e2d822c0b5b58520bd6160c4",
+            "name": "1650305098325.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305098325.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "c65d0e7296e70281dff689ebf5acfca5": {
+            "format": "png",
+            "id": "c65d0e7296e70281dff689ebf5acfca5",
+            "name": "1650305121171.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305121171.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1f52ab0f24aa0496529035106cfe14ea": {
+            "format": "png",
+            "id": "1f52ab0f24aa0496529035106cfe14ea",
+            "name": "1650305134468.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305134468.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f41f783f30a5d8e0ace3e507164d30a7": {
+            "format": "png",
+            "id": "f41f783f30a5d8e0ace3e507164d30a7",
+            "name": "1650305156029.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305156029.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a0c169de77a6eee642501219391cd985": {
+            "format": "png",
+            "id": "a0c169de77a6eee642501219391cd985",
+            "name": "1650305165791.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305165791.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "568e8e768269e066c1a7b4760782ad6d": {
+            "format": "png",
+            "id": "568e8e768269e066c1a7b4760782ad6d",
+            "name": "1650305180828.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305180828.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "8c809b42563a78535c8e637e5bb47bd5": {
+            "format": "png",
+            "id": "8c809b42563a78535c8e637e5bb47bd5",
+            "name": "1650305209763.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305209763.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d94999d557c57bdea0836dfa0bd32bd3": {
+            "format": "png",
+            "id": "d94999d557c57bdea0836dfa0bd32bd3",
+            "name": "1650305217389.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305217389.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "8642b825a332424811910ce2a42548e3": {
+            "format": "png",
+            "id": "8642b825a332424811910ce2a42548e3",
+            "name": "1650305226861.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305226861.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "864a41c405907a78c10c363f3ecd7631": {
+            "format": "png",
+            "id": "864a41c405907a78c10c363f3ecd7631",
+            "name": "1650305232541.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305232541.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "bd0d68ca406b77b6e50e1e9dd1066fc3": {
+            "format": "png",
+            "id": "bd0d68ca406b77b6e50e1e9dd1066fc3",
+            "name": "1650305246404.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305246404.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "11007fe1f829a6782586eb99ca3135c4": {
+            "format": "png",
+            "id": "11007fe1f829a6782586eb99ca3135c4",
+            "name": "1650305306781.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305306781.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fe7470c12a66dd8b2c295592ac27baa0": {
+            "format": "png",
+            "id": "fe7470c12a66dd8b2c295592ac27baa0",
+            "name": "1650305384795.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1650305384795.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fc6d4eac3b3e8d499bd46b6644e26b09": {
+            "format": "png",
+            "id": "fc6d4eac3b3e8d499bd46b6644e26b09",
+            "name": "1651946851.1378784.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651946851.1378784.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "7caaf6891a9239ac3631881e46560567": {
+            "format": "png",
+            "id": "7caaf6891a9239ac3631881e46560567",
+            "name": "1651946946.0202417.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651946946.0202417.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1e7e14f83313a876e1e7bdd25dd834c0": {
+            "format": "png",
+            "id": "1e7e14f83313a876e1e7bdd25dd834c0",
+            "name": "1651946952.33.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651946952.33.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0852e175d9323044461bb175268b0639": {
+            "format": "png",
+            "id": "0852e175d9323044461bb175268b0639",
+            "name": "1651946987.24.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651946987.24.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e1abcbddee834c09f6aeadbfd96cda02": {
+            "format": "png",
+            "id": "e1abcbddee834c09f6aeadbfd96cda02",
+            "name": "1651946996.17.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651946996.17.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "cabdf5a1dfe7b421df92d9161071adbc": {
+            "format": "png",
+            "id": "cabdf5a1dfe7b421df92d9161071adbc",
+            "name": "1651946999.4.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651946999.4.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0741dbac99e4120b6181dc62f8a0f311": {
+            "format": "png",
+            "id": "0741dbac99e4120b6181dc62f8a0f311",
+            "name": "1651947001.75.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947001.75.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f75b76b7abf5bdbb5dfb527693992921": {
+            "format": "png",
+            "id": "f75b76b7abf5bdbb5dfb527693992921",
+            "name": "1651947005.71.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947005.71.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1d4db83b4388935f6ea97957eded3ed4": {
+            "format": "png",
+            "id": "1d4db83b4388935f6ea97957eded3ed4",
+            "name": "1651947011.81.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947011.81.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "00c4dc30f253fb2c8f86fcd6ed552fe4": {
+            "format": "png",
+            "id": "00c4dc30f253fb2c8f86fcd6ed552fe4",
+            "name": "1651947023.09.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947023.09.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a5129163eaea2b6843ec1da877bf7619": {
+            "format": "png",
+            "id": "a5129163eaea2b6843ec1da877bf7619",
+            "name": "1651947026.04.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947026.04.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "abec59537f8fd002000564638da7c090": {
+            "format": "png",
+            "id": "abec59537f8fd002000564638da7c090",
+            "name": "1651947036.65.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947036.65.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1302b13a1482c37c17506e276a40b484": {
+            "format": "png",
+            "id": "1302b13a1482c37c17506e276a40b484",
+            "name": "1651947040.41.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947040.41.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fe6a290ca14f372df8adf21a7f0941fd": {
+            "format": "png",
+            "id": "fe6a290ca14f372df8adf21a7f0941fd",
+            "name": "1651947046.32.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947046.32.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "98f60d8e0bdc4bf297181f6f1eb36707": {
+            "format": "png",
+            "id": "98f60d8e0bdc4bf297181f6f1eb36707",
+            "name": "1651947052.63.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947052.63.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "b17cbccc68755f3e79bdfedecd7201e2": {
+            "format": "png",
+            "id": "b17cbccc68755f3e79bdfedecd7201e2",
+            "name": "1651947071.56.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947071.56.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "c375bdc6965ea0ff5d040b1f8ac82890": {
+            "format": "png",
+            "id": "c375bdc6965ea0ff5d040b1f8ac82890",
+            "name": "1651947079.15.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947079.15.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "c53cf559a4c28d7b168ff46eb5661ea3": {
+            "format": "png",
+            "id": "c53cf559a4c28d7b168ff46eb5661ea3",
+            "name": "1651947085.06.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947085.06.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "808d8b87c9d301c6dc401887e1a2d857": {
+            "format": "png",
+            "id": "808d8b87c9d301c6dc401887e1a2d857",
+            "name": "1651947090.36.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947090.36.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "15c4f301840b5fc2eb96bd4a7bf89c4e": {
+            "format": "png",
+            "id": "15c4f301840b5fc2eb96bd4a7bf89c4e",
+            "name": "1651947093.72.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947093.72.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d607c71bf1f3f02b2e5cc24dfea00e90": {
+            "format": "png",
+            "id": "d607c71bf1f3f02b2e5cc24dfea00e90",
+            "name": "1651947099.56.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947099.56.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0bb6d2645468e67b16fda24f9f229bc8": {
+            "format": "png",
+            "id": "0bb6d2645468e67b16fda24f9f229bc8",
+            "name": "1651947131.92.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947131.92.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "dfe3e2c90757918ee8e1f8ce8841c87c": {
+            "format": "png",
+            "id": "dfe3e2c90757918ee8e1f8ce8841c87c",
+            "name": "1651947137.63.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947137.63.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "73cf7484e3927b56bd9c54038a544620": {
+            "format": "png",
+            "id": "73cf7484e3927b56bd9c54038a544620",
+            "name": "1651947146.69.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947146.69.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ea10dfa0315d332c8993acb0728ca2cc": {
+            "format": "png",
+            "id": "ea10dfa0315d332c8993acb0728ca2cc",
+            "name": "1651947151.59.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947151.59.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "dd52d5c04aaa6702d320cddcd210deb1": {
+            "format": "png",
+            "id": "dd52d5c04aaa6702d320cddcd210deb1",
+            "name": "1651947168.71.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947168.71.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "296df26a36a768ada6eee691b08a18ad": {
+            "format": "png",
+            "id": "296df26a36a768ada6eee691b08a18ad",
+            "name": "1651947193.35.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947193.35.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 1,
+            "type": 1
+        },
+        "0d751edc5275f0f727fe6ca93c0698cf": {
+            "format": "png",
+            "id": "0d751edc5275f0f727fe6ca93c0698cf",
+            "name": "1651947194.35.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947194.35.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 1,
+            "type": 1
+        },
+        "61f9190d53802be2f600ef58306c503a": {
+            "format": "png",
+            "id": "61f9190d53802be2f600ef58306c503a",
+            "name": "1651947218.93.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947218.93.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "93a01dd35e58e6e5220c014add8511b5": {
+            "format": "png",
+            "id": "93a01dd35e58e6e5220c014add8511b5",
+            "name": "1651947221.81.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947221.81.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "2d1ca571bca8cdb882bec97ece962c07": {
+            "format": "png",
+            "id": "2d1ca571bca8cdb882bec97ece962c07",
+            "name": "1651947231.89.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947231.89.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "eb3c193459d4202b51ceae264e8aa300": {
+            "format": "png",
+            "id": "eb3c193459d4202b51ceae264e8aa300",
+            "name": "1651947234.3.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947234.3.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ba7c372236ad8dca21755fb5ce8392fa": {
+            "format": "png",
+            "id": "ba7c372236ad8dca21755fb5ce8392fa",
+            "name": "1651947237.93.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947237.93.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "6ae2e65be23ba94df930f586cddc77d1": {
+            "format": "png",
+            "id": "6ae2e65be23ba94df930f586cddc77d1",
+            "name": "1651947244.64.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947244.64.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "5cea58e8f7165e0d2c41351f765d7f72": {
+            "format": "png",
+            "id": "5cea58e8f7165e0d2c41351f765d7f72",
+            "name": "1651947248.67.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947248.67.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "bf2874ffb2aa8fc75ba8d8d445c1fa99": {
+            "format": "png",
+            "id": "bf2874ffb2aa8fc75ba8d8d445c1fa99",
+            "name": "1651947255.31.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947255.31.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f1e2b270adb08de663942e79b7130370": {
+            "format": "png",
+            "id": "f1e2b270adb08de663942e79b7130370",
+            "name": "1651947323.49.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947323.49.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "dee0c4bc014555d6c951e5d75a88e718": {
+            "format": "png",
+            "id": "dee0c4bc014555d6c951e5d75a88e718",
+            "name": "1651947331.25.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947331.25.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "acae639b5614886be950e7d35b2a7bf6": {
+            "format": "png",
+            "id": "acae639b5614886be950e7d35b2a7bf6",
+            "name": "1651947335.5.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947335.5.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "7e41dde1d787958f3e96d5d5496b7910": {
+            "format": "png",
+            "id": "7e41dde1d787958f3e96d5d5496b7910",
+            "name": "1651947345.54.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947345.54.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "3db6e9e2225b49df6ddbabe126cf68d6": {
+            "format": "png",
+            "id": "3db6e9e2225b49df6ddbabe126cf68d6",
+            "name": "1651947422.59.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947422.59.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e200adc045896694041be8f4c5df3f66": {
+            "format": "png",
+            "id": "e200adc045896694041be8f4c5df3f66",
+            "name": "1651947424.87.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947424.87.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e772807094fa704711c63bfed823a265": {
+            "format": "png",
+            "id": "e772807094fa704711c63bfed823a265",
+            "name": "1651947427.29.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947427.29.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "597aff7bcb399e30415ad0649f5f381d": {
+            "format": "png",
+            "id": "597aff7bcb399e30415ad0649f5f381d",
+            "name": "1651947429.1.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947429.1.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "c130012c5f0796da83e28c7f5c02b403": {
+            "format": "png",
+            "id": "c130012c5f0796da83e28c7f5c02b403",
+            "name": "1651947442.66.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947442.66.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "edcb1f29de5ddd8b1b95175dc32ba48a": {
+            "format": "png",
+            "id": "edcb1f29de5ddd8b1b95175dc32ba48a",
+            "name": "1651947453.67.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947453.67.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "26dd42463d02b9aded739ef9f5b58603": {
+            "format": "png",
+            "id": "26dd42463d02b9aded739ef9f5b58603",
+            "name": "1651947455.15.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947455.15.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "6e3548c4fa7cf4949b1be82c06ec2caa": {
+            "format": "png",
+            "id": "6e3548c4fa7cf4949b1be82c06ec2caa",
+            "name": "1651947457.7.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947457.7.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "b6c5478692a0ebc245202381316da0bd": {
+            "format": "png",
+            "id": "b6c5478692a0ebc245202381316da0bd",
+            "name": "1651947459.85.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947459.85.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "357ca0b4d483ff2c87e40d8036ec1d5f": {
+            "format": "png",
+            "id": "357ca0b4d483ff2c87e40d8036ec1d5f",
+            "name": "1651947464.95.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947464.95.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "3c75c04f91c3644eb3b506cb10e8cff4": {
+            "format": "png",
+            "id": "3c75c04f91c3644eb3b506cb10e8cff4",
+            "name": "1651947471.8.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947471.8.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "4f22c7c71cf4741bc89ec335fcdfeec1": {
+            "format": "png",
+            "id": "4f22c7c71cf4741bc89ec335fcdfeec1",
+            "name": "1651947489.52.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947489.52.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "9f444d42e863303b1081796575254446": {
+            "format": "png",
+            "id": "9f444d42e863303b1081796575254446",
+            "name": "1651947501.47.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947501.47.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "5589de6c65e82b41d37ecbc65cfe5d79": {
+            "format": "png",
+            "id": "5589de6c65e82b41d37ecbc65cfe5d79",
+            "name": "1651947516.24.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947516.24.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "bc7f7c577fe0afd18365b2247be43fc1": {
+            "format": "png",
+            "id": "bc7f7c577fe0afd18365b2247be43fc1",
+            "name": "1651947547.46.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947547.46.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "748ba547d5d92fbdb85f1b7b4ae77059": {
+            "format": "png",
+            "id": "748ba547d5d92fbdb85f1b7b4ae77059",
+            "name": "1651947549.75.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947549.75.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a77507a9e014f9bceddd0d653b6874ff": {
+            "format": "png",
+            "id": "a77507a9e014f9bceddd0d653b6874ff",
+            "name": "1651947551.15.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947551.15.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0088396b8321f6cd01309232ced04af9": {
+            "format": "png",
+            "id": "0088396b8321f6cd01309232ced04af9",
+            "name": "1651947554.37.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947554.37.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "b111cc6c994e0977c76c44683faf97c2": {
+            "format": "png",
+            "id": "b111cc6c994e0977c76c44683faf97c2",
+            "name": "1651947556.46.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947556.46.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "34ae6079ecac1feaa151fe28c41a52f7": {
+            "format": "png",
+            "id": "34ae6079ecac1feaa151fe28c41a52f7",
+            "name": "1651947559.41.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947559.41.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "176d40628751466e18596870894b9b4e": {
+            "format": "png",
+            "id": "176d40628751466e18596870894b9b4e",
+            "name": "1651947560.62.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947560.62.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "4e0d44886dbe87b2d49c1c079ddd2ac3": {
+            "format": "png",
+            "id": "4e0d44886dbe87b2d49c1c079ddd2ac3",
+            "name": "1651947563.78.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947563.78.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "39e42de6218fd70f4a219c48ec8878a0": {
+            "format": "png",
+            "id": "39e42de6218fd70f4a219c48ec8878a0",
+            "name": "1651947566.39.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947566.39.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "89a98d3bb83ad5af49ae25e41d77d817": {
+            "format": "png",
+            "id": "89a98d3bb83ad5af49ae25e41d77d817",
+            "name": "1651947571.23.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947571.23.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f6b9020002979442f609d133ed69f244": {
+            "format": "png",
+            "id": "f6b9020002979442f609d133ed69f244",
+            "name": "1651947576.19.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947576.19.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "4fe2835a7a6a0874e5f86077e49a7282": {
+            "format": "png",
+            "id": "4fe2835a7a6a0874e5f86077e49a7282",
+            "name": "1651947577.13.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947577.13.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "dd790ad1a951b95e8b91d42da750a488": {
+            "format": "png",
+            "id": "dd790ad1a951b95e8b91d42da750a488",
+            "name": "1651947581.1.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947581.1.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "155321821f0d31e109a764b7d7cd1226": {
+            "format": "png",
+            "id": "155321821f0d31e109a764b7d7cd1226",
+            "name": "1651947583.72.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947583.72.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f965d816ead87cd397c35829e38e31ee": {
+            "format": "png",
+            "id": "f965d816ead87cd397c35829e38e31ee",
+            "name": "1651947585.59.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947585.59.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "8d14abf153ffbd50611469e062e37782": {
+            "format": "png",
+            "id": "8d14abf153ffbd50611469e062e37782",
+            "name": "1651947587.41.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947587.41.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "c08d45f2178fc9f9bb848d8aa8f9b9f4": {
+            "format": "png",
+            "id": "c08d45f2178fc9f9bb848d8aa8f9b9f4",
+            "name": "1651947617.69.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947617.69.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "b6d4be6166de1c47d8feb10c27ffca05": {
+            "format": "png",
+            "id": "b6d4be6166de1c47d8feb10c27ffca05",
+            "name": "1651947619.97.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947619.97.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ebfb04496ada44b0b377194cf4f299db": {
+            "format": "png",
+            "id": "ebfb04496ada44b0b377194cf4f299db",
+            "name": "1651947622.45.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947622.45.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "6ace608da49ad3164ca577e936e8bddb": {
+            "format": "png",
+            "id": "6ace608da49ad3164ca577e936e8bddb",
+            "name": "1651947623.99.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947623.99.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "eadfbf425c0e678d00640e446d5d5c45": {
+            "format": "png",
+            "id": "eadfbf425c0e678d00640e446d5d5c45",
+            "name": "1651947629.23.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947629.23.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0488cec0d78bbc684650decb3a87b4ed": {
+            "format": "png",
+            "id": "0488cec0d78bbc684650decb3a87b4ed",
+            "name": "1651947631.25.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947631.25.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "5aeffa8530a57f83da169e09e45e649d": {
+            "format": "png",
+            "id": "5aeffa8530a57f83da169e09e45e649d",
+            "name": "1651947635.74.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947635.74.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "aa3586998a7f665fff8191313a5e2a1a": {
+            "format": "png",
+            "id": "aa3586998a7f665fff8191313a5e2a1a",
+            "name": "1651947638.3.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947638.3.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1fe35107a2dc77ff3aa4d3d63b28ce06": {
+            "format": "png",
+            "id": "1fe35107a2dc77ff3aa4d3d63b28ce06",
+            "name": "1651947641.45.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947641.45.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1008660ba2162433e23122bd95ba7fe6": {
+            "format": "png",
+            "id": "1008660ba2162433e23122bd95ba7fe6",
+            "name": "1651947650.11.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947650.11.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e4066ca78d36b27d78af783f8e745c37": {
+            "format": "png",
+            "id": "e4066ca78d36b27d78af783f8e745c37",
+            "name": "1651947653.4.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947653.4.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "9425fdb106c815e51202f74828c2df55": {
+            "format": "png",
+            "id": "9425fdb106c815e51202f74828c2df55",
+            "name": "1651947707.65.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947707.65.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ae227b889a4226a41e62e2080cafa7f7": {
+            "format": "png",
+            "id": "ae227b889a4226a41e62e2080cafa7f7",
+            "name": "1651947710.94.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947710.94.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "9196b7c9e78284f2626a62918ba9a229": {
+            "format": "png",
+            "id": "9196b7c9e78284f2626a62918ba9a229",
+            "name": "1651947716.38.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947716.38.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "96637ef264b6eb5f610d991937e0be6f": {
+            "format": "png",
+            "id": "96637ef264b6eb5f610d991937e0be6f",
+            "name": "1651947731.21.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947731.21.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "eb45fc0ab0eb4d2d40ac05103d4bdb26": {
+            "format": "png",
+            "id": "eb45fc0ab0eb4d2d40ac05103d4bdb26",
+            "name": "1651947744.98.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947744.98.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fc07b941b7fe8afcaeaf3ccee45fc56c": {
+            "format": "png",
+            "id": "fc07b941b7fe8afcaeaf3ccee45fc56c",
+            "name": "1651947748.0.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947748.0.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "3f96c46b6747c14176625d3f4a8b68ce": {
+            "format": "png",
+            "id": "3f96c46b6747c14176625d3f4a8b68ce",
+            "name": "1651947754.71.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947754.71.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "dd6a0e15e2dc4e99049dfbe80ad6e7e6": {
+            "format": "png",
+            "id": "dd6a0e15e2dc4e99049dfbe80ad6e7e6",
+            "name": "1651947760.41.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947760.41.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "b6c00ab2922bcc506434bf36afc8d0e2": {
+            "format": "png",
+            "id": "b6c00ab2922bcc506434bf36afc8d0e2",
+            "name": "1651947766.25.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947766.25.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "6b930e3ab38ba06fd76b5fd47e505901": {
+            "format": "png",
+            "id": "6b930e3ab38ba06fd76b5fd47e505901",
+            "name": "1651947778.01.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947778.01.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0e18f59682981140d6c31c296f448163": {
+            "format": "png",
+            "id": "0e18f59682981140d6c31c296f448163",
+            "name": "1651947793.11.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947793.11.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0ab1b1fd7272416610b3979a7cfc7fdf": {
+            "format": "png",
+            "id": "0ab1b1fd7272416610b3979a7cfc7fdf",
+            "name": "1651947794.59.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947794.59.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e44527eee0495c0fec5bba37a49dd78b": {
+            "format": "png",
+            "id": "e44527eee0495c0fec5bba37a49dd78b",
+            "name": "1651947796.47.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947796.47.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "8332007cf84efd15c2ffb54d308fd1c2": {
+            "format": "png",
+            "id": "8332007cf84efd15c2ffb54d308fd1c2",
+            "name": "1651947808.62.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947808.62.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a1fb2b6dd69d196b20cfe0b88c2fa847": {
+            "format": "png",
+            "id": "a1fb2b6dd69d196b20cfe0b88c2fa847",
+            "name": "1651947810.5.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947810.5.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "66c3022ad1d128a79768e9606cbaba42": {
+            "format": "png",
+            "id": "66c3022ad1d128a79768e9606cbaba42",
+            "name": "1651947811.91.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947811.91.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "620c6f3bf35af212e1c6c95e5c8159b2": {
+            "format": "png",
+            "id": "620c6f3bf35af212e1c6c95e5c8159b2",
+            "name": "1651947830.24.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947830.24.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ca188c0b3e0cea936c698cb3aa2e6fab": {
+            "format": "png",
+            "id": "ca188c0b3e0cea936c698cb3aa2e6fab",
+            "name": "1651947839.77.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947839.77.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f3da10c33d4c5bc441a7d52e18d53861": {
+            "format": "png",
+            "id": "f3da10c33d4c5bc441a7d52e18d53861",
+            "name": "1651947852.33.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947852.33.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "8eb01baca96b45baad7939229c397521": {
+            "format": "png",
+            "id": "8eb01baca96b45baad7939229c397521",
+            "name": "1651947854.41.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947854.41.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "2b47833f15b56c9e4fdd12eddd6cda44": {
+            "format": "png",
+            "id": "2b47833f15b56c9e4fdd12eddd6cda44",
+            "name": "1651947858.71.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947858.71.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "04f682722401aba8f40106d8a63d0205": {
+            "format": "png",
+            "id": "04f682722401aba8f40106d8a63d0205",
+            "name": "1651947860.52.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947860.52.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "9e18f8512d07622e3ac0fbbeaf62ac59": {
+            "format": "png",
+            "id": "9e18f8512d07622e3ac0fbbeaf62ac59",
+            "name": "1651947862.46.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947862.46.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e0f9bfa0dce962610eaca5bb6077b511": {
+            "format": "png",
+            "id": "e0f9bfa0dce962610eaca5bb6077b511",
+            "name": "1651947864.07.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947864.07.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "97d5b9d8242dad40478b668563e8523e": {
+            "format": "png",
+            "id": "97d5b9d8242dad40478b668563e8523e",
+            "name": "1651947868.44.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947868.44.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d95039e187e96ae915d501737e68254e": {
+            "format": "png",
+            "id": "d95039e187e96ae915d501737e68254e",
+            "name": "1651947902.54.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947902.54.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "6696bd4f544c0bcf1a81b4b42e7d26ed": {
+            "format": "png",
+            "id": "6696bd4f544c0bcf1a81b4b42e7d26ed",
+            "name": "1651947909.53.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947909.53.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0c813b95e08b9b11a312c550a82dd67d": {
+            "format": "png",
+            "id": "0c813b95e08b9b11a312c550a82dd67d",
+            "name": "1651947921.07.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947921.07.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "047d6a8139d31eeb8584c6088034c386": {
+            "format": "png",
+            "id": "047d6a8139d31eeb8584c6088034c386",
+            "name": "1651947925.03.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947925.03.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "21b6865a3f823bf9149609f45d291a8b": {
+            "format": "png",
+            "id": "21b6865a3f823bf9149609f45d291a8b",
+            "name": "1651947927.65.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947927.65.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "3534eed9fb04ac2cdc41a1872a4a0f12": {
+            "format": "png",
+            "id": "3534eed9fb04ac2cdc41a1872a4a0f12",
+            "name": "1651947930.88.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947930.88.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0604cc55b1cf6ec5080fe2841c6199a5": {
+            "format": "png",
+            "id": "0604cc55b1cf6ec5080fe2841c6199a5",
+            "name": "1651947935.11.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947935.11.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "4c22352c891bbcba09ccfe40edbf1be4": {
+            "format": "png",
+            "id": "4c22352c891bbcba09ccfe40edbf1be4",
+            "name": "1651947937.66.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947937.66.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "4072dc1246089d3f7eba1f28b5cf99d3": {
+            "format": "png",
+            "id": "4072dc1246089d3f7eba1f28b5cf99d3",
+            "name": "1651947942.22.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947942.22.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "81e2b3b03b3f2ae49e7bb507251117f5": {
+            "format": "png",
+            "id": "81e2b3b03b3f2ae49e7bb507251117f5",
+            "name": "1651947946.52.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947946.52.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "9230fb6eeaf5e50d669c6ea57baca752": {
+            "format": "png",
+            "id": "9230fb6eeaf5e50d669c6ea57baca752",
+            "name": "1651947948.6.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947948.6.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "804e3e8a898345348e96b4ec054d6cb9": {
+            "format": "png",
+            "id": "804e3e8a898345348e96b4ec054d6cb9",
+            "name": "1651947949.87.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947949.87.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d70d5dd8b6e3d419f0dbf1c10ef5f9fd": {
+            "format": "png",
+            "id": "d70d5dd8b6e3d419f0dbf1c10ef5f9fd",
+            "name": "1651947953.5.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947953.5.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "c6bf5c3091ad6db756bd7f6e44208c62": {
+            "format": "png",
+            "id": "c6bf5c3091ad6db756bd7f6e44208c62",
+            "name": "1651947954.84.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947954.84.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "9ab3b51fa4a6e70287410c9a9bf14783": {
+            "format": "png",
+            "id": "9ab3b51fa4a6e70287410c9a9bf14783",
+            "name": "1651947956.45.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947956.45.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "03918e43ec705c6328252f21e5a744d8": {
+            "format": "png",
+            "id": "03918e43ec705c6328252f21e5a744d8",
+            "name": "1651947960.62.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947960.62.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "50561f057ee2b9c1d06b21b46672c2a4": {
+            "format": "png",
+            "id": "50561f057ee2b9c1d06b21b46672c2a4",
+            "name": "1651947961.76.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947961.76.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "b9067ad904512294133e517986e8731f": {
+            "format": "png",
+            "id": "b9067ad904512294133e517986e8731f",
+            "name": "1651947965.04.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947965.04.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "199235b990ba97256e12a81556456b8a": {
+            "format": "png",
+            "id": "199235b990ba97256e12a81556456b8a",
+            "name": "1651947968.61.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947968.61.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "c64928081ec206f64495e7fee004c58b": {
+            "format": "png",
+            "id": "c64928081ec206f64495e7fee004c58b",
+            "name": "1651947974.45.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947974.45.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "985ec2164880da0dff88b29f49192584": {
+            "format": "png",
+            "id": "985ec2164880da0dff88b29f49192584",
+            "name": "1651947979.68.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947979.68.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "83b5efd5a4edace05605efae9777d769": {
+            "format": "png",
+            "id": "83b5efd5a4edace05605efae9777d769",
+            "name": "1651947983.51.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947983.51.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d31c00289dcdd57ce28cdf8022d5529b": {
+            "format": "png",
+            "id": "d31c00289dcdd57ce28cdf8022d5529b",
+            "name": "1651947986.4.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947986.4.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ff48c5f646d818e2a4ab635cb02e00ab": {
+            "format": "png",
+            "id": "ff48c5f646d818e2a4ab635cb02e00ab",
+            "name": "1651947990.49.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947990.49.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "3e5af9c018caa0ca512ca1836faa46a0": {
+            "format": "png",
+            "id": "3e5af9c018caa0ca512ca1836faa46a0",
+            "name": "1651947995.46.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947995.46.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "9ad74dfad53000762d6117dbe0ab053b": {
+            "format": "png",
+            "id": "9ad74dfad53000762d6117dbe0ab053b",
+            "name": "1651948005.53.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948005.53.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "7513995ec6cbabadc6ac03ec1a817990": {
+            "format": "png",
+            "id": "7513995ec6cbabadc6ac03ec1a817990",
+            "name": "1651948012.85.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948012.85.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "25ec1f0a1be911acd0a1d19ee4cfdcfd": {
+            "format": "png",
+            "id": "25ec1f0a1be911acd0a1d19ee4cfdcfd",
+            "name": "1651948018.08.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948018.08.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a8bba05b12afead19328d6ff633e3c67": {
+            "format": "png",
+            "id": "a8bba05b12afead19328d6ff633e3c67",
+            "name": "1651948028.96.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948028.96.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fa4f4b2ac965118dc6cad03f7394bc0c": {
+            "format": "png",
+            "id": "fa4f4b2ac965118dc6cad03f7394bc0c",
+            "name": "1651948029.57.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948029.57.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "41e22b2b9c9a66fbbe7597ed6ccbf296": {
+            "format": "png",
+            "id": "41e22b2b9c9a66fbbe7597ed6ccbf296",
+            "name": "1651948031.65.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948031.65.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "06733a699ab79868eb0a65c0dbf82c83": {
+            "format": "png",
+            "id": "06733a699ab79868eb0a65c0dbf82c83",
+            "name": "1651948033.33.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948033.33.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "3f1f6b6bcc16ce1d02b10dcbbb08be9c": {
+            "format": "png",
+            "id": "3f1f6b6bcc16ce1d02b10dcbbb08be9c",
+            "name": "1651948034.8.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948034.8.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "11d2d281978c8d05d7487045d2206c17": {
+            "format": "png",
+            "id": "11d2d281978c8d05d7487045d2206c17",
+            "name": "1651948036.21.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948036.21.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e0878e94ba6917c8724bfd74f048ecee": {
+            "format": "png",
+            "id": "e0878e94ba6917c8724bfd74f048ecee",
+            "name": "1651948038.5.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948038.5.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a3d4b1d4fd8ce7fec83ab70f96d85d1d": {
+            "format": "png",
+            "id": "a3d4b1d4fd8ce7fec83ab70f96d85d1d",
+            "name": "1651948041.52.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948041.52.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1e552c60029442c66d82583ffe0095aa": {
+            "format": "png",
+            "id": "1e552c60029442c66d82583ffe0095aa",
+            "name": "1651948050.45.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948050.45.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fac1be8ceddc6a24d5972937606d784d": {
+            "format": "png",
+            "id": "fac1be8ceddc6a24d5972937606d784d",
+            "name": "1651948052.73.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948052.73.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "4319511697faa7e4328b4eff80ae607b": {
+            "format": "png",
+            "id": "4319511697faa7e4328b4eff80ae607b",
+            "name": "1651948054.95.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948054.95.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d8c836d8ad0b6e1ec88a91996986e14c": {
+            "format": "png",
+            "id": "d8c836d8ad0b6e1ec88a91996986e14c",
+            "name": "1651948056.82.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948056.82.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "7ae5694007c5d310be598fedf2806149": {
+            "format": "png",
+            "id": "7ae5694007c5d310be598fedf2806149",
+            "name": "1651948059.44.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948059.44.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "2ce6116d75c8296b30b51065381ffb58": {
+            "format": "png",
+            "id": "2ce6116d75c8296b30b51065381ffb58",
+            "name": "1651948061.66.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948061.66.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a37fdbf4bec5ce3af8f23710e67841fb": {
+            "format": "png",
+            "id": "a37fdbf4bec5ce3af8f23710e67841fb",
+            "name": "1651948068.1.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948068.1.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "7668b64dd6351db53b3456e0fd454d31": {
+            "format": "png",
+            "id": "7668b64dd6351db53b3456e0fd454d31",
+            "name": "1651948073.14.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948073.14.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "70bd2d4ecb0f836442b897aea5184933": {
+            "format": "png",
+            "id": "70bd2d4ecb0f836442b897aea5184933",
+            "name": "1651948076.29.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948076.29.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "68e5836330078fdfb28437e64c91878d": {
+            "format": "png",
+            "id": "68e5836330078fdfb28437e64c91878d",
+            "name": "1651948123.42.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948123.42.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "504f685c03af63fcb9a580e1db24c1da": {
+            "format": "png",
+            "id": "504f685c03af63fcb9a580e1db24c1da",
+            "name": "1651948126.64.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948126.64.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "2f39c1d47f8631ae7b3ac710152d25d0": {
+            "format": "png",
+            "id": "2f39c1d47f8631ae7b3ac710152d25d0",
+            "name": "1651948180.71.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948180.71.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1668ef4e01cc5007a63670ec97db59f0": {
+            "format": "png",
+            "id": "1668ef4e01cc5007a63670ec97db59f0",
+            "name": "1651947712.067904.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947712.067904.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "b314c9089f7664aa811ab8e624635b83": {
+            "format": "png",
+            "id": "b314c9089f7664aa811ab8e624635b83",
+            "name": "1651947715.4264052.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947715.4264052.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "77814a2ef1073c8dccdb5b0fbe2b2f93": {
+            "format": "png",
+            "id": "77814a2ef1073c8dccdb5b0fbe2b2f93",
+            "name": "1651947717.5693347.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947717.5693347.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "3300c86150c36d898938968d108e8be7": {
+            "format": "png",
+            "id": "3300c86150c36d898938968d108e8be7",
+            "name": "1651947721.1936498.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947721.1936498.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "04d4f610ca01f34541e2b8129a4a1c50": {
+            "format": "png",
+            "id": "04d4f610ca01f34541e2b8129a4a1c50",
+            "name": "1651947726.295269.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947726.295269.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a456522968e531b2ac5cca2d75dbef6d": {
+            "format": "png",
+            "id": "a456522968e531b2ac5cca2d75dbef6d",
+            "name": "1651947745.499198.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947745.499198.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "c2a45cb34b79bd131544f220d86cb03f": {
+            "format": "png",
+            "id": "c2a45cb34b79bd131544f220d86cb03f",
+            "name": "1651947750.3306873.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947750.3306873.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "987ff76dd7fe686d38286ec6b78d6518": {
+            "format": "png",
+            "id": "987ff76dd7fe686d38286ec6b78d6518",
+            "name": "1651947753.48666.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947753.48666.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "7575cc405b0cbc3f500e23988c66fd11": {
+            "format": "png",
+            "id": "7575cc405b0cbc3f500e23988c66fd11",
+            "name": "1651947756.9110734.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947756.9110734.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "80ae60fcdf836da7f8f55849605d92fe": {
+            "format": "png",
+            "id": "80ae60fcdf836da7f8f55849605d92fe",
+            "name": "1651947761.3399246.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947761.3399246.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "6cb78179ce81098763b9ee1fc054c0ee": {
+            "format": "png",
+            "id": "6cb78179ce81098763b9ee1fc054c0ee",
+            "name": "1651947764.9643052.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947764.9643052.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "8a1baf905adb5f0c76805e6d661f6440": {
+            "format": "png",
+            "id": "8a1baf905adb5f0c76805e6d661f6440",
+            "name": "1651947769.3293068.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947769.3293068.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0b3796b999a6276a77532913d382ba21": {
+            "format": "png",
+            "id": "0b3796b999a6276a77532913d382ba21",
+            "name": "1651947773.4936755.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947773.4936755.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "2329baa0d344cd5210468c3bbe20b68d": {
+            "format": "png",
+            "id": "2329baa0d344cd5210468c3bbe20b68d",
+            "name": "1651947777.318457.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947777.318457.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "8de7036ac300e25cedbe3a9ac739962e": {
+            "format": "png",
+            "id": "8de7036ac300e25cedbe3a9ac739962e",
+            "name": "1651947782.6228821.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947782.6228821.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1c0d23925412dbdca02f2f18ddee3d38": {
+            "format": "png",
+            "id": "1c0d23925412dbdca02f2f18ddee3d38",
+            "name": "1651947783.9698553.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947783.9698553.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f80d9fa4b4133ce6b9347ce31a9afcf3": {
+            "format": "png",
+            "id": "f80d9fa4b4133ce6b9347ce31a9afcf3",
+            "name": "1651947786.3849094.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947786.3849094.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ad71544a8a31686ed374802f33f40f80": {
+            "format": "png",
+            "id": "ad71544a8a31686ed374802f33f40f80",
+            "name": "1651947791.0801752.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947791.0801752.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "91c815f18defedf7245571e0eb96818f": {
+            "format": "png",
+            "id": "91c815f18defedf7245571e0eb96818f",
+            "name": "1651947792.3586495.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947792.3586495.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "9e05fd3efd8b7e340ad969c1f1a2c7b3": {
+            "format": "png",
+            "id": "9e05fd3efd8b7e340ad969c1f1a2c7b3",
+            "name": "1651947794.3733926.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947794.3733926.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "677600fc06800f1b49f46c7f01391e18": {
+            "format": "png",
+            "id": "677600fc06800f1b49f46c7f01391e18",
+            "name": "1651947802.0303023.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947802.0303023.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1108824de0e263b2a7dbb0ebe60fcdc4": {
+            "format": "png",
+            "id": "1108824de0e263b2a7dbb0ebe60fcdc4",
+            "name": "1651947804.4425087.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947804.4425087.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "5242db0fa7ba666773859504275a900e": {
+            "format": "png",
+            "id": "5242db0fa7ba666773859504275a900e",
+            "name": "1651947807.3948612.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947807.3948612.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "5a2271639bc3da188dbd0b3547376b96": {
+            "format": "png",
+            "id": "5a2271639bc3da188dbd0b3547376b96",
+            "name": "1651947810.7510912.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947810.7510912.png",
+            "size": {
+                "width": 640,
+                "height": 480
+            },
+            "state": 2,
+            "type": 1
+        },
+        "595f33385ecd2214a3b2bd78bf9826c3": {
+            "format": "png",
+            "id": "595f33385ecd2214a3b2bd78bf9826c3",
+            "name": "1651947813.6396592.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947813.6396592.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "4fa14bd8141cd68ebd5e6778678c475b": {
+            "format": "png",
+            "id": "4fa14bd8141cd68ebd5e6778678c475b",
+            "name": "1651947816.3265166.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947816.3265166.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d2a1d68124769e1f60672b9afe41ea1c": {
+            "format": "png",
+            "id": "d2a1d68124769e1f60672b9afe41ea1c",
+            "name": "1651947819.212789.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947819.212789.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "45b3153fa9ad1290345a312811d2b85a": {
+            "format": "png",
+            "id": "45b3153fa9ad1290345a312811d2b85a",
+            "name": "1651947822.4338276.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947822.4338276.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "084b9d16718db99a4fb616b8d63e8203": {
+            "format": "png",
+            "id": "084b9d16718db99a4fb616b8d63e8203",
+            "name": "1651947835.7347462.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947835.7347462.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "14a27b467485b9ca8e040c48834dcc59": {
+            "format": "png",
+            "id": "14a27b467485b9ca8e040c48834dcc59",
+            "name": "1651947838.3474061.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947838.3474061.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "dd0871fc4986e30be5674188557502a4": {
+            "format": "png",
+            "id": "dd0871fc4986e30be5674188557502a4",
+            "name": "1651947840.628133.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947840.628133.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "5eb0adfcb9c749a0b555701a528cefde": {
+            "format": "png",
+            "id": "5eb0adfcb9c749a0b555701a528cefde",
+            "name": "1651947842.5093932.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947842.5093932.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "6869638638098a63057490d5e730f399": {
+            "format": "png",
+            "id": "6869638638098a63057490d5e730f399",
+            "name": "1651947844.7259588.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947844.7259588.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "73909c6d4be91bf3e1f2d20ce83fc7fd": {
+            "format": "png",
+            "id": "73909c6d4be91bf3e1f2d20ce83fc7fd",
+            "name": "1651947846.6700134.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947846.6700134.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1cc8ed4fcab587d243588c9a811991e7": {
+            "format": "png",
+            "id": "1cc8ed4fcab587d243588c9a811991e7",
+            "name": "1651947851.5054033.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947851.5054033.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "567109cb498e2780df17eaa90570fab2": {
+            "format": "png",
+            "id": "567109cb498e2780df17eaa90570fab2",
+            "name": "1651947854.258086.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947854.258086.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f7e59420f7f1f808360f756f95185223": {
+            "format": "png",
+            "id": "f7e59420f7f1f808360f756f95185223",
+            "name": "1651947857.8826573.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947857.8826573.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fd00fba3c45ea618f3a4bb663a338ff5": {
+            "format": "png",
+            "id": "fd00fba3c45ea618f3a4bb663a338ff5",
+            "name": "1651947865.3375418.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947865.3375418.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "06141068cb21399f61c3702e7f263228": {
+            "format": "png",
+            "id": "06141068cb21399f61c3702e7f263228",
+            "name": "1651947868.5566106.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947868.5566106.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "73a3234be4c7d8e5ea9d078aa279d07f": {
+            "format": "png",
+            "id": "73a3234be4c7d8e5ea9d078aa279d07f",
+            "name": "1651947968.191316.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947968.191316.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "89c69b63ef738209c09ba951d3da8f33": {
+            "format": "png",
+            "id": "89c69b63ef738209c09ba951d3da8f33",
+            "name": "1651947972.083826.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947972.083826.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "641c88cf09242355e683378a413199c1": {
+            "format": "png",
+            "id": "641c88cf09242355e683378a413199c1",
+            "name": "1651947976.5193512.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947976.5193512.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1a5c750eae0f894f5ea8aec6281608a0": {
+            "format": "png",
+            "id": "1a5c750eae0f894f5ea8aec6281608a0",
+            "name": "1651947981.3495016.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947981.3495016.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "dc0ede74d756951fcfbfd86d618a4762": {
+            "format": "png",
+            "id": "dc0ede74d756951fcfbfd86d618a4762",
+            "name": "1651947989.2023346.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947989.2023346.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1efc329d1cbc3cfa77522bb7aa1b30e0": {
+            "format": "png",
+            "id": "1efc329d1cbc3cfa77522bb7aa1b30e0",
+            "name": "1651947992.8308465.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947992.8308465.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "59458f8709390a5dab1f4cc01a634bd5": {
+            "format": "png",
+            "id": "59458f8709390a5dab1f4cc01a634bd5",
+            "name": "1651947998.3371406.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651947998.3371406.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "5105dd117a2525bba7bfb21f5f3b11b0": {
+            "format": "png",
+            "id": "5105dd117a2525bba7bfb21f5f3b11b0",
+            "name": "1651948004.4459343.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948004.4459343.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "053c2daacbe5c93482675dd34c8abbbf": {
+            "format": "png",
+            "id": "053c2daacbe5c93482675dd34c8abbbf",
+            "name": "1651948009.0094247.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948009.0094247.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ca8195b021f6a7952d0c6df09e100abd": {
+            "format": "png",
+            "id": "ca8195b021f6a7952d0c6df09e100abd",
+            "name": "1651948013.170198.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948013.170198.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "509b86f0868001435194b1965b159dcb": {
+            "format": "png",
+            "id": "509b86f0868001435194b1965b159dcb",
+            "name": "1651948018.6107337.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948018.6107337.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "4a09917bd0f25545adb854426b338f36": {
+            "format": "png",
+            "id": "4a09917bd0f25545adb854426b338f36",
+            "name": "1651948031.0286856.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948031.0286856.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 1,
+            "type": 1
+        },
+        "edebd84319c8c6d0396e6e7f57567b50": {
+            "format": "png",
+            "id": "edebd84319c8c6d0396e6e7f57567b50",
+            "name": "1651948034.8601198.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948034.8601198.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "255073b6a3d2d385398aa9772bcf2a8f": {
+            "format": "png",
+            "id": "255073b6a3d2d385398aa9772bcf2a8f",
+            "name": "1651948041.0340722.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948041.0340722.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "b3d297cdb78f8db0a358c27233300dbc": {
+            "format": "png",
+            "id": "b3d297cdb78f8db0a358c27233300dbc",
+            "name": "1651948044.7284262.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948044.7284262.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "04462db02e449f15e35177e7d8efe1ee": {
+            "format": "png",
+            "id": "04462db02e449f15e35177e7d8efe1ee",
+            "name": "1651948048.1511908.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948048.1511908.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "03a7497c94a4ce546c5810001f969e29": {
+            "format": "png",
+            "id": "03a7497c94a4ce546c5810001f969e29",
+            "name": "1651948054.1242533.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948054.1242533.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1c678f6f34bd601ed8056d0f94480844": {
+            "format": "png",
+            "id": "1c678f6f34bd601ed8056d0f94480844",
+            "name": "1651948060.9078577.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948060.9078577.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "8f65b81156fd6f5cffadc84af4040c44": {
+            "format": "png",
+            "id": "8f65b81156fd6f5cffadc84af4040c44",
+            "name": "1651948070.4386325.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948070.4386325.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0865b6cd22081675c240fa7eac8b2957": {
+            "format": "png",
+            "id": "0865b6cd22081675c240fa7eac8b2957",
+            "name": "1651948072.7869437.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948072.7869437.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "37198c8433dd9dec63e86bb5054da218": {
+            "format": "png",
+            "id": "37198c8433dd9dec63e86bb5054da218",
+            "name": "1651948074.8717782.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948074.8717782.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "2ee81f13d891b600c8feb1f6744c7818": {
+            "format": "png",
+            "id": "2ee81f13d891b600c8feb1f6744c7818",
+            "name": "1651948077.0238473.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948077.0238473.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "4c03717672740d1ef18bad7340a0aa26": {
+            "format": "png",
+            "id": "4c03717672740d1ef18bad7340a0aa26",
+            "name": "1651948078.9640903.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948078.9640903.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fb3117e2144b27e886bbaf5e35a06dc0": {
+            "format": "png",
+            "id": "fb3117e2144b27e886bbaf5e35a06dc0",
+            "name": "1651948083.5970047.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948083.5970047.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a9afa44fc065794ac8ba675ea06df512": {
+            "format": "png",
+            "id": "a9afa44fc065794ac8ba675ea06df512",
+            "name": "1651948090.915555.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948090.915555.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "341320b28fe8b195c865c8f268a8b4b1": {
+            "format": "png",
+            "id": "341320b28fe8b195c865c8f268a8b4b1",
+            "name": "1651948093.6023703.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948093.6023703.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "6cf04211cee0e7d346249e4832334a0d": {
+            "format": "png",
+            "id": "6cf04211cee0e7d346249e4832334a0d",
+            "name": "1651948097.3603258.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948097.3603258.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "eead775f1e775822e6d64ffd86ac07e0": {
+            "format": "png",
+            "id": "eead775f1e775822e6d64ffd86ac07e0",
+            "name": "1651948100.115326.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948100.115326.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "c5566221f739bb3c6a0e9903863b2fed": {
+            "format": "png",
+            "id": "c5566221f739bb3c6a0e9903863b2fed",
+            "name": "1651948102.5954714.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948102.5954714.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "5875efcca8bb4a9ceb80501da70f9791": {
+            "format": "png",
+            "id": "5875efcca8bb4a9ceb80501da70f9791",
+            "name": "1651948105.8880665.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948105.8880665.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f75ca4fa0f32acb206545910bd01d6e7": {
+            "format": "png",
+            "id": "f75ca4fa0f32acb206545910bd01d6e7",
+            "name": "1651948108.4388125.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948108.4388125.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "74f51080c34ee9325fccc7c9e51aa456": {
+            "format": "png",
+            "id": "74f51080c34ee9325fccc7c9e51aa456",
+            "name": "1651948110.0483758.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948110.0483758.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e2f8199c2707714bf810a3951cb7e539": {
+            "format": "png",
+            "id": "e2f8199c2707714bf810a3951cb7e539",
+            "name": "1651948113.1384003.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948113.1384003.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "879c21ae98a2d9985b8961f8d6950674": {
+            "format": "png",
+            "id": "879c21ae98a2d9985b8961f8d6950674",
+            "name": "1651948116.4254117.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948116.4254117.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "55a636dd3fd76bb94885278bf96b3e5a": {
+            "format": "png",
+            "id": "55a636dd3fd76bb94885278bf96b3e5a",
+            "name": "1651948120.0499272.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948120.0499272.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "bde0d6e253a82ba80dd23e1d7f989576": {
+            "format": "png",
+            "id": "bde0d6e253a82ba80dd23e1d7f989576",
+            "name": "1651948123.4107385.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948123.4107385.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "de80156a430a75b27ea751c1c648eac0": {
+            "format": "png",
+            "id": "de80156a430a75b27ea751c1c648eac0",
+            "name": "1651948126.9034846.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948126.9034846.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "b171f90c79f10c43387e6a2d2d62db6f": {
+            "format": "png",
+            "id": "b171f90c79f10c43387e6a2d2d62db6f",
+            "name": "1651948132.0714436.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948132.0714436.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "6bcb94d1dea721c6aebf70dc2b4ae584": {
+            "format": "png",
+            "id": "6bcb94d1dea721c6aebf70dc2b4ae584",
+            "name": "1651948136.096285.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948136.096285.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "1df6caf8c823a643e94367ef466879f1": {
+            "format": "png",
+            "id": "1df6caf8c823a643e94367ef466879f1",
+            "name": "1651948142.1414564.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948142.1414564.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "967b99307f4678362ee0ba510283b17f": {
+            "format": "png",
+            "id": "967b99307f4678362ee0ba510283b17f",
+            "name": "1651948166.75.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948166.75.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "8ca3ffca772f048fe9bca99380159dfd": {
+            "format": "png",
+            "id": "8ca3ffca772f048fe9bca99380159dfd",
+            "name": "1651948170.98.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948170.98.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "085b99d56a6d5226f5690b6e4f1cbb98": {
+            "format": "png",
+            "id": "085b99d56a6d5226f5690b6e4f1cbb98",
+            "name": "1651948176.7747364.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948176.7747364.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "04d4e3941ffa9da9a2163aab6fad793b": {
+            "format": "png",
+            "id": "04d4e3941ffa9da9a2163aab6fad793b",
+            "name": "1651948179.7950928.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948179.7950928.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fe550b2918c22961b88f47587cc4b83c": {
+            "format": "png",
+            "id": "fe550b2918c22961b88f47587cc4b83c",
+            "name": "1651948183.558245.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948183.558245.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f0447565682f0e33628fa06166c766c4": {
+            "format": "png",
+            "id": "f0447565682f0e33628fa06166c766c4",
+            "name": "1651948187.784387.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948187.784387.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a1818f6b2edf94c7a0be7e6a50d3fce9": {
+            "format": "png",
+            "id": "a1818f6b2edf94c7a0be7e6a50d3fce9",
+            "name": "1651948190.4058802.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948190.4058802.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "30a0247f232815ad344b664da77ca1a3": {
+            "format": "png",
+            "id": "30a0247f232815ad344b664da77ca1a3",
+            "name": "1651948193.2909415.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948193.2909415.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "f057f6eca73238a8d11075ae938db9c9": {
+            "format": "png",
+            "id": "f057f6eca73238a8d11075ae938db9c9",
+            "name": "1651948205.5751646.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948205.5751646.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ccd64714563f3965f5a3e9f297b80ee9": {
+            "format": "png",
+            "id": "ccd64714563f3965f5a3e9f297b80ee9",
+            "name": "1651948208.5995758.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948208.5995758.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a8e4929c7498be14e1c79a2a9f9441ed": {
+            "format": "png",
+            "id": "a8e4929c7498be14e1c79a2a9f9441ed",
+            "name": "1651948211.2870948.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948211.2870948.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "baa8031d788b8f7056d48cdbdea96f0d": {
+            "format": "png",
+            "id": "baa8031d788b8f7056d48cdbdea96f0d",
+            "name": "1651948213.6323688.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948213.6323688.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "bf7f4d883355fd972f9cf4f9b6902381": {
+            "format": "png",
+            "id": "bf7f4d883355fd972f9cf4f9b6902381",
+            "name": "1651948216.1877468.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948216.1877468.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e7063f646cdcd9e2f7b6c93ff92b7a32": {
+            "format": "png",
+            "id": "e7063f646cdcd9e2f7b6c93ff92b7a32",
+            "name": "1651948218.4690816.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948218.4690816.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "0dd608679ef53052befbcf06db0353be": {
+            "format": "png",
+            "id": "0dd608679ef53052befbcf06db0353be",
+            "name": "1651948222.1635919.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948222.1635919.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "69bcd0bd8ea3918beb16d8e8a7b5db65": {
+            "format": "png",
+            "id": "69bcd0bd8ea3918beb16d8e8a7b5db65",
+            "name": "1651948224.9777162.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948224.9777162.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fbe8beaf996d83c575a46e618ee5f205": {
+            "format": "png",
+            "id": "fbe8beaf996d83c575a46e618ee5f205",
+            "name": "1651948227.934147.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948227.934147.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "09260f6903aea60bf6e6f970d816dcfe": {
+            "format": "png",
+            "id": "09260f6903aea60bf6e6f970d816dcfe",
+            "name": "1651948230.8200843.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948230.8200843.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "a924b54e6c6d28adf30f58a4e76b261e": {
+            "format": "png",
+            "id": "a924b54e6c6d28adf30f58a4e76b261e",
+            "name": "1651948237.331652.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948237.331652.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ce69096b4458478d67286fe7ccfb697c": {
+            "format": "png",
+            "id": "ce69096b4458478d67286fe7ccfb697c",
+            "name": "1651948242.1670616.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948242.1670616.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "ee75fda1d20be4ca366c2b66f8df185d": {
+            "format": "png",
+            "id": "ee75fda1d20be4ca366c2b66f8df185d",
+            "name": "1651948245.85708.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948245.85708.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "26b0fc6e00f47a3980dff9edc3e51200": {
+            "format": "png",
+            "id": "26b0fc6e00f47a3980dff9edc3e51200",
+            "name": "1651948256.5993068.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948256.5993068.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "fbec756a0cfacb80f087be817c141b68": {
+            "format": "png",
+            "id": "fbec756a0cfacb80f087be817c141b68",
+            "name": "1651948272.5127513.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948272.5127513.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e7c333201752a647870bcfa61ffb451d": {
+            "format": "png",
+            "id": "e7c333201752a647870bcfa61ffb451d",
+            "name": "1651948328.6377203.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948328.6377203.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d39e826852d1098b3027dbfc5f5d56c3": {
+            "format": "png",
+            "id": "d39e826852d1098b3027dbfc5f5d56c3",
+            "name": "1651948332.8038914.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948332.8038914.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "cf113b898b71776644031bb9cf99de2c": {
+            "format": "png",
+            "id": "cf113b898b71776644031bb9cf99de2c",
+            "name": "1651948338.7081554.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948338.7081554.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "3c2422a6aa71847a4237c510f95f9cf0": {
+            "format": "png",
+            "id": "3c2422a6aa71847a4237c510f95f9cf0",
+            "name": "1651948344.2139053.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948344.2139053.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "9ae4c1e5b46b4a0b69467f33f00a5611": {
+            "format": "png",
+            "id": "9ae4c1e5b46b4a0b69467f33f00a5611",
+            "name": "1651948355.4276204.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948355.4276204.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "186578386f22971cbe0a9e8be2fcda9e": {
+            "format": "png",
+            "id": "186578386f22971cbe0a9e8be2fcda9e",
+            "name": "1651948359.317872.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948359.317872.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "53bd7f1e70c051e21e145d1c7090ab19": {
+            "format": "png",
+            "id": "53bd7f1e70c051e21e145d1c7090ab19",
+            "name": "1651948372.8118002.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948372.8118002.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d242ef9321f0de1fc8bebe436a1801a2": {
+            "format": "png",
+            "id": "d242ef9321f0de1fc8bebe436a1801a2",
+            "name": "1651948376.5723639.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948376.5723639.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e29fe5a5415747f621423040e1282cfe": {
+            "format": "png",
+            "id": "e29fe5a5415747f621423040e1282cfe",
+            "name": "1651948379.9968057.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948379.9968057.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d8371a447de2facabb468b65aabfd000": {
+            "format": "png",
+            "id": "d8371a447de2facabb468b65aabfd000",
+            "name": "1651948382.2131834.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948382.2131834.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "36da33ac0d141e75bf7680df2cbea3dd": {
+            "format": "png",
+            "id": "36da33ac0d141e75bf7680df2cbea3dd",
+            "name": "1651948384.0260599.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948384.0260599.png",
+            "size": {
+                "width": 160,
+                "height": 120
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d62765e8f6882cb062fce76cb13768d4": {
+            "format": "png",
+            "id": "d62765e8f6882cb062fce76cb13768d4",
+            "name": "1651948386.5779076.png",
+            "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651948386.5779076.png",
             "size": {
                 "width": 160,
                 "height": 120

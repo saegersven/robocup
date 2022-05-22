@@ -27,10 +27,12 @@ images = []
 
 input_height = 120
 input_width = 160
-Xs = 32
-Ys = 24
+Xs = 40
+Ys = 12
 chunk_height = input_height / Ys
 chunk_width = input_width / Xs
+
+batch_size = 16
 
 with open(CSV_PATH, "r") as f:
 	for row in f.readlines():
@@ -43,7 +45,7 @@ with open(CSV_PATH, "r") as f:
 
 		num_victims = int(cols[1])
 
-		target = np.empty((Ys, Xs, 2), dtype=np.float32)
+		target = np.empty((Ys, Xs), dtype=np.float32)
 
 		for y in range(Ys):
 			for x in range(Xs):
@@ -98,10 +100,14 @@ with open(CSV_PATH, "r") as f:
 					dist_br = (chunk_xmax - x_v)**2 + (chunk_ymax - y_v)**2
 
 					if(dist_tl <= radius2 or dist_bl <= radius2 or dist_tr <= radius2 or dist_br <= radius2):
+						# Set bounding box properties
+
 						v = 1.0
-						if(int(cols[1]) == 1):
+						if(int(cols[j]) == 1):
 							# Dead victim
 							d = 1.0
+						else:
+							d = 0.0
 
 					# # Check if this chunk is responsible for predicting class
 					# # (Check if bounding box intersects the chunk)
@@ -112,15 +118,15 @@ with open(CSV_PATH, "r") as f:
 					# 	else:
 					# 		# Dead victim
 					# 		d = 1.0
-				# target[y, x, 0] = (x_bb - chunk_xmin) / chunk_width
-				# target[y, x, 1] = (y_bb - chunk_ymin) / chunk_height
-				# target[y, x, 2] = w_bb / input_width
-				# target[y, x, 3] = h_bb / input_height
+				target[y, x] = v
+				# target[y, x, 1] = (x_bb - chunk_xmin) / chunk_width
+				# target[y, x, 2] = (y_bb - chunk_ymin) / chunk_height
+				# target[y, x, 3] = w_bb / input_width
+				# target[y, x, 4] = h_bb / input_height
 				# target[y, x, 4] = c_bb
 				# target[y, x, 5] = l
 				# target[y, x, 6] = d
-				target[y, x, 0] = v
-				target[y, x, 1] = d
+				#target[y, x, 1] = d
 
 				if INSPECT_IMAGES:
 					c = 0.5
@@ -129,7 +135,7 @@ with open(CSV_PATH, "r") as f:
 
 					for x_ in range(int(chunk_width)):
 						for y_ in range(int(chunk_height)):
-							image[y * int(chunk_width) + y_, x * int(chunk_height) + x_] *= c
+							image[y * int(chunk_height) + y_, x * int(chunk_width) + x_] *= c
 
 		if INSPECT_IMAGES:
 			cv2.imshow("Image", image)
@@ -141,7 +147,7 @@ with open(CSV_PATH, "r") as f:
 
 for img in os.listdir(NO_VICTIMS_IN):
 	image = cv2.imread(NO_VICTIMS_IN + "/" + img, cv2.IMREAD_GRAYSCALE)
-	target = np.zeros((Ys, Xs, 2), dtype=np.float32)
+	target = np.zeros((Ys, Xs), dtype=np.float32)
 
 	targets.append(target)
 	images.append(image)
@@ -182,20 +188,20 @@ model = Sequential([
 	layers.Conv2D(8, 3, padding='same', activation='relu'),
 	layers.MaxPooling2D(2),
 	layers.Conv2D(16, 3, padding='same', activation='relu'),
-	layers.MaxPooling2D(7),
+	layers.MaxPooling2D(6),
 	#layers.Conv2D(64, 3, padding='same', activation='relu'),
 	#layers.MaxPooling2D(4),
 	layers.Dropout(0.2),
 	layers.Flatten(),
 	#layers.Dense(512, activation='relu'),
-	layers.Dense(Ys * Xs * (2), activation='linear'),
-	layers.Reshape((Ys, Xs, 2))
+	layers.Dense(Ys * Xs, activation='linear'),
+	layers.Reshape((Ys, Xs))
 ])
 
 model.compile(optimizer='adam', loss='mse', metrics=["accuracy"])
 
 model.summary()
 
-model.fit(images, targets, batch_size=4, epochs=25, verbose=1)
+model.fit(images, targets, batch_size=batch_size, epochs=50, verbose=1)
 
 model.save('model.h5', save_format='h5')
