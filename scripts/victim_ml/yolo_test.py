@@ -11,7 +11,8 @@ from tensorflow import keras
 from keras.preprocessing import image
 
 Xs = 40
-Ys = 12
+Ys = 30
+Cs = 3
 input_height = 120
 input_width = 160
 chunk_width = int(input_width / Xs)
@@ -43,6 +44,8 @@ for i, p in enumerate(predictions):
 	average_d = 0.0
 	num_cells = 0
 
+	victims = []
+
 	for y in range(Ys):
 		for x in range(Xs):
 			# Draw bounding box along with confidence
@@ -63,15 +66,28 @@ for i, p in enumerate(predictions):
 			confidence = min(max(p[y, x, 0], 0.0), 1.0)
 			confidence_map[y, x] = int(confidence * 255)
 
+			# if(p[y, x, 0] > 0.25):
+			# 	#center_x = int((p[y, x, 3] + x) * chunk_width)
+			# 	#center_y = int((p[y, x, 4] + y) * chunk_height)
+			# 	center_x = (x + 0.5) * chunk_width
+			# 	center_y = (y + 0.5) * chunk_height
+			# 	cv2.circle(debug_image, (int(center_x), int(center_y)), 2, (90), 3)
 
 			# print(xmin)
 
 			# if(confidence > 0.2):
 			# 	cv2.rectangle(image, (int(xmin), int(ymin)), (int(xmax), int(ymax)), (10), 3)
 
-			for x_ in range(chunk_width):
-				for y_ in range(chunk_height):
-					image[y * chunk_height + y_, x * chunk_width + x_] *= confidence
+			# for x_ in range(chunk_width):
+			# 	for y_ in range(chunk_height):
+			# 		image[y * chunk_height + y_, x * chunk_width + x_] *= confidence
+
+
+
+	# cv2.imshow("Debug", debug_image)
+	# #cv2.imshow("Output", cv2.resize(p, (160, 120)))
+	# cv2.waitKey(0)
+	# continue
 
 	# ret, thresholded_confidence = cv2.threshold(confidence_map, 90, 255, cv2.THRESH_BINARY)
 	# contours, _ = cv2.findContours(thresholded_confidence, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -90,12 +106,13 @@ for i, p in enumerate(predictions):
 	p = np.clip(p, 0.0, 1.0)
 
 	p = cv2.GaussianBlur(p, (1, 3), cv2.BORDER_DEFAULT)
-	p_resized = cv2.resize(p, (160, 120))
-	cv2.imshow("Probability map", p_resized)
+	#p_resized = cv2.resize(p, (160, 120))
+	#cv2.imshow("Probability map", p_resized)
 	cv2.imshow("Image", debug_image)
 
-
-	thresh = cv2.inRange(p, (0.32, 0.0, 0.0), (1.0, 1.0, 1.0))
+	thresh1 = cv2.inRange(p, (0.32, 0.0), (1.0, 1.0))
+	thresh2 = cv2.inRange(p, (0.0, 0.32), (1.0, 1.0))
+	thresh = cv2.bitwise_or(thresh1, thresh2)
 	cv2.imshow("Thresholded", thresh)
 
 	contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -107,7 +124,7 @@ for i, p in enumerate(predictions):
 		cv2.drawContours(mask, contour, -1, 255, -1)
 		mean = cv2.mean(p, mask=mask)
 
-		dead = mean[1] > mean[2]
+		dead = mean[0] > mean[1]
 
 		rect = cv2.boundingRect(contour)
 		x, y, w, h = rect
@@ -118,7 +135,7 @@ for i, p in enumerate(predictions):
 		h *= chunk_height
 
 		#print(w * h)
-		if(w * h < 400.0):
+		if(w * h < (360.0/60.0)*y+40.0):
 			continue
 
 		# Check if contour is too wide to be one victim

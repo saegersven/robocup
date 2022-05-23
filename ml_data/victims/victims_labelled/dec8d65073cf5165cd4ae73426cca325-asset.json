@@ -1,0 +1,48 @@
+{
+    "asset": {
+        "format": "png",
+        "id": "dec8d65073cf5165cd4ae73426cca325",
+        "name": "1651959766.3840597.png",
+        "path": "file:E:/Robocup/robocup/ml_data/victims/victims/1651959766.3840597.png",
+        "size": {
+            "width": 160,
+            "height": 120
+        },
+        "state": 2,
+        "type": 1
+    },
+    "regions": [
+        {
+            "id": "CI7CFwuGL",
+            "type": "RECTANGLE",
+            "tags": [
+                "dead"
+            ],
+            "boundingBox": {
+                "height": 11.168831168831169,
+                "width": 10.12987012987013,
+                "left": 86.03896103896103,
+                "top": 0
+            },
+            "points": [
+                {
+                    "x": 86.03896103896103,
+                    "y": 0
+                },
+                {
+                    "x": 96.16883116883116,
+                    "y": 0
+                },
+                {
+                    "x": 96.16883116883116,
+                    "y": 11.168831168831169
+                },
+                {
+                    "x": 86.03896103896103,
+                    "y": 11.168831168831169
+                }
+            ]
+        }
+    ],
+    "version": "2.2.0"
+}

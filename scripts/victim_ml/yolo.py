@@ -1,6 +1,7 @@
 import cv2
 import os
 import numpy as np
+import math
 
 import tensorflow as tf
 import keras.backend as K
@@ -28,7 +29,8 @@ images = []
 input_height = 120
 input_width = 160
 Xs = 40
-Ys = 12
+Ys = 30
+Cs = 2
 chunk_height = input_height / Ys
 chunk_width = input_width / Xs
 
@@ -45,13 +47,15 @@ with open(CSV_PATH, "r") as f:
 
 		num_victims = int(cols[1])
 
-		target = np.empty((Ys, Xs, 3), dtype=np.float32)
+		target = np.empty((Ys, Xs, Cs), dtype=np.float32)
 
 		for y in range(Ys):
 			for x in range(Xs):
 				v = 0.0
 				d = 0.0
 				l = 0.0
+				x_victim = 0.0
+				y_victim = 0.0
 
 				x_bb = 0.0
 				y_bb = 0.0
@@ -64,6 +68,8 @@ with open(CSV_PATH, "r") as f:
 				chunk_xmax = chunk_xmin + chunk_width
 				chunk_ymax = chunk_ymin + chunk_height
 
+				min_dist = 10000
+
 				for i in range(num_victims):
 					j = 2 + i*5
 					xmin = float(cols[j + 1])
@@ -72,6 +78,12 @@ with open(CSV_PATH, "r") as f:
 					ymax = float(cols[j + 4])
 					x_v = (xmin + xmax) / 2
 					y_v = (ymin + ymax) / 2
+
+					dist_to_center = math.sqrt(((x+0.5)*chunk_width-x_v)**2 + ((y+0.5)*chunk_height-y_v)**2)
+					dist_to_center /= max(chunk_width, chunk_height)
+
+					if(dist_to_center < min_dist):
+						min_dist = dist_to_center
 
 					# Check if this chunk is responsible for predicting bounding box
 					# (Check if the center is inside the chunk)
@@ -103,13 +115,13 @@ with open(CSV_PATH, "r") as f:
 					if(dist_tl <= radius2 or dist_bl <= radius2 or dist_tr <= radius2 or dist_br <= radius2):
 						# Set bounding box properties
 
+						x_victim = x_v
+						y_victim = y_v
 						v = 1.0
 						if(int(cols[j]) == 1):
 							# Dead victim
 							d = 1.0
-							l = 0.0
 						else:
-							d = 0.0
 							l = 1.0
 
 					# # Check if this chunk is responsible for predicting class
@@ -121,9 +133,12 @@ with open(CSV_PATH, "r") as f:
 					# 	else:
 					# 		# Dead victim
 					# 		d = 1.0
-				target[y, x, 0] = v
-				target[y, x, 1] = d
-				target[y, x, 2] = l
+				#target[y, x, 0] = v
+				target[y, x, 0] = d
+				target[y, x, 1] = l
+				#target[y, x, 3] = c_bb
+				#target[y, x, 3] = x_bb
+				#target[y, x, 4] = y_bb
 				# target[y, x, 1] = (x_bb - chunk_xmin) / chunk_width
 				# target[y, x, 2] = (y_bb - chunk_ymin) / chunk_height
 				# target[y, x, 3] = w_bb / input_width
@@ -131,7 +146,7 @@ with open(CSV_PATH, "r") as f:
 				# target[y, x, 4] = c_bb
 				# target[y, x, 5] = l
 				# target[y, x, 6] = d
-				#target[y, x, 1] = d
+				# target[y, x, 1] = d
 
 				if INSPECT_IMAGES:
 					c = 0.5
@@ -152,7 +167,7 @@ with open(CSV_PATH, "r") as f:
 
 for img in os.listdir(NO_VICTIMS_IN):
 	image = cv2.imread(NO_VICTIMS_IN + "/" + img, cv2.IMREAD_GRAYSCALE)
-	target = np.zeros((Ys, Xs, 3), dtype=np.float32)
+	target = np.zeros((Ys, Xs, Cs), dtype=np.float32)
 
 	targets.append(target)
 	images.append(image)
@@ -190,23 +205,31 @@ def alt_loss_fn(y_true, y_pred):
 
 model = Sequential([
 	layers.Rescaling(1./255, input_shape=(input_height, input_width, 1)),
-	layers.Conv2D(8, 3, padding='same', activation='relu'),
+	layers.Conv2D(8, 5, padding='same', activation='relu'),
 	layers.MaxPooling2D(2),
 	layers.Conv2D(16, 3, padding='same', activation='relu'),
 	layers.MaxPooling2D(6),
 	#layers.Conv2D(64, 3, padding='same', activation='relu'),
 	#layers.MaxPooling2D(4),
-	layers.Dropout(0.2),
+	layers.Dropout(0.1),
 	layers.Flatten(),
-	#layers.Dense(512, activation='relu'),
-	layers.Dense(Ys * Xs * 3, activation='linear'),
-	layers.Reshape((Ys, Xs, 3))
+	#layers.Dense(1024, activation='linear'),
+	layers.Dense(Ys * Xs * Cs, activation='linear'),
+	layers.Reshape((Ys, Xs, Cs))
 ])
 
 model.compile(optimizer='adam', loss='mse', metrics=["accuracy"])
 
 model.summary()
 
-model.fit(images, targets, batch_size=batch_size, epochs=50, verbose=1)
+model.fit(images, targets, batch_size=batch_size, epochs=20, verbose=1)
 
 model.save('model.h5', save_format='h5')
+
+# Convert to TensorFlow Lite model
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+
+# Save tflite model to file
+with open("victim.tflite", "wb") as f:
+	f.write(tflite_model)

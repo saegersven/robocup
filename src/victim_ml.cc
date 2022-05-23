@@ -1,5 +1,9 @@
 #include "victim_ml.h"
  
+#define OUT_WIDTH 40
+#define OUT_HEIGHT 30
+#define OUT_CHANNELS 2
+
 VictimML::VictimML() {
     std::cout << "Loading victim NN" << std::endl;
     model = tflite::FlatBufferModel::BuildFromFile("/home/pi/robocup/runtime_data/victim.tflite");
@@ -49,20 +53,17 @@ cv::Mat VictimML::invoke(cv::Mat image) {
     interpreter->Invoke();
     output_layer = interpreter->typed_output_tensor<float>(0);
 
-    const uint32_t OUT_WIDTH = 40;
-    const uint32_t OUT_HEIGHT = 12;
-
     // Map output layer to cv::Mat
-    cv::Mat out(OUT_HEIGHT, OUT_WIDTH, CV_32FC3);
+    cv::Mat out(OUT_HEIGHT, OUT_WIDTH, CV_32FC2);
 
     for(int i = 0; i < OUT_HEIGHT; ++i) {
         float* p = out.ptr<float>(i);
         for(int j = 0; j < OUT_WIDTH; ++j) {
-            for(int k = 0; k < 3; ++k) {
-                float val = output_layer[i * OUT_WIDTH * 3 + j * 3 + k];
+            for(int k = 0; k < OUT_CHANNELS; ++k) {
+                float val = output_layer[i * OUT_WIDTH * OUT_CHANNELS + j * OUT_CHANNELS + k];
                 if(val > 1.0f) val == 1.0f;
                 else if(val < 0.0f) val == 0.0f;
-                p[j * 3 + k] = val;
+                p[j * OUT_CHANNELS + k] = val;
             }
         }
     }
@@ -70,11 +71,16 @@ cv::Mat VictimML::invoke(cv::Mat image) {
 }
 
 std::vector<Victim> VictimML::extract_victims(cv::Mat probability_map) {
+    const float THRESHOLD = 0.2f;
+
     cv::Mat blurred;
     cv::GaussianBlur(probability_map, blurred, cv::Size(1, 3), 0);
 
-    cv::Mat thresh;
-    cv::inRange(blurred, cv::Scalar(0.2f, 0.0f, 0.0f), cv::Scalar(1.0f, 1.0f, 1.0f), thresh);
+    cv::Mat thresh1;
+    cv::Mat thresh2;
+    cv::inRange(blurred, cv::Scalar(THRESHOLD, 0.0f), cv::Scalar(1.0f, 1.0f), thresh1);
+    cv::inRange(blurred, cv::Scalar(0.0f, THRESHOLD), cv::Scalar(1.0f, 1.0f), thresh2);
+    cv::Mat thresh = cv::bitwise_or(thresh1, thresh2);
 
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
@@ -87,7 +93,7 @@ std::vector<Victim> VictimML::extract_victims(cv::Mat probability_map) {
         cv::drawContours(mask, contours, i, cv::Scalar(255), -1);
         cv::Scalar mean = cv::mean(blurred, mask);
 
-        bool dead = mean[1] > mean[2];
+        bool is_dead = mean[1] > mean[2];
 
         /*float total_alive = 0.0f;
         float total_dead = 0.0f;
@@ -103,19 +109,20 @@ std::vector<Victim> VictimML::extract_victims(cv::Mat probability_map) {
         }
         bool dead = total_dead > total_alive;*/
 
-        std::cout << dead << "\t";
+        //std::cout << is_dead << "\t";
 
-        const float CHUNK_WIDTH = (float)160 / 40;
-        const float CHUNK_HEIGHT = (float)120 / 12;
+        const float CHUNK_WIDTH = (float)160 / OUT_WIDTH;
+        const float CHUNK_HEIGHT = (float)120 / OUT_HEIGHT;
 
         cv::Rect rect = cv::boundingRect(contours[i]);
+        float min_area = (360.0f / 60.0f) * (rect.y + rect.height / 2.0f) + 40.0f;
 
-        if((float)rect.height * CHUNK_HEIGHT * (float)rect.width * CHUNK_WIDTH < 100.0f) {
+        if((float)rect.height * CHUNK_HEIGHT * (float)rect.width * CHUNK_WIDTH < min_area) {
             continue;
         }
 
         victims.push_back({
-            dead,
+            is_dead,
             ((float)rect.x + rect.width / 2.0f) * CHUNK_WIDTH,
             ((float)rect.y + rect.height / 2.0f) * CHUNK_HEIGHT
         });
