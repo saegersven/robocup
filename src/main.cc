@@ -51,7 +51,7 @@ int main() {
 		int dist2 = robot->get_vl53l0x_distance(2);
 		std::cout << dist1 << "\t\t" << dist2 << "\t\t" << dist1 - dist2 << "\t\t" << "Angle: " << rad_to_deg(std::atan((dist2-dist1)/145.0f)) << "\n";
 	}*/
-	/*
+	
 
 	//####################
 	VictimML v;
@@ -85,15 +85,15 @@ int main() {
 
 		cv::imshow("Frame", debug_frame);
 
-		cv::Mat out_resized;
-		cv::resize(out, out_resized, cv::Size(160, 120));
-		cv::imshow("Out", out_resized);
+		//cv::Mat out_resized;
+		//cv::resize(out, out_resized, cv::Size(160, 120));
+		//cv::imshow("Out", out_resized);
 		cv::waitKey(1);
 	}
 
 	exit(0);
 	//####################
-	*/
+	
 
 	int waiting_for_heading_cnt = 0;
 
