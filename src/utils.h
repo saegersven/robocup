@@ -37,3 +37,5 @@ cv::Vec3b average_color(cv::Mat in);
 float average_circle_color(cv::Mat in, float center_x, float center_y, float radius);
 
 uint32_t count_circle_in_range(cv::Mat in, float center_x, float center_y, float radius, std::function<bool (uint8_t, uint8_t, uint8_t)> f);
+
+cv::Mat two_channel_to_three_channel(cv::Mat in);

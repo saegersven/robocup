@@ -171,8 +171,7 @@ public:
 	// SENSORS
 	bool button(uint8_t pin);
 	void button_wait(uint8_t pin, bool state = true, uint32_t timeout = 0xffffffff);
-	//float single_distance(int8_t echo, uint8_t trig, int timeout = 20);
-	//float distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements = 1, float remove_percentage = 0.2f, uint32_t timeout_single_measurement = 200, uint32_t timeout = 2000);
+	int distance_avg(uint8_t sensor_id, uint8_t num_measurements, float remove_percentage);
 
 	float get_heading();
 	float get_pitch();

@@ -181,3 +181,17 @@ uint32_t count_circle_in_range(cv::Mat in, float center_x, float center_y, float
 
 	return num_circle_pixels_in_range;
 }
+
+cv::Mat two_channel_to_three_channel(cv::Mat in) {
+	cv::Mat out(in.rows, in.cols, CV_32FC3);
+	for(int i = 0; i < in.rows; ++i) {
+		float* p_in = in.ptr<float>(i);
+		float* p_out = out.ptr<float>(i);
+		for(int j = 0; j < in.cols; ++j) {
+			p_out[j * 3] = p_in[j * 2];
+			p_out[j * 3 + 1] = p_in[j * 2 + 1];
+			p_out[j * 3 + 2] = 0.0f;
+		}
+	}
+	return out;
+}

@@ -30,31 +30,9 @@ int main() {
 	robot->set_gpio(LED_2, false);
 	robot->set_gpio(BUZZER, false);
 
-	/*while(true) {
-		float dist = robot->get_vl53l0x_distance(0);
-		std::cout << std::to_string(dist) << std::endl;
-		if (dist < 100.0f) robot->set_gpio(LED_2, true);
-		else robot->set_gpio(LED_2, false);
-	}*/
-	/*
-	//####################
-	while(true) {
-		for(int i = 0; i < 3; ++i) {
-			float dist = robot->get_vl53l0x_distance(i);
-			std::cout << dist << "\t";
-		}
-		std::cout << std::endl;
-	}*/
-
-	/*while(true) {
-		int dist1 = robot->get_vl53l0x_distance(1);
-		int dist2 = robot->get_vl53l0x_distance(2);
-		std::cout << dist1 << "\t\t" << dist2 << "\t\t" << dist1 - dist2 << "\t\t" << "Angle: " << rad_to_deg(std::atan((dist2-dist1)/145.0f)) << "\n";
-	}*/
-	
-
 	//####################
 	VictimML v;
+	v.init();
 
 	cv::VideoCapture cap;
 	cap.open("/dev/cams/back", cv::CAP_V4L2);
@@ -62,15 +40,19 @@ int main() {
 		std::cout << "Back cam not opened" << std::endl;
 	}
 
+	std::cout << "Distance_avg: " << robot->distance_avg(DIST_FORWARD, 5, 0.2f) << "\n";
 	while(true) {
 		cv::Mat frame;
 		cap.grab();
 		cap.retrieve(frame);
 		cv::Mat debug_frame = frame.clone();
 
+		std::cout << "A" << std::endl;
 		cv::Mat out = v.invoke(frame);
+		std::cout << "B" << std::endl;
 		
 		std::vector<Victim> victims = v.extract_victims(out);
+		std::cout << "C" << std::endl;
 
 		std::string alive_text("Alive");
 		std::string dead_text("Dead");
@@ -85,6 +67,9 @@ int main() {
 
 		cv::imshow("Frame", debug_frame);
 
+		cv::Mat out_new = two_channel_to_three_channel(out);
+		cv::resize(out_new, out_new, cv::Size(320, 240));
+		cv::imshow("Out", out_new);
 		//cv::Mat out_resized;
 		//cv::resize(out, out_resized, cv::Size(160, 120));
 		//cv::imshow("Out", out_resized);
@@ -134,31 +119,6 @@ int main() {
 	robot->set_gpio(LED_2, false);
 	robot->beep(100, BUZZER);
 	delay(100);
-
-	/*while(1) {
-		std::cout << robot->get_pitch() << std::endl;
-		delay(10);
-	}*/
-
-	/*cv::VideoCapture cap("/dev/cams/back", cv::CAP_V4L2);
-	if(!cap.isOpened()) {
-		std::cout << "Back cam not opened" << std::endl;
-	}
-
-	cv::Mat frame;
-	while (1) {
-		cap.grab();
-		cap.retrieve(frame);
-		//cv::flip(frame, frame, -1);
-		cv::imshow("Back cam frame", frame);
-		cv::waitKey(1);
-
-		if(robot->button(BTN_DEBUG)) {
-			save_img("/home/pi/Desktop/back_cam_calibration/", frame);
-			delay(1000);
-		}
-	}
-	cap.release();*/
 	
 	// MAIN LOOP
 	while(1) {

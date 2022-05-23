@@ -51,7 +51,7 @@ void Rescue::rescue() {
 	robot->m(100, 100, 180);
 
 	// Take time to align so that wall is on the right
-	if(robot->distance(DIST_SIDE_FRONT) > 200) {
+	if(robot->distance_avg(DIST_SIDE_FRONT, 5, 0.2f) > 200) {
 		// No wall on the right, so turn 90° clockwise and align
 		robot->turn(RAD_90);
 		robot->m(100, 100, 800);
@@ -110,7 +110,7 @@ void Rescue::find_black_corner() {
 			std::cout << "Adjusting distance" << std::endl;
 
 			const uint16_t CORNER_WALL_DISTANCE = 350;
-			float distance_diff = (float)robot->distance(DIST_FORWARD) - CORNER_WALL_DISTANCE;
+			float distance_diff = (float)robot->distance_avg(DIST_FORWARD, 5, 0.2f) - CORNER_WALL_DISTANCE;
 			robot->m(100, 100, distance_diff * DISTANCE_FACTOR);
 
 			std::cout << "Aligning with corner" << std::endl;
