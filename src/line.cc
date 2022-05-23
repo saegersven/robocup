@@ -415,7 +415,7 @@ bool Line::line(cv::Mat& frame) {
 			delay(50);
 
 			float dist_front = robot->distance_avg(DIST_FORWARD, 5, 0.2f);
-			float dist_side = robot->distance(DIST_SIDE_FRONT, 5, 0.2f);
+			float dist_side = robot->distance_avg(DIST_SIDE_FRONT, 5, 0.2f);
 
 			std::cout << "Front distance: " << dist_front << std::endl;
 			std::cout << "Side distance: " << dist_side << std::endl;

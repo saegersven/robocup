@@ -73,7 +73,7 @@ cv::Mat VictimML::invoke(cv::Mat image) {
 }
 
 std::vector<Victim> VictimML::extract_victims(cv::Mat probability_map) {
-    const float THRESHOLD = 0.2f;
+    const float THRESHOLD = 0.25f;
 
     cv::Mat blurred;
     cv::GaussianBlur(probability_map, blurred, cv::Size(1, 3), 0);

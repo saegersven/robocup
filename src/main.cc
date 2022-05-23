@@ -47,12 +47,9 @@ int main() {
 		cap.retrieve(frame);
 		cv::Mat debug_frame = frame.clone();
 
-		std::cout << "A" << std::endl;
 		cv::Mat out = v.invoke(frame);
-		std::cout << "B" << std::endl;
 		
 		std::vector<Victim> victims = v.extract_victims(out);
-		std::cout << "C" << std::endl;
 
 		std::string alive_text("Alive");
 		std::string dead_text("Dead");
