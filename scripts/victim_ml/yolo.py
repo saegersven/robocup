@@ -222,7 +222,7 @@ model.compile(optimizer='adam', loss='mse', metrics=["accuracy"])
 
 model.summary()
 
-model.fit(images, targets, batch_size=batch_size, epochs=20, verbose=1)
+model.fit(images, targets, batch_size=batch_size, epochs=40, verbose=1)
 
 model.save('model.h5', save_format='h5')
 

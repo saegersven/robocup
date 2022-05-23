@@ -108,12 +108,33 @@ for i, p in enumerate(predictions):
 	p = cv2.GaussianBlur(p, (1, 3), cv2.BORDER_DEFAULT)
 	#p_resized = cv2.resize(p, (160, 120))
 	#cv2.imshow("Probability map", p_resized)
-	cv2.imshow("Image", debug_image)
 
 	thresh1 = cv2.inRange(p, (0.32, 0.0), (1.0, 1.0))
 	thresh2 = cv2.inRange(p, (0.0, 0.32), (1.0, 1.0))
 	thresh = cv2.bitwise_or(thresh1, thresh2)
 	cv2.imshow("Thresholded", thresh)
+
+	# kernel = np.ones((3, 3), 'uint8')
+	# dilatated_thresh = cv2.dilate(thresh, kernel, iterations=1)
+	# dilatated_thresh = cv2.resize(dilatated_thresh, (160, 120))
+
+	#bgr_mask = cv2.cvtColor(dilatated_thresh, cv2.COLOR_GRAY2BGR)
+
+	# masked_image = cv2.bitwise_and(image, image, mask=dilatated_thresh)
+
+	# masked_image = cv2.GaussianBlur(masked_image, (3, 3), cv2.BORDER_DEFAULT, 1.5)
+
+	# circles = cv2.HoughCircles(masked_image, cv2.HOUGH_GRADIENT, 1, 20, param1=20, param2=25, minRadius=0, maxRadius=0)
+	# circles = np.uint16(np.around(circles))
+
+	# if circles is not None:
+	# 	for i in circles[0,:]:
+	# 		cv2.circle(debug_image, (i[0], i[1]), i[2], (0, 255, 0), 2)
+
+	# cv2.imshow("Masked", masked_image)
+	# cv2.imshow("Image", debug_image)
+	# cv2.waitKey(0)
+	# continue
 
 	contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
