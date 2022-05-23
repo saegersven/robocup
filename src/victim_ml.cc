@@ -1,7 +1,7 @@
 #include "victim_ml.h"
  
-#define OUT_WIDTH 40
-#define OUT_HEIGHT 30
+#define OUT_WIDTH 32
+#define OUT_HEIGHT 20
 #define OUT_CHANNELS 2
 
 VictimML::VictimML() { }
