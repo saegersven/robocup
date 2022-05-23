@@ -335,13 +335,13 @@ float Robot::get_pitch() {
 	return fl_euler_data_p;
 }
 
-float Robot::distance(uint8_t sensor_id) {
+uint16_t Robot::distance(uint8_t sensor_id) {
 	uint16_t distance = vl53l0x_vec[sensor_id]->readRangeSingleMillimeters();
 	if(vl53l0x_vec[sensor_id]->timeoutOccurred()) {
 		std::cout << "VL53L0X (" << std::to_string(sensor_id) << ") timeout!" << std::endl;
-		return 4000.0f;
+		return 4000;
 	}
-	return (float)distance;
+	return distance;
 
 	/*
 	vl53l0x_vec[sensor_id]->setMeasurementTimingBudget(20000);

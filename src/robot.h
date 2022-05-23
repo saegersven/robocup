@@ -178,5 +178,5 @@ public:
 	float get_pitch();
 	void set_gpio(int pin, bool state);
 
-	float distance(uint8_t sensor_id);
+	uint16_t distance(uint8_t sensor_id);
 };
