@@ -40,7 +40,6 @@ int main() {
 		std::cout << "Back cam not opened" << std::endl;
 	}
 
-	std::cout << "Distance_avg: " << robot->distance_avg(DIST_FORWARD, 5, 0.2f) << "\n";
 	while(true) {
 		cv::Mat frame;
 		cap.grab();
