@@ -245,15 +245,15 @@ bool Line::abort_obstacle(cv::Mat frame) {
 void Line::obstacle() {
 	while(running) {
 		if(obstacle_active != 1) continue;
-		if(obstacle_enabled && robot->distance(DIST_FORWARD) < 90.0f) {
+		if(obstacle_enabled && robot->distance(DIST_FORWARD) < 90) {
 			robot->set_gpio(LED_1, true);
 			robot->stop();
 			robot->block();
 			delay(10);
 			//if(robot->distance_avg(DIST_1, 10, 0.4f, 500, 3000) < 9.5f) {
-			if(robot->distance(DIST_FORWARD) < 95.0f) {
+			if(robot->distance(DIST_FORWARD) < 95) {
 				//if(robot->distance_avg(DIST_1, 30, 0.4f, 500, 10000) < 9.5f) {	
-				if(robot->distance(DIST_FORWARD) < 95.0f) {			
+				if(robot->distance(DIST_FORWARD) < 95) {			
 					std::cout << "Obstacle" << std::endl;
 					obstacle_active = 2;
 				}
@@ -300,19 +300,10 @@ bool Line::obstacle_straight_line(uint32_t duration) {
 }
 
 bool Line::line(cv::Mat& frame) {
-	/*
-	// save roi of frame for ml purposes	
-	#ifdef DEBUG
-   		if (micros() % 21 == 0) {
-			cv::Mat roi = frame(cv::Range(24, 43), cv::Range(15, 67));
-			save_img("/home/pi/Desktop/linefollowing_rois/", roi);	
-   		}
-	#endif
-	*/
 	// Check if obstacle thread has notified main thread
 	if(obstacle_active == 2) {
 		robot->stop();
-		//if(robot->distance_avg(DIST_1, 10, 0.2f, 500, 5000) < 9.0f) {
+		//if(robot->distance_avg(DIST_1, 5, 0.2f, 500, 5000) < 9.0f) {
 		if(robot->distance(DIST_FORWARD) < 90.0f) {
 			std::cout << "Obstacle!" << std::endl;
 			robot->set_gpio(LED_2, true);				
@@ -423,10 +414,8 @@ bool Line::line(cv::Mat& frame) {
 			robot->m(100, 100, 850);
 			delay(50);
 
-			//float dist_front = robot->distance_avg(DIST_1, 10, 0.2f);
-			float dist_front = robot->distance(DIST_FORWARD);
-			//float dist_side = robot->distance_avg(DIST_2, 10, 0.2f);
-			float dist_side = robot->distance(DIST_SIDE_FRONT);
+			float dist_front = robot->distance_avg(DIST_FORWARD, 5, 0.2f);
+			float dist_side = robot->distance(DIST_SIDE_FRONT, 5, 0.2f);
 
 			std::cout << "Front distance: " << dist_front << std::endl;
 			std::cout << "Side distance: " << dist_side << std::endl;
@@ -490,8 +479,6 @@ float Line::circular_line(cv::Mat& in) {
 
 	uint32_t num_angles = 0;
 
-	//std::vector<std::pair<float, float>> line_angles; // Map of angle and distance
-
 	//cv::Point2f center(in.cols / 2, in.rows); // Bottom center
 	float center_x = in.cols / 2.0f;
 	float center_y = in.rows;
@@ -530,10 +517,6 @@ float Line::circular_line(cv::Mat& in) {
 }
 
 void Line::follow(cv::Mat& frame, cv::Mat black) {
-	//std::cout << "Follow" << std::endl;
-
-	//cv::Mat black = in_range_black(frame);
-
 	float line_angle = circular_line(black);
 
 	if(std::isnan(line_angle)) line_angle = 0.0f;
@@ -552,15 +535,7 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 		cv::Scalar(0, 255, 0), 2
 		);
 #endif
-
-	// auto now = std::chrono::high_resolution_clock::now();
-	// float dt = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update).count() / 1000000.0f;
-	// last_update = now;
-
-	// this->line_angle_integral = line_angle_integral * FOLLOW_LAST_I_FACTOR + line_angle * dt;
-
 	int16_t error = line_angle * FOLLOW_P_FACTOR;
-	/* + line_angle_integral * FOLLOW_I_FACTOR; */
 
 #ifndef MOVEMENT_OFF
 	float pitch = robot->get_pitch();
@@ -917,10 +892,4 @@ void Line::check_red_stripe(cv::Mat frame) {
 		robot->start_video(front_cam_id);
 		obstacle_enabled = true;
 	}
-	
-/*
-#ifdef DEBUG
-	cv::imshow("Red", red);
-#endif
-*/
 }

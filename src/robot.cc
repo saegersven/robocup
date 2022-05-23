@@ -102,17 +102,6 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 
 	std::cout << "VL53L0Xs initialized" << std::endl;
 
-	// Setup Servo motor pins
-	// 50Hz has a period of 20ms, so multiply value by 100 to get period in microseconds
-	// if(softPwmCreate(SERVO_1, 0, 200)) {
-	//  std::cout << "Error setting up PWM for Servo 1" << std::endl;
-	//  exit(ERRCODE_BOT_SETUP_PWM);
-	// }
-	// if(softPwmCreate(SERVO_2, 0, 200)) {
-	//  std::cout << "Error setting up PWM for Servo 2" << std::endl;
-	//  exit(ERRCODE_BOT_SETUP_PWM);
-	// }
-
 	io_mutex.unlock();
 
 	this->asc_speed_left = 0.0f;
@@ -137,21 +126,10 @@ int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, const uint8_t* reg_data, ui
 	if(write(dev_addr, write_buf, 1) != 1) {
 		return 1;
 	}
-	// if(write(dev_addr, reg_data, len) != len) {
-	//  return 1;
-	// }
-	// if(len == 1) {
-	//  i2c_smbus_write_byte_data(dev_addr, reg_addr, reg_data[0]);
-	//  return 0;
-	// }
-
-	// i2c_smbus_write_block_data(dev_addr, reg_addr, len, reg_data);
 	return 0;
 }
 
 int8_t i2c_write8(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data) {
-	//uint8_t write_buf[1] = {reg_data};
-	//return i2c_write(dev_addr, reg_addr, write_buf, 1);
 	wiringPiI2CWriteReg8(dev_addr, reg_addr, reg_data);
 }
 
@@ -164,13 +142,6 @@ int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t l
 	if(read(dev_addr, reg_data, len) != len) {
 		return 1;
 	}
-	// if(len == 1) {
-	//  reg_data = new uint8_t();
-	//  reg_data[0] = i2c_smbus_read_byte_data(dev_addr, reg_addr);
-	//  return 0;
-	// }
-
-	// i2c_smbus_read_block_data(dev_addr, reg_addr, reg_data);
 	return 0;
 }
 
@@ -185,61 +156,6 @@ void Robot::init_bno055() {
 		std::cout << "I2C Error setting up BNO055" << std::endl;
 		exit(ERRCODE_BOT_SETUP_I2C);
 	}
-
-	// bno055.bus_write = &i2c_write;
-	// bno055.bus_read = &i2c_read;
-	// bno055.delay_msec = &API_delay_msek;
-	// bno055.dev_addr = bno_fd;
-
-	// bno_comres = bno055_init(&this->bno055);
-
-	// bno_comres += bno055_set_sys_rst(0x01);
-	// delay(700);
-
-	// bno_comres += bno055_set_power_mode(BNO055_POWER_MODE_NORMAL);
-
-	// bno_comres += bno055_write_page_id(0x00);
-
-	// uint8_t write_buf[1] = {0x00};
-	// bno_comres += bno055_write_register(BNO055_SYS_TRIGGER_ADDR, write_buf, 1);
-
-	// // Set accelerometer range
-	// bno_comres += bno055_set_accel_range(BNO055_ACCEL_RANGE_2G);
-	// bno_comres += bno055_set_gyro_range(BNO055_GYRO_RANGE_2000DPS);
-	// bno_comres += bno055_set_mag_data_output_rate(0x05);
-
-	// delay(10);
-
-	// // write_buf[0] = BNO055_OPERATION_MODE_NDOF;
-	// // bno_comres += bno055_write_register(BNO055_OPERATION_MODE_REG, write_buf, 1);
-
-	// bno_comres += bno055_set_operation_mode(BNO055_OPERATION_MODE_NDOF);
-
-	// delay(10);
-
-	// R       0
-	// W       61      0
-	// W       63      32
-	// W       62      0
-	// W       7       0
-	// W       63      0
-	// W       7       1
-	// R       8
-	// W       8       13
-	// W       7       0
-	// R       61
-	// W       7       1
-	// R       10
-	// W       10      56
-	// W       7       0
-	// R       61
-	// W       7       1
-	// R       9
-	// W       9       13
-	// W       7       0
-	// W       61      0
-	// W       61      12
-
 
 	uint8_t chip_id[1] = {0};
 	i2c_read(bno_fd, 0, chip_id, 1);
@@ -272,30 +188,12 @@ void Robot::init_bno055() {
 float Robot::get_heading() {
 	float fl_euler_data_h;
 
-	// bno_comres += bno055_read_euler_h(&euler_data_h);
-	// bno_comres += bno055_read_euler_r(&euler_data_r);
-	// bno_comres += bno055_read_euler_p(&euler_data_p);
-
-	//bno_comres = 0;
-	//auto start_time = std::chrono::high_resolution_clock::now();
-
 	//bno_comres += bno055_convert_double_euler_h_rad(&f_euler_data_h);
 	int16_t temp = 0;
 	i2c_read(bno_fd, 26, (uint8_t*)&temp, 2);
 
 	fl_euler_data_h = (float)temp / 16.0f * PI / 180.0f;
 
-	//std::cout << fl_euler_data_h << std::endl;
-
-	//auto end_time = std::chrono::high_resolution_clock::now();
-
-	//std::cout << "Reading took " <<
-	//  std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms" << std::endl;
-
-	// bno_comres += bno055_convert_float_euler_r_rad(&f_euler_data_r);
-	// bno_comres += bno055_convert_float_euler_p_rad(&f_euler_data_p);
-
-	//std::cout << "X: " << std::to_string(rad_to_deg(f_euler_data_h)) << std::endl;
 	if (fl_euler_data_h < 0) return last_heading;
 	last_heading = fl_euler_data_h;
 
@@ -305,32 +203,10 @@ float Robot::get_heading() {
 float Robot::get_pitch() {
 	float fl_euler_data_p;
 
-	// bno_comres += bno055_read_euler_h(&euler_data_h);
-	// bno_comres += bno055_read_euler_r(&euler_data_r);
-	// bno_comres += bno055_read_euler_p(&euler_data_p);
-
-	//bno_comres = 0;
-	//auto start_time = std::chrono::high_resolution_clock::now();
-
-	//bno_comres += bno055_convert_double_euler_h_rad(&f_euler_data_h);
 	int16_t temp = 0;
 	i2c_read(bno_fd, 28, (uint8_t*)&temp, 2);
 
 	fl_euler_data_p = (float)temp / 16.0f * PI / 180.0f;
-
-	//std::cout << fl_euler_data_h << std::endl;
-
-	//auto end_time = std::chrono::high_resolution_clock::now();
-
-	//std::cout << "Reading took " <<
-	//  std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms" << std::endl;
-
-	// bno_comres += bno055_convert_float_euler_r_rad(&f_euler_data_r);
-	// bno_comres += bno055_convert_float_euler_p_rad(&f_euler_data_p);
-
-	//std::cout << "X: " << std::to_string(rad_to_deg(f_euler_data_h)) << std::endl;
-	//if (fl_euler_data_h < 0) return last_heading;
-	//last_heading = fl_euler_data_h;
 
 	return fl_euler_data_p;
 }
@@ -342,31 +218,7 @@ uint16_t Robot::distance(uint8_t sensor_id) {
 		return 4000;
 	}
 	return distance;
-
-	/*
-	vl53l0x_vec[sensor_id]->setMeasurementTimingBudget(20000);
-	vl53l0x_vec[sensor_id]->startContinuous();
-	while(true) {
-		uint64_t start = micros();
-		float dist = vl53l0x_vec[sensor_id]->readRangeContinuousMillimeters();
-		std::cout << dist << "\t" << (micros() - start) << " us\n";
-		if(dist < 100.0f) set_gpio(LED_2, true);
-		else set_gpio(LED_2, false);
-	}
-	vl53l0x_vec[sensor_id]->stopContinuous();
-	*/
 }
-
-// void Robot::delay_c(uint32_t ms, int id) {
-//  if(!cams[id].cap.isOpened()) {
-//      delay(ms);
-//      return;
-//  }
-//  std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
-//  while(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start) < ms) {
-//      cams[cam_id].cap.grab();
-//  }
-// }
 
 int Robot::init_camera(const std::string& id, bool calibrated, int width, int height, int fps, const std::string& subtractive_mask_path) {
 	Camera cam(id, calibrated, width, height, fps);
@@ -412,8 +264,6 @@ void Robot::m(int8_t left, int8_t right, int32_t duration, uint8_t brake_duty_cy
 	io_mutex.lock();
 
 	// Reconfigure the H-Bridge's direction control pins
-	//digitalWrite(M1_1, left < 0 ? HIGH : LOW);
-	//digitalWrite(M1_2, left <= 0 ? LOW : HIGH);
 
 	digitalWrite(M1_1, left < 0 ? HIGH : LOW);
 	digitalWrite(M1_2, left <= 0 ? LOW : HIGH);
@@ -427,8 +277,6 @@ void Robot::m(int8_t left, int8_t right, int32_t duration, uint8_t brake_duty_cy
 
 	// Wait for duration and stop
 	if(duration != 0) {
-		//std::this_thread::sleep_for(std::chrono::milliseconds(duration));
-		//delay_c(duration, this->front_cam_id);
 		delay(duration);
 		io_mutex.unlock();
 		stop(brake_duty_cycle);
@@ -486,16 +334,12 @@ void Robot::turn(float rad) {
 			if(new_heading > start_heading + RAD_90) start_heading += RAD_360;
 		}
 		float d_heading = new_heading - start_heading;
-		//std::cout << rad_to_deg(new_heading) << " " << rad_to_deg(d_heading) << std::endl;
-		//std::cout << rad_to_deg(new_heading) << " - " << rad_to_deg(start_heading) << " = " << rad_to_deg(std::abs(d_heading)) << std::endl;
 
 		uint32_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
 
 		if((ms > min_time && std::abs(d_heading) >= to_turn - deg_to_rad(11.0f))) break;
 	}
 	stop();
-
-	//std::cout << "Accuracy: " << rad_to_deg(std::abs(get_heading() - start_heading)) << "°" << std::endl;
 }
 
 // dir: true = clockwise, false = counterclockwise
@@ -534,41 +378,25 @@ void Robot::turn_to_heading(float heading) {
 	if (heading == 0) heading = 0.01f;
 	if (heading == curr_heading) turn(deg_to_rad(3));
 	int SPEED = 30;
-	//int CORRECTION = 50; // nice comment
 
 	if (curr_heading < heading && heading - PI < curr_heading) {
 		std::cout << "Case 1" << std::endl;
 		turn_to_heading_last(heading, SPEED, true);
-		//while (get_heading() < heading) m(-SPEED, SPEED);
-		//m(50, -50, CORRECTION);
 	} 
 	else if (curr_heading < heading && heading - PI > curr_heading) {
 		std::cout << "Case 2" << std::endl;
 		while (get_heading() > 0.15) m(SPEED, -SPEED); // turn to ~0°
 		turn(-0.2); // turn over 0° threshold
-		//while (get_heading() > heading) m(SPEED, -SPEED);
-		//m(-50, 50, CORRECTION);
 		turn_to_heading_last(heading, SPEED, false);
 	}
 	else if (curr_heading > heading && heading + PI < curr_heading) {
 		std::cout << "Case 3" << std::endl;
 		while (get_heading() < 6.13) m(-SPEED, SPEED); // turn to ~0°
 		turn(0.2); // turn over 0° threshold
-		//while (get_heading() < heading) m(-SPEED, SPEED);
-		//m(50, -50, CORRECTION);
 		turn_to_heading_last(heading, SPEED, true);
 	}
 	else if (curr_heading > heading && heading + PI > curr_heading) {
 		std::cout << "Case 4" << std::endl;
-		/*float last_heading = get_heading();
-		float curr_heading = get_heading();
-		while (curr_heading > heading) {
-			m(SPEED, -SPEED);
-			curr_heading = get_heading();
-			if(std::abs(curr_heading - last_heading) > RAD_180) break;
-			last_heading = curr_heading;
-		}
-		m(-50, 50, CORRECTION);*/
 		turn_to_heading_last(heading, SPEED, false);
 	} else {
 		std::cout << "turn_to_heading: UNKNOWN CASE, pHeading: " << heading << "   curr_heading: " << curr_heading << std::endl;
@@ -617,8 +445,6 @@ void Robot::straight(int8_t speed, uint32_t duration) {
 			integral = 0.0f;
 		}
 		last_error = error;
-
-		//std::cout << "E\t" << error << std::endl;
 
 		integral = integral * I_DAMPEN_FACTOR + error * dt;
 		float correction = P_FACTOR * error + I_FACTOR * integral;
@@ -763,34 +589,14 @@ void Robot::button_wait(uint8_t pin, bool state, uint32_t timeout) {
 	io_mutex.unlock();
 }
 
-/*float Robot::single_distance(int8_t echo, uint8_t trig, int timeout) {
-	timeout = timeout * 1000; // convert msec to usec for micros() function
-	digitalWrite(trig, HIGH);
-	delayMicroseconds(10);
-	digitalWrite(trig, LOW);
-
-	uint64_t start_time = micros();
-
-	while (digitalRead(echo) == LOW && micros() - start_time < timeout);
-	volatile uint64_t startTimeUsec = micros();
-	while (digitalRead(echo) == HIGH);
-	volatile uint64_t endTimeUsec = micros();
-
-	uint64_t travelTimeUsec = endTimeUsec - startTimeUsec;
-
-	// convert distance to cm, multiply with speed of sound (0,0343 cm/us) and divide by 2 to get one-way distance
-	return ((travelTimeUsec / 10000.0f) * 340.29f * 0.5f);
-}*/
-
-/*float Robot::distance_avg(uint8_t echo, uint8_t trig, uint8_t measurements, float remove_percentage, uint32_t timeout_single_measurement, uint32_t timeout) {
-	float arr[measurements];
+int Robot::distance_avg(uint8_t sensor_id, uint8_t num_measurements, float remove_percentage) {
+	float arr[num_measurements];
 
 	// take measurements
 	for(int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
-		float dist = single_distance(echo, trig, timeout_single_measurement);
+		float dist = distance(sensor_id);
 		//std::cout << i << ": "<< dist << std::endl;
 		arr[i] = dist;
-		delay(5);
 	}
 
 	// calculate avg after removing n percent of exteme measurements
@@ -800,16 +606,15 @@ void Robot::button_wait(uint8_t pin, bool state, uint32_t timeout) {
 	int kthPercent = (arr_len * remove_percentage);
 	float sum = 0;
 
-	for (int i = 0; i < arr_len; i++)
+	for(int i = 0; i < arr_len; i++)
 		if (i >= kthPercent && i < (arr_len - kthPercent))
 			sum += arr[i];
 
 	float avg = sum / (arr_len - 2 * kthPercent);
 
 	//std::cout << "Avg: "<< avg << std::endl;
-	delay(5);
-	return avg;
-}*/
+	return (int)avg;
+}
 
 void Robot::set_gpio(int pin, bool state) {
 	digitalWrite(pin, state);

@@ -148,8 +148,7 @@ bool check_green_stripe(cv::Mat frame) {
 void Rescue::find_black_corner() {
 	std::cout << "find_black_corner" << std::endl;
 	// check if there's a wall next to the robot (right side):
-	//if (robot->distance_avg(DIST_2, 10, 0.2f) > 20.0f) {
-	if(robot->distance(DIST_SIDE_FRONT) > 200.0f) {
+	if(robot->distance_avg(DIST_SIDE_FRONT, 5, 0.2f) > 200.0f) {
 		// if not drive so that there is one:
 		robot->turn(-RAD_90);
 		robot->m(-100, -100, 350);
@@ -193,10 +192,8 @@ void Rescue::find_black_corner() {
 				break;
 			}*/
 
-			//float dist = robot->single_distance(DIST_1);
 			float dist = robot->distance(DIST_FORWARD);
-			//if (dist < 33.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 33.0f) {
-			if(dist < 330.0f && robot->distance(DIST_FORWARD) < 330.0f) {
+			if(dist < 330 && robot->distance_avg(DIST_FORWARD, 5, 0.2f) < 350) {
 				std::cout << "Wall" << std::endl;
 				isWall = true; 
 				break;
@@ -269,7 +266,7 @@ void Rescue::find_black_corner() {
 	float min_dist = 99999999.9f;
 	while (micros() - start < 2500000) {
 		robot->m(100, 100, 100);
-		float dist = robot->distance_avg(DIST_2, 10, 0.2f);
+		float dist = robot->distance_avg(DIST_2, 5, 0.2f);
 
 		// save min dist
 		if (dist < min_dist) min_dist = dist;
@@ -291,7 +288,7 @@ void Rescue::find_black_corner() {
 
 	// now turn a bit left/right (depending on where is a sidewall)
 
-	if (robot->distance_avg(DIST_2, 10, 0.2f) > 40.0f) {
+	if (robot->distance_avg(DIST_2, 5, 0.2f) > 40.0f) {
 		robot->turn(-RAD_90);
 		robot->m(-100, -100, 700);
 	} else {		
@@ -461,8 +458,7 @@ bool Rescue::find_victim(bool ignore_dead) {
 	float angle1 = pixel_angle * victim_x;
 	robot->turn(angle1);
 
-	//float dist = robot->distance_avg(DIST_1, 20, 0.4f);
-	float dist = robot->distance(DIST_FORWARD);
+	float dist = robot->distance_avg(DIST_FORWARD, 5, 0.2f);
 	if(dist > 1000.0f) {
 		std::cout << "Hopefully just silver" << std::endl;
 		robot->turn(-angle1);
@@ -581,7 +577,7 @@ void Rescue::find_exit() {
 		// Drive while there is a side wall
 		//float side_distance = robot->single_distance(DIST_2);
 		float side_distance = robot->distance(DIST_SIDE_FRONT);
-		//while(disable_side || side_distance < 30.0f || robot->distance_avg(DIST_2, 10, 0.2f) < 30.0f) {
+		//while(disable_side || side_distance < 30.0f || robot->distance_avg(DIST_2, 5, 0.2f) < 30.0f) {
 		while(disable_side || side_distance < 300.0f || robot->distance(DIST_SIDE_FRONT) < 300.0f) {
 			last_side_distance = side_distance;
 			std::cout << side_distance << std::endl;
@@ -598,9 +594,9 @@ void Rescue::find_exit() {
 				cap.release();
 				robot->m(-100, -100, 200);
 			}
-			//if(silver || (robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 10, 0.2f) < 10.0f)) {
+			//if(silver || (robot->single_distance(DIST_1) < 10.0f && robot->distance_avg(DIST_1, 5, 0.2f) < 10.0f)) {
 			if(silver || robot->distance(DIST_FORWARD) < 100.0f) {
-				//float s_dist = robot->distance_avg(DIST_2, 10, 0.2f);
+				//float s_dist = robot->distance_avg(DIST_2, 5, 0.2f);
 				float s_dist = robot->distance(DIST_SIDE_FRONT);
 				if(s_dist > 300.0f) break;
 				if(!silver) cap.release();
