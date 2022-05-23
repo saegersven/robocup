@@ -28,6 +28,7 @@ private:
 
 public:
 	VictimML();
+	void init();
 	cv::Mat invoke(cv::Mat image);
 	std::vector<Victim> extract_victims(cv::Mat probability_map);
 };

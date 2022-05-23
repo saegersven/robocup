@@ -4,7 +4,7 @@
 #define OUT_HEIGHT 30
 #define OUT_CHANNELS 2
 
-VictimML::VictimML() {
+void VictimML::init() {
     std::cout << "Loading victim NN" << std::endl;
     model = tflite::FlatBufferModel::BuildFromFile("/home/pi/robocup/runtime_data/victim.tflite");
     tflite::ops::builtin::BuiltinOpResolver resolver;

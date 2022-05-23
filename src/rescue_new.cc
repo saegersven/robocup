@@ -44,6 +44,8 @@ void Rescue::rescue() {
 	caps.push_back(cv::VideoCapture());
 	caps.push_back(cv::VideoCapture());
 
+	victimML.init();
+
 	robot->stop();
 	robot->beep(100, BUZZER);
 	robot->m(100, 100, 180);
@@ -65,8 +67,18 @@ void Rescue::rescue() {
 
 	find_black_corner();
 
+	// Drop Rescue Kit
+	robot->servo(SERVO_1, ARM_DROP, 500);
+	robot->servo(SERVO_2, GRAB_OPEN, 500);
+	robot->servo(SERVO_2, GRAB_CLOSED, 500);
+	robot->servo(SERVO_1, ARM_UP, 500);
+	robot->m(100, 100, 550);
+	robot->turn(RAD_180);
+
 	std::cout << "END" << std::endl;
 	exit(0);
+
+	// Search for victims
 }
 
 float Rescue::get_angle_to_right_wall() {
@@ -123,4 +135,82 @@ void Rescue::find_black_corner() {
 			robot->turn(-RAD_90);
 		}
 	}
+}
+
+bool Rescue::rescue_victim(bool ignore_dead) {
+	cv::Mat frame = capture(CAM_FAR);
+	cv::Mat probability_map = victimML.invoke(frame);
+	std::vector<Victim> victims = victimML.extract_victims(probability_map);
+
+	const uint16_t WIDTH = 160;
+	const uint16_t HEIGHT = 120;
+	const float FAR_CAM_FOV = deg_to_rad(60.0f);
+
+	bool victim_selected = false;
+	Victim selected_victim;
+
+	// Select lowest victim ignoring dead victims if ignore_dead is true
+	for(int i = 0; i < victims.size(); ++i) {
+		if(!ignore_dead || !victims[i].dead) {
+			if(victims[i].y > selected_victim.y) {
+				selected_victim = victims[i];
+				victim_selected = true;
+			}
+		}
+	}
+
+	if(!victim_selected) return false;
+
+	float angle = (selected_victim.x / WIDTH - 0.5) * FAR_CAM_FOV;
+	robot->turn(angle);
+
+	uint32_t num_steps = 0;
+	const uint16_t APPROACH_STEP_SIZE = 300;
+	while(selected_victim.y < HEIGHT * 0.7f) {
+		++num_steps;
+		robot->m(100, 100, APPROACH_STEP_SIZE);
+		delay(200);
+
+		frame = capture(CAM_FAR);
+		probability_map = victimML.invoke(frame);
+		victims = victimML.extract_victims(probability_map);
+
+		victim_selected = false;
+		selected_victim = {false, 0.0f, 0.0f};
+
+		// Select victim that is closest to the center
+		for(int i = 0; i < victims.size(); ++i) {
+			if(abs(victims[i].x - WIDTH / 2) < abs(selected_victim.x - WIDTH / 2)) {
+				selected_victim = victims[i];
+				victim_selected = true;
+			}
+		}
+
+		float angle2 = (selected_victim.x / WIDTH - 0.5) * FAR_CAM_FOV;
+		robot->turn(angle2);
+	}
+
+	// Pick victim up
+	robot->turn(RAD_180);
+	robot->servo(SERVO_2, GRAB_OPEN, 750);
+	robot->servo(SERVO_1, ARM_ALMOST_DOWN, 650);
+	robot->m(-50, -50, 340);
+	robot->servo(SERVO_1, ARM_DOWN, 250);
+	robot->servo(SERVO_2, GRAB_CLOSED, 750);
+	robot->m(50, 50, 100);
+	robot->servo(SERVO_1, ARM_UP, 750);
+
+	robot->m(100, 100, num_steps * APPROACH_STEP_SIZE);
+	robot->turn(-angle - RAD_180);
+	robot->m(-100, -100, 800);
+
+	robot->servo(SERVO_1, ARM_DROP, 500);
+	robot->servo(SERVO_2, GRAB_OPEN, 500);
+	robot->servo(SERVO_2, GRAB_CLOSED, 500);
+	robot->servo(SERVO_1, ARM_UP, 500);
+
+	robot->m(100, 100, 550);
+	robot->turn(RAD_180);
+
+	return true;
 }

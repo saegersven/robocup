@@ -6,6 +6,7 @@
 class Rescue {
 private:
 	std::shared_ptr<Robot> robot;
+	VictimML victimML;
 
 	std::thread::native_handle_type native_handle;
 
@@ -19,6 +20,7 @@ private:
 	void rescue();
 	float get_angle_to_right_wall();
 	void find_black_corner();
+	bool rescue_victim(bool ignore_dead);
 
 public:
 	Rescue(std::shared_ptr<Robot> robot);
