@@ -10,9 +10,9 @@ import cv2
 from tensorflow import keras
 from keras.preprocessing import image
 
-Xs = 40
-Ys = 30
-Cs = 3
+Xs = 32
+Ys = 20
+Cs = 2
 input_height = 120
 input_width = 160
 chunk_width = int(input_width / Xs)
@@ -104,6 +104,11 @@ for i, p in enumerate(predictions):
 	# cv2.imshow("Confidence map", image)
 
 	p = np.clip(p, 0.0, 1.0)
+
+	zeros = np.zeros((p.shape[0], p.shape[1], 1), dtype=p.dtype)
+	p_expanded = np.append(p, zeros, axis=2)
+
+	cv2.imshow("Expanded output", cv2.resize(p_expanded, (160, 120)))
 
 	p = cv2.GaussianBlur(p, (1, 3), cv2.BORDER_DEFAULT)
 	#p_resized = cv2.resize(p, (160, 120))

@@ -45,4 +45,4 @@ libs
 
 ml
 
-#scripts/victim_ml/model.h5
+scripts/victim_ml/model.h5

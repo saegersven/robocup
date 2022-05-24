@@ -28,8 +28,8 @@ images = []
 
 input_height = 120
 input_width = 160
-Xs = 40
-Ys = 30
+Xs = 32
+Ys = 20
 Cs = 2
 chunk_height = input_height / Ys
 chunk_width = input_width / Xs
@@ -208,10 +208,10 @@ model = Sequential([
 	layers.Conv2D(8, 5, padding='same', activation='relu'),
 	layers.MaxPooling2D(2),
 	layers.Conv2D(16, 3, padding='same', activation='relu'),
-	layers.MaxPooling2D(6),
-	#layers.Conv2D(64, 3, padding='same', activation='relu'),
-	#layers.MaxPooling2D(4),
-	layers.Dropout(0.1),
+	layers.MaxPooling2D(4),
+	layers.Conv2D(16, 3, padding='same', activation='relu'),
+	#layers.MaxPooling2D(2),
+	layers.Dropout(0.3),
 	layers.Flatten(),
 	#layers.Dense(1024, activation='linear'),
 	layers.Dense(Ys * Xs * Cs, activation='linear'),
@@ -222,7 +222,7 @@ model.compile(optimizer='adam', loss='mse', metrics=["accuracy"])
 
 model.summary()
 
-model.fit(images, targets, batch_size=batch_size, epochs=40, verbose=1)
+model.fit(images, targets, batch_size=batch_size, epochs=25, verbose=1)
 
 model.save('model.h5', save_format='h5')
 
@@ -231,5 +231,5 @@ converter = tf.lite.TFLiteConverter.from_keras_model(model)
 tflite_model = converter.convert()
 
 # Save tflite model to file
-with open("victim.tflite", "wb") as f:
+with open("../../runtime_data/victim.tflite", "wb") as f:
 	f.write(tflite_model)
