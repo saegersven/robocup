@@ -37,6 +37,8 @@ with open(INPUT_CSV, "r") as f:
 
 		image = cv2.imread(INPUT_DIR + "/" + img, cv2.IMREAD_GRAYSCALE)
 		print(img)
+		if(image.shape[0] > 200):
+			print("-> Image too big!!!!")
 		image1 = np.flip(image, axis=1)
 
 		# image_bright = image.copy()

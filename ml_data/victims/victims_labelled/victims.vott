@@ -5,7 +5,7 @@
         "name": "Far cam",
         "providerType": "localFileSystemProxy",
         "providerOptions": {
-            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiZGZiNDJlZDM2M2I0NDk4MmJlN2M1YmI4MWE5YjAzOWFiODU5YTQ1MjBjZWFiZWZjYzZiYTgyN2Q5ZGJmMjEzYjRkYWEwZDBlMDhjM2RhM2RjZTNhYmE4MzdmZjZjOTkyODMyMDZlYmUwNDI2OWE4NTFiYzM1MTc2YmRlZjI0Mzc2YjJhNjdjYTY4MWM0ZGQ4NzA5YzdiMTE2YTM1MWE1YSIsIml2IjoiNDY4ZDMwNTFhNmNiYjU1MTUyYzBmMWQ4NGJhOGE3MmZkNGE2Nzg1NDY2NmM2N2ExIn0="
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiYzIyMDM1ZGFhNTRiNWUwYTMwZjAzYTcwYzYwYmUyY2RkYjkwNmMwNGNhNjNkODEwMDJhZjk4MTI0ZmY1ZjZjNTI1MzUyMTMyOWZkZjBiYTJlYWE1YzA3MjZjOGZjY2I0MjJlZjMzZDQ2M2QyYmJhODQyNWNlMWZhZmU3YjRkYWVhMmZhNmFlNGM3NzViMTJkZGJiYzE5MmFlM2VlMDU5ZCIsIml2IjoiMmViZDdlNmQ2NzA5NmZmYTViN2FlNjU0NmFiMWM0ODI2MDNkODczM2JmZjU1NjNiIn0="
         },
         "id": "va2Dh3kLP"
     },
@@ -13,7 +13,7 @@
         "name": "Out",
         "providerType": "localFileSystemProxy",
         "providerOptions": {
-            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiMDBjNmNmODA5ZWU2ODY4NDdmZjU4ZmFiNmIxZGI3Zjk2YWExYjRiNTUzMTFmZDg5YzJkZDZlNjQyOTExOWVkM2MzMzZjYzZmMDJjNzQxM2E2ZTYyNGI3NzY2MjQ0M2M2NjY1OGM4YjMzZmMxODE5Zjk2NzcxODVhODAzNDE5MGYzZDY1NDBiOTc4N2QyMzM3ODc4NWY1Y2FmMDg2MjM3MCIsIml2IjoiY2QyZmFkNTI5ZjU2NWQyNGIwNWRhMDA3NGJhYmI4OTI1NTRjZDA5OTUyYjdhZmQxIn0="
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiNTRhNDMxYjUyYWYwYTkwYzEyMjYzZTE1YzMyNGZmODljODUwZGQxNzE5ZGI5M2I2NTc5ZTA3OTU2MDMyNTA2YjllM2NkMWZiZjY1ZGE0YmRmNzBiYmVmNmQwMjE2MDgzNzczZjM0MDc3YTc4NGVjNjBhMWQ2YmNmNzMyNzAzOTc5ZWU4YWFlNjVkMTk2MDVlMTdkMzI1ODdiN2Y1OGMwZCIsIml2IjoiYzBmNjAzYWNjOTI4NjU0ZmIyN2EyZmQxNDIwYmJhMTJhYzRjZDgyNTNlNzdlYTFhIn0="
         },
         "id": "qGAP70gcY"
     },
@@ -39,11 +39,11 @@
     "exportFormat": {
         "providerType": "csv",
         "providerOptions": {
-            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiMWViMzIxY2M2ZmFhOWI0MjY0ZTRiOGQ4YzBmNzQzM2JhNDQ2ZjQxYjM0ZjY0ZGIyMzdkZTdmYmZjZWRhYTVkMzc2NWZkYjZmNDExMGJjMmFkZGNhYTI0ODE1OGM1MjA4IiwiaXYiOiIzMjc5ODNjOGMxNGZiMjIzYTgwNTUyYThhMDUzODJiZTU5MmQwZjM3YjU1OWFkMjcifQ=="
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiZTc4NTZjYjQ1ZTA5Zjg2NjFmMzFhNGU1MTBjYTk0Mjk2ZmQ1MGRkM2JhZTM3N2UxNWI1MzcyZGVkYmJmODY1YjFjY2IyYjQwNDczNWQ5NWIzMTA4NzA0ZTY1NTBmODBjIiwiaXYiOiJhN2Q2Y2I3MGExNmQxNzU3OTc2NmVlYzkzNmI3NTRmOWM4Y2E1ZDJhYmQ1NzdmODAifQ=="
         }
     },
     "version": "2.2.0",
-    "lastVisitedAssetId": "759ca1a15e84953a2e381d3ee6d1ad3e",
+    "lastVisitedAssetId": "1668ef4e01cc5007a63670ec97db59f0",
     "assets": {
         "7756c922c3c8283e70dcceedb9c29919": {
             "format": "png",
@@ -2886,7 +2886,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "b314c9089f7664aa811ab8e624635b83": {
@@ -2898,7 +2898,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "77814a2ef1073c8dccdb5b0fbe2b2f93": {
@@ -2910,7 +2910,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "3300c86150c36d898938968d108e8be7": {
@@ -2922,7 +2922,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "04d4f610ca01f34541e2b8129a4a1c50": {
@@ -2934,7 +2934,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "a456522968e531b2ac5cca2d75dbef6d": {
@@ -2946,7 +2946,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "c2a45cb34b79bd131544f220d86cb03f": {
@@ -2958,7 +2958,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "987ff76dd7fe686d38286ec6b78d6518": {
@@ -2970,7 +2970,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "7575cc405b0cbc3f500e23988c66fd11": {
@@ -2982,7 +2982,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "80ae60fcdf836da7f8f55849605d92fe": {
@@ -2994,7 +2994,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "6cb78179ce81098763b9ee1fc054c0ee": {
@@ -3006,7 +3006,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "8a1baf905adb5f0c76805e6d661f6440": {
@@ -3018,7 +3018,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "0b3796b999a6276a77532913d382ba21": {
@@ -3030,7 +3030,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "2329baa0d344cd5210468c3bbe20b68d": {
@@ -3042,7 +3042,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "8de7036ac300e25cedbe3a9ac739962e": {
@@ -3054,7 +3054,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "1c0d23925412dbdca02f2f18ddee3d38": {
@@ -3066,7 +3066,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "f80d9fa4b4133ce6b9347ce31a9afcf3": {
@@ -3078,7 +3078,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "ad71544a8a31686ed374802f33f40f80": {
@@ -3090,7 +3090,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "91c815f18defedf7245571e0eb96818f": {
@@ -3102,7 +3102,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "9e05fd3efd8b7e340ad969c1f1a2c7b3": {
@@ -3114,7 +3114,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "677600fc06800f1b49f46c7f01391e18": {
@@ -3126,7 +3126,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "1108824de0e263b2a7dbb0ebe60fcdc4": {
@@ -3138,7 +3138,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "5242db0fa7ba666773859504275a900e": {
@@ -3150,7 +3150,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "5a2271639bc3da188dbd0b3547376b96": {
@@ -3162,7 +3162,7 @@
                 "width": 640,
                 "height": 480
             },
-            "state": 2,
+            "state": 1,
             "type": 1
         },
         "595f33385ecd2214a3b2bd78bf9826c3": {

@@ -2,6 +2,7 @@ import cv2
 import os
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 import tensorflow as tf
 import keras.backend as K
@@ -36,6 +37,9 @@ chunk_width = input_width / Xs
 
 batch_size = 16
 
+x_data = []
+y_data = []
+
 with open(CSV_PATH, "r") as f:
 	for row in f.readlines():
 		# Example row:
@@ -48,6 +52,21 @@ with open(CSV_PATH, "r") as f:
 		num_victims = int(cols[1])
 
 		target = np.empty((Ys, Xs, Cs), dtype=np.float32)
+
+		for i in range(num_victims):
+			j = 2 + i*5
+			xmin = float(cols[j + 1])
+			ymin = float(cols[j + 2])
+			xmax = float(cols[j + 3])
+			ymax = float(cols[j + 4])
+			x_v = (xmin + xmax) / 2
+			y_v = (ymin + ymax) / 2
+
+			if(x_v > 160.0 or y_v > 120.0):
+				print(f"{cols[0]} is too big!!")
+
+			x_data.append(x_v)
+			y_data.append(y_v)
 
 		for y in range(Ys):
 			for x in range(Xs):
@@ -150,7 +169,7 @@ with open(CSV_PATH, "r") as f:
 
 				if INSPECT_IMAGES:
 					c = 0.5
-					if(target[y, x, 0] == 1.0):
+					if(target[y, x, 0] == 1.0 or target[y, x, 1] == 1.0):
 						c = 1.0
 
 					for x_ in range(int(chunk_width)):
@@ -164,6 +183,11 @@ with open(CSV_PATH, "r") as f:
 
 		targets.append(target)
 		images.append(image)
+
+
+#plt.scatter(x_data, y_data)
+#plt.show()
+#exit(0)
 
 for img in os.listdir(NO_VICTIMS_IN):
 	image = cv2.imread(NO_VICTIMS_IN + "/" + img, cv2.IMREAD_GRAYSCALE)
