@@ -2,6 +2,9 @@ import numpy as np
 import os
 import cv2
 
+INPUT_NO_VICTIMS = "../../ml_data/victims/no_victims"
+OUTPUT_NO_VICTIMS = "../../ml_data/victims/no_victims_us"
+
 INPUT_DIR = "../../ml_data/victims/victims"
 OUTPUT_DIR = "../../ml_data/victims/victims_us"
 INPUT_CSV = "out.csv"
@@ -53,3 +56,12 @@ with open(INPUT_CSV, "r") as f:
 with open(OUTPUT_CSV, "w") as f:
 	for row in rows_to_add:
 		f.write(row)
+
+for img in os.listdir(INPUT_NO_VICTIMS):
+	image = cv2.imread(INPUT_NO_VICTIMS + "/" + img, cv2.IMREAD_GRAYSCALE)
+	cv2.imwrite(OUTPUT_NO_VICTIMS + "/" + img, image)
+
+	filename_f = img[0:-4] + "_f.png"
+
+	image1 = np.flip(image, axis=1)
+	cv2.imwrite(OUTPUT_NO_VICTIMS + "/" + filename_f, image1)

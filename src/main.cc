@@ -30,12 +30,16 @@ int main() {
 	robot->set_gpio(LED_2, false);
 	robot->set_gpio(BUZZER, false);
 
+	/*
 	//####################
 	VictimML v;
 	v.init();
 
 	cv::VideoCapture cap;
-	cap.open("/dev/cams/back", cv::CAP_V4L2);
+	cap.open("/dev/cams/front", cv::CAP_V4L2);
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, 320);
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 192);
+	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 	if(!cap.isOpened()) {
 		std::cout << "Back cam not opened" << std::endl;
 	}
@@ -44,6 +48,12 @@ int main() {
 		cv::Mat frame;
 		cap.grab();
 		cap.retrieve(frame);
+
+		cv::resize(frame, frame, cv::Size(200, 120));
+		frame = frame(cv::Range(0, 120), cv::Range(20, 180));
+
+		std::cout << frame.cols << "x" << frame.rows << std::endl;
+
 		cv::Mat debug_frame = frame.clone();
 
 		cv::Mat out = v.invoke(frame);
@@ -54,8 +64,8 @@ int main() {
 		std::string dead_text("Dead");
 
 		for(int i = 0; i < victims.size(); ++i) {
-			int x = victims[i].x * 4;
-			int y = victims[i].y * 4;
+			int x = victims[i].x;
+			int y = victims[i].y;
 			std::cout << x << ", " << y << std::endl;
 			cv::putText(debug_frame, victims[i].dead ? dead_text : alive_text, cv::Point(x, y), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, false);
 			cv::circle(debug_frame, cv::Point(x, y), 2, cv::Scalar(255, 0, 0), 3);
@@ -74,15 +84,15 @@ int main() {
 
 	exit(0);
 	//####################
-	
+	*/
+
+	std::cout << "FRONT DISTANCE: " << robot->distance(DIST_FORWARD) << std::endl;
+	std::cout << "SIDE_FRONT DISTANCE: " << robot->distance(DIST_SIDE_FRONT) << std::endl;
+	std::cout << "SIDE_BACK DISTANCE: " << robot->distance(DIST_SIDE_BACK) << std::endl;
 
 	int waiting_for_heading_cnt = 0;
 
 	while(robot->get_heading() == 0) {
-		std::cout << "FRONT DISTANCE: " << robot->distance(DIST_FORWARD) << std::endl;
-		std::cout << "SIDE_FRONT DISTANCE: " << robot->distance(DIST_SIDE_FRONT) << std::endl;
-		std::cout << "SIDE_BACK DISTANCE: " << robot->distance(DIST_SIDE_BACK) << std::endl;
-
 		robot->m(-30, 30, 20);
 		robot->m(30, -30, 20);
 		waiting_for_heading_cnt++;

@@ -119,7 +119,7 @@ bool Line::check_silver(const cv::Mat& frame) {
 	if(frame_counter % 100 == 0) {
 		save_img("/home/pi/Desktop/linefollowing_rois/", roi);
 	}
-
+	
 	return s;
 
 	/*
@@ -245,7 +245,15 @@ bool Line::abort_obstacle(cv::Mat frame) {
 void Line::obstacle() {
 	while(running) {
 		if(obstacle_active != 1) continue;
-		if(obstacle_enabled && robot->distance(DIST_FORWARD) < 90) {
+		uint16_t dist = robot->distance(DIST_FORWARD);
+
+		if(dist > 800 && dist < 1250) {
+			silver_distance = true;
+		} else {
+			silver_distance = false;
+		}
+
+		if(obstacle_enabled && dist < 90) {
 			robot->set_gpio(LED_1, true);
 			robot->stop();
 			robot->block();

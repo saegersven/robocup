@@ -63,8 +63,8 @@ cv::Mat VictimML::invoke(cv::Mat image) {
         for(int j = 0; j < OUT_WIDTH; ++j) {
             for(int k = 0; k < OUT_CHANNELS; ++k) {
                 float val = output_layer[i * OUT_WIDTH * OUT_CHANNELS + j * OUT_CHANNELS + k];
-                if(val > 1.0f) val == 1.0f;
-                else if(val < 0.0f) val == 0.0f;
+                if(val > 1.0f) val = 1.0f;
+                else if(val < 0.0f) val = 0.0f;
                 p[j * OUT_CHANNELS + k] = val;
             }
         }
@@ -73,17 +73,20 @@ cv::Mat VictimML::invoke(cv::Mat image) {
 }
 
 std::vector<Victim> VictimML::extract_victims(cv::Mat probability_map) {
-    const float THRESHOLD = 0.25f;
+    const float THRESHOLD_DEAD = 0.3f;
+    const float THRESHOLD_ALIVE = 0.4f;
 
     cv::Mat blurred;
-    cv::GaussianBlur(probability_map, blurred, cv::Size(1, 3), 0);
+    cv::GaussianBlur(probability_map, blurred, cv::Size(3, 3), 0);
 
     cv::Mat thresh1;
     cv::Mat thresh2;
-    cv::inRange(blurred, cv::Scalar(THRESHOLD, 0.0f), cv::Scalar(1.0f, 1.0f), thresh1);
-    cv::inRange(blurred, cv::Scalar(0.0f, THRESHOLD), cv::Scalar(1.0f, 1.0f), thresh2);
+    cv::inRange(blurred, cv::Scalar(THRESHOLD_DEAD, 0.0f), cv::Scalar(1.0f, 1.0f), thresh1);
+    cv::inRange(blurred, cv::Scalar(0.0f, THRESHOLD_ALIVE), cv::Scalar(1.0f, 1.0f), thresh2);
     cv::Mat thresh;
     cv::bitwise_or(thresh1, thresh2, thresh);
+
+    cv::imshow("Threshold", thresh);
 
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;

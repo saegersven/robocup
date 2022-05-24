@@ -20,7 +20,7 @@ from keras.preprocessing import image
 # For images with no victims -> all zero
 
 VICTIMS_IN = "../../ml_data/victims/victims_us"
-NO_VICTIMS_IN = "../../ml_data/victims/no_victims"
+NO_VICTIMS_IN = "../../ml_data/victims/no_victims_us"
 CSV_PATH = "out_us.csv"
 
 INSPECT_IMAGES = False

@@ -302,6 +302,10 @@ void Robot::stop(uint8_t brake_duty_cycle) {
 }
 
 void Robot::turn(float rad) {
+	if(rad == 0.0f) {
+		stop();
+		return;
+	}
 	if(block_m) return;
 
 	//m(100, -100, deg * TURN_DURATION_FACTOR);
