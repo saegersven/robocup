@@ -92,35 +92,31 @@ void Rescue::rescue() {
 	robot->servo(SERVO_2, GRAB_CLOSED, 500);
 	robot->servo(SERVO_1, ARM_UP, 500);
 
-	robot->m(100, 100, 250);
-	robot->turn(RAD_180);
-	robot->m(100, 100, 800);
-
-	find_exit();
-
 
 	robot->m(100, 100, 750);
 	robot->turn(RAD_180 - deg_to_rad(60.0f));
 
 	// Search for victims
 	uint8_t turn_counter = 0;
-
+	uint8_t rescued_victims_cnt = 0;
 	const int num_victims = 3;
 
-	for (int rescued_victims_cnt = 0; rescued_victims_cnt < num_victims; rescued_victims_cnt++) {
+	while(true) {
 		bool searching_victim = true;
 		bool is_in_center = false;
 		bool abort = false;
 
-		while (searching_victim) {
+		while (true) {
 			if(turn_counter == 12) {
 				if(is_in_center) {
-					robot->m(100, 100, 1200);
+					robot->turn(deg_to_rad(20.0f));
+					robot->m(100, 100, 1600);
 					abort = true;
 					break;
 				} else {
-					robot->m(100, 100, 500);
-					robot->m(-100, -100, 1400);
+					robot->turn(deg_to_rad(-100.0f));
+					robot->m(100, 100, 1400);
+					robot->turn(deg_to_rad(100.0f));
 					is_in_center = true;
 					//robot->turn(-RAD_90);
 					robot->beep(100);
@@ -129,10 +125,31 @@ void Rescue::rescue() {
 			}
 
 			if (rescue_victim(rescued_victims_cnt < 2, turn_counter * deg_to_rad(-30.0f))) {
-				searching_victim = false;
+				// Rescue victim
+				robot->turn(-RAD_180 + turn_counter * deg_to_rad(30.0f) + deg_to_rad(60.0f));
+
+				if(is_in_center) {
+					robot->turn(deg_to_rad(20.0f));
+					robot->m(100, 100, 2200);
+				} else {
+					robot->m(100, 100, 1400);
+				}
+
+			    robot->m(-100, -100, 600);
+				robot->turn(RAD_180);
+				robot->m(-100, -100, 1000);
+
+				// unload victim
+				robot->servo(SERVO_1, ARM_DROP, 500);
+				robot->servo(SERVO_2, GRAB_OPEN, 500);
+				robot->servo(SERVO_2, GRAB_CLOSED, 500);
+				robot->servo(SERVO_1, ARM_UP, 500);
+
+				++rescued_victims_cnt;
+				break;
 			} else {
 				std::cout << "looking for victim" << std::endl;
-				robot->turn(deg_to_rad(-30));
+				robot->turn(deg_to_rad(-30.0f));
 				delay(50);
 				++turn_counter;
 			}
@@ -142,13 +159,19 @@ void Rescue::rescue() {
 		is_in_center = false;
 
 		if(rescued_victims_cnt == num_victims - 1) {
-			robot->turn(-RAD_180);
-			robot->m(100, 100, 800);
+			robot->m(100, 100, 200);
+			robot->turn(RAD_180);
+			robot->m(100, 100, 700);
 		} else {
+			robot->m(100, 100, 550);
 			robot->turn(RAD_180 - deg_to_rad(60.0f));
 			turn_counter = 0;
 		}
 	}
+
+	find_exit();
+
+	finished = true;
 }
 
 float Rescue::get_angle_to_right_wall() {
@@ -157,9 +180,9 @@ float Rescue::get_angle_to_right_wall() {
 	if(dist_front > 400 || dist_back > 400) return 0.0f;
 	float angle = std::atan((dist_back - dist_front) / 145.0f);
 	if(std::abs(angle) > deg_to_rad(10.0f)) {
-		float dist_front = robot->distance_avg(DIST_SIDE_FRONT, 10, 0.2f);
-		float dist_back = robot->distance_avg(DIST_SIDE_BACK, 10, 0.2f);
-		float angle = std::atan((dist_back - dist_front) / 145.0f);
+		dist_front = robot->distance_avg(DIST_SIDE_FRONT, 10, 0.2f);
+		dist_back = robot->distance_avg(DIST_SIDE_BACK, 10, 0.2f);
+		angle = std::atan((dist_back - dist_front) / 145.0f);
 	}
 	return angle;
 }
@@ -211,7 +234,7 @@ void Rescue::find_black_corner() {
 				robot->m(-100, -100, 550);
 				robot->turn(-RAD_90);
 				//robot->m(100, 100, 500);
-				robot->m(-100, -100, 150);
+				//robot->m(-100, -100, 150);
 				robot->turn(RAD_180);
 				robot->m(-100, -100, 750);
 				return;
@@ -312,7 +335,7 @@ bool Rescue::rescue_victim(bool ignore_dead, float angle_offset) {
 
 	robot->m(100, 100, 200 * num_steps);
 
-	robot->turn(-RAD_180 - angle - angle_offset);
+	robot->turn(-angle);
 
 	/*frame = capture(CAM_FAR);
 	cv::Mat thresh;
@@ -338,20 +361,9 @@ bool Rescue::rescue_victim(bool ignore_dead, float angle_offset) {
 
     robot->turn(angle_to_corner);*/
 
-	robot->turn(deg_to_rad(60.0f));
+	
 
-    robot->m(100, 100, 1500);
-    robot->m(-100, -100, 600);
-	robot->turn(RAD_180);
-	robot->m(-100, -100, 1500);
-
-	// unload victim
-	robot->servo(SERVO_1, ARM_DROP, 500);
-	robot->servo(SERVO_2, GRAB_OPEN, 500);
-	robot->servo(SERVO_2, GRAB_CLOSED, 500);
-	robot->servo(SERVO_1, ARM_UP, 500);
-
-	robot->m(100, 100, 450);
+	//robot->m(100, 100, 450);
 
 	return true;
 }
