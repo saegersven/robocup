@@ -238,7 +238,7 @@ bool Line::abort_obstacle(cv::Mat frame) {
 	cv::Mat black = in_range(cut, &is_black);
 	uint32_t non_zero = cv::countNonZero(black);
 	std::cout << non_zero << std::endl;
-	return non_zero > 200;
+	return (float)non_zero / black.cols / black.rows > 0.3f;
 }
 
 // ASYNC
@@ -373,9 +373,11 @@ bool Line::line(cv::Mat& frame) {
 		bool silver_start = false;
 		uint32_t num_black_pixels = 0;
 		cv::Mat black = in_range(frame, &is_black, &num_black_pixels);
+		//std::cout << "Num black pixels: " << num_black_pixels << "  Silver distance: " << silver_distance << std::endl;
 
 		// Check for silver
 		if(num_black_pixels < 300 && silver_distance) {
+			std::cout << "check successfull" << std::endl;
 			robot->stop();
 			delay(100);
 			cv::VideoCapture cap("/dev/cams/back", cv::CAP_V4L2);
@@ -402,6 +404,7 @@ bool Line::line(cv::Mat& frame) {
 			} else {
 				silver_distance = false;
 				std::cout << "NO SILVER" << std::endl;
+				robot->m(100, 100, 150);
 			}
 		}
 
@@ -422,18 +425,18 @@ bool Line::line(cv::Mat& frame) {
 			robot->m(100, 100, 850);
 			delay(50);
 
-			float dist_front = robot->distance_avg(DIST_FORWARD, 5, 0.2f);
-			float dist_side = robot->distance_avg(DIST_SIDE_FRONT, 5, 0.2f);
+			//float dist_front = robot->distance_avg(DIST_FORWARD, 5, 0.2f);
+			//float dist_side = robot->distance_avg(DIST_SIDE_FRONT, 5, 0.2f);
 
-			std::cout << "Front distance: " << dist_front << std::endl;
-			std::cout << "Side distance: " << dist_side << std::endl;
+			//std::cout << "Front distance: " << dist_front << std::endl;
+			//std::cout << "Side distance: " << dist_side << std::endl;
 
 			// check front distance < foo and side distance < foo and black pixels in frame < foo
 			// increase rescue_cnt for each
 			// #redundancy
-			int rescue_cnt = 0;
-			if (dist_front > 500.0f && dist_front < 1300.0f) ++rescue_cnt;
-			if (dist_side > 30.0f && dist_side < 1200.0f) ++rescue_cnt;
+			//int rescue_cnt = 0;
+			//if (dist_front > 500.0f && dist_front < 1300.0f) ++rescue_cnt;
+			//if (dist_side > 30.0f && dist_side < 1200.0f) ++rescue_cnt;
 
 			// count number of black pixels in image, if low -> rescue
 			robot->start_video(front_cam_id);
@@ -441,9 +444,7 @@ bool Line::line(cv::Mat& frame) {
 			uint32_t num_black_pixels = 0;
 			in_range(check_frame, &is_black, &num_black_pixels);
 
-			if (num_black_pixels < 200) ++rescue_cnt;
-			std::cout << "Rescue_cnt: " << rescue_cnt << std::endl;
-			if (rescue_cnt >= 2) {
+			if (num_black_pixels < 200) {
 				return true;
 			} else {
 				robot->m(-100, -100, 830); // return to previous position (a bit further to avoid another false positive)
@@ -550,7 +551,8 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 
 	if(pitch > deg_to_rad(16.0f) && pitch < deg_to_rad(40.0f)) {
 		robot->set_gpio(LED_1, true);
-		robot->m(FOLLOW_MOTOR_SPEED + 30 - error / 2, FOLLOW_MOTOR_SPEED + 30 + error / 2);
+
+		robot->m(80 - (error > 0 ? error : 0), 80 + (error < 0 ? error : 0));
 		enable_no_difference = false;
 	} else {
 		robot->m(FOLLOW_MOTOR_SPEED - error, FOLLOW_MOTOR_SPEED + error);
@@ -835,7 +837,7 @@ void Line::rescue_kit(cv::Mat& frame) {
 		//robot->m(60, -60, 300 * angle);
 		robot->turn(angle);
 
-		stop();
+		robot->stop();
 		delay(500);
 
 		// Maximum distance is 68, so 44 seems like a good value

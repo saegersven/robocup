@@ -133,6 +133,8 @@ private:
 
 	void init_bno055();
 
+	void reset_vl53l0x(uint8_t sensor_id);
+
 public:
 	Robot();
 
@@ -177,5 +179,5 @@ public:
 	float get_pitch();
 	void set_gpio(int pin, bool state);
 
-	uint16_t distance(uint8_t sensor_id);
+	uint16_t distance(uint8_t sensor_id, uint8_t num_reboots = 0);
 };
