@@ -236,9 +236,9 @@ bool Line::abort_obstacle(cv::Mat frame) {
 	cv::Mat cut = frame(cv::Range(OBSTACLE_Y_LOWER, OBSTACLE_Y_UPPER),
 		cv::Range(OBSTACLE_X_LOWER, OBSTACLE_X_UPPER));
 	cv::Mat black = in_range(cut, &is_black);
-	uint32_t non_zero = cv::countNonZero(black);
+	float non_zero = (float)cv::countNonZero(black) / black.cols / black.rows;
 	std::cout << non_zero << std::endl;
-	return (float)non_zero / black.cols / black.rows > 0.3f;
+	return non_zero > 0.4f;
 }
 
 // ASYNC
@@ -315,7 +315,7 @@ bool Line::line(cv::Mat& frame) {
 		if(robot->distance(DIST_FORWARD) < 90.0f) {
 			std::cout << "Obstacle!" << std::endl;
 			robot->set_gpio(LED_2, true);				
-			robot->m(-80, -80, 140);
+			robot->m(-80, -80, 110);
 
 			robot->turn(-RAD_90);
 			robot->m(80, 80, 750);
@@ -379,6 +379,7 @@ bool Line::line(cv::Mat& frame) {
 		if(num_black_pixels < 300 && silver_distance) {
 			std::cout << "check successfull" << std::endl;
 			robot->stop();
+			robot->stop_video(front_cam_id);
 			delay(100);
 			cv::VideoCapture cap("/dev/cams/back", cv::CAP_V4L2);
 			cap.grab();
@@ -406,6 +407,7 @@ bool Line::line(cv::Mat& frame) {
 				std::cout << "NO SILVER" << std::endl;
 				robot->m(100, 100, 150);
 			}
+			robot->start_video(front_cam_id);
 		}
 
 		if(!silver_start) {
