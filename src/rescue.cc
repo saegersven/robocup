@@ -73,7 +73,7 @@ void Rescue::rescue() {
 		robot->turn(-RAD_90);
 		robot->m(-100, -100, 300);
 		robot->turn(-RAD_180);
-		robot->m(100, 100, 400);
+		robot->m(100, 100, 250);
 
 		/*if(robot->distance(DIST_SIDE_FRONT) < 200) {
 			// There is a wall right now, align
@@ -82,7 +82,14 @@ void Rescue::rescue() {
 			robot->m(-100, -100, 450);
 			robot->turn(-RAD_90);
 		}*/
+	} else {
+		if(robot->distance(DIST_SIDE_FRONT) < 120) {
+			robot->turn(RAD_90);
+			robot->m(-100, -100, 100);
+			robot->turn(-RAD_90);
+		}
 	}
+	robot->turn(-get_angle_to_right_wall());
 
 	find_black_corner();
 
@@ -93,7 +100,7 @@ void Rescue::rescue() {
 	robot->servo(SERVO_1, ARM_UP, 500);
 
 
-	robot->m(100, 100, 650);
+	robot->m(100, 100, 800);
 	robot->turn(RAD_180 - deg_to_rad(60.0f));
 
 	// Search for victims
@@ -114,7 +121,7 @@ void Rescue::rescue() {
 					if(is_in_center) {
 						//robot->turn(deg_to_rad(20.0f));
 						//robot->m(100, 100, 1000);
-						robot->m(-100, -100, 1200);
+						robot->m(-100, -100, 1300);
 						if(center_long) {
 							robot->turn(deg_to_rad(-135.0f));
 						} else {
@@ -150,11 +157,11 @@ void Rescue::rescue() {
 					uint16_t dist1 = robot->distance_avg(DIST_FORWARD, 10, 0.2f);
 					uint16_t dist2 = robot->distance_avg(DIST_SIDE_FRONT, 10, 0.2f);
 					if(dist1 > dist2) {
-						robot->m(100, 100, 1200);
+						robot->m(100, 100, 1300);
 						center_long = true;
 					} else {
 						robot->turn(RAD_90);
-						robot->m(100, 100, 1200);
+						robot->m(100, 100, 1300);
 						center_long = false;
 					}
 
@@ -174,7 +181,7 @@ void Rescue::rescue() {
 				if(is_in_center) {
 					//robot->turn(deg_to_rad(20.0f));
 					//robot->m(100, 100, 1000);
-					robot->m(-100, -100, 1200);
+					robot->m(-100, -100, 1300);
 					if(center_long) {
 						robot->turn(deg_to_rad(-135.0f));
 					} else {
@@ -204,6 +211,7 @@ void Rescue::rescue() {
 					robot->m(100, 100, 750);
 					abort = true;
 				}
+				if(rescued_victims_cnt == 2) searching_dead_victim = true;
 				break;
 			} else {
 				std::cout << "looking for victim" << std::endl;
@@ -279,6 +287,10 @@ void Rescue::turn_90_wall() {
 
 void Rescue::find_black_corner() {
 	std::cout << "Searching for corner" << std::endl;
+	while(robot->distance(DIST_FORWARD) < 460) {
+		robot->m(-100, -100);
+	}
+	robot->stop();
 	const float DISTANCE_PER_STEP = 200.0f; // Approximate distance driven each step [mm]
 	const float GOAL_DISTANCE = 60.0f;
 	uint64_t last_turn = micros();
@@ -538,6 +550,7 @@ void Rescue::find_exit() {
 						}
 						robot->stop();
 						robot->turn(-RAD_90);
+						robot->m(-100, -100, 200);
 					}
 				}
 				robot->turn(-get_angle_to_right_wall());

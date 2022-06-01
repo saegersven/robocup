@@ -286,7 +286,7 @@ bool Line::obstacle_straight_line(uint32_t duration) {
 		cv::Mat frame = robot->capture(front_cam_id);
 		cv::imshow("Debug", frame);
 		cv::waitKey(1);
-		cv::Mat roi = frame(cv::Range(26, 47), cv::Range(26, 55));
+		cv::Mat roi = frame(cv::Range(0, 48), cv::Range(30, 80));
 		uint32_t roi_size = roi.cols * roi.rows;
 
 		uint32_t num_black = 0;
@@ -295,7 +295,7 @@ bool Line::obstacle_straight_line(uint32_t duration) {
 		float p = (float)num_black / roi_size;
 		std::cout << p << std::endl;
 
-		if(p > 0.8f) {
+		if(p > 0.3f) {
 			// Abort
 			robot->stop();
 			return true;
@@ -325,7 +325,7 @@ bool Line::line(cv::Mat& frame) {
 			delay(50);
 			robot->start_video(front_cam_id);
 
-			const uint32_t durations[] = {1250, 1250, 1250, 450};
+			const uint32_t durations[] = {1100, 1100, 1100, 450};
 
 			for(int i = 0; i < 4; ++i) {
 				if(obstacle_straight_line(durations[i])) break;
@@ -354,14 +354,18 @@ bool Line::line(cv::Mat& frame) {
 		if(!last_frame.empty()) {
 			float diff = average_difference(frame, last_frame);
 
-			if(enable_no_difference && diff < 2.1f) {
+			if(diff < 2.1f) {
 				++no_difference_counter;
 				if(no_difference_counter == 100) {
+					if(enable_no_difference) {
+						std::cout << "No difference, moving a bit" << std::endl;
+						robot->m(-50, 100, 180);
+						robot->m(100, -50, 180);
+						robot->m(100, 100, 250);
+					} else {
+						robot->m(100, 100, 200);
+					}
 					no_difference_counter = 0;
-					std::cout << "No difference, moving a bit" << std::endl;
-					robot->m(-50, 100, 180);
-					robot->m(100, -50, 180);
-					robot->m(100, 100, 250);
 				}
 			} else {
 				no_difference_counter = 0;
@@ -376,7 +380,7 @@ bool Line::line(cv::Mat& frame) {
 		//std::cout << "Num black pixels: " << num_black_pixels << "  Silver distance: " << silver_distance << std::endl;
 
 		// Check for silver
-		if(num_black_pixels < 300 && silver_distance) {
+		if(num_black_pixels < 250 && silver_distance) {
 			std::cout << "check successfull" << std::endl;
 			robot->stop();
 			robot->stop_video(front_cam_id);
@@ -417,7 +421,7 @@ bool Line::line(cv::Mat& frame) {
 			green(frame, black);
 		}
 
-		if(silver_start || (check_silver(frame))) {
+		if(silver_start /*|| (check_silver(frame))*/) {
 			#ifdef DEBUG
 				save_img("/home/pi/Desktop/silver_images/", frame);
 			#endif
@@ -550,11 +554,16 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 
 #ifndef MOVEMENT_OFF
 	float pitch = robot->get_pitch();
+	std::cout << pitch << std::endl;
 
 	if(pitch > deg_to_rad(16.0f) && pitch < deg_to_rad(40.0f)) {
 		robot->set_gpio(LED_1, true);
 
 		robot->m(80 - (error > 0 ? error : 0), 80 + (error < 0 ? error : 0));
+		enable_no_difference = false;
+	} else if(pitch < deg_to_rad(-13.0f)) {
+		robot->set_gpio(LED_1, true);
+		robot->m(10 - error, 10 + error);
 		enable_no_difference = false;
 	} else {
 		robot->m(FOLLOW_MOTOR_SPEED - error, FOLLOW_MOTOR_SPEED + error);
@@ -612,7 +621,7 @@ std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<b
 				float group_center_y = 0.0f;
 				add_to_group_center(x, y, ir, num_group_pixels, group_center_x, group_center_y);
 
-				if(num_group_pixels > 100) {
+				if(num_group_pixels > 140) {
 					group_center_x /= num_group_pixels;
 					group_center_y /= num_group_pixels;
 					groups.push_back({group_center_x, group_center_y, num_group_pixels});
