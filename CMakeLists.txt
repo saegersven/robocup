@@ -26,7 +26,7 @@ include_directories("libs/FunctionalPlus/include")
 include_directories("libs/vl53l0x-linux")
 add_library(vl53l0x-linux STATIC libs/vl53l0x-linux/VL53L0X.cpp libs/vl53l0x-linux/I2Cdev.cpp libs/vl53l0x-linux/VL53L0X.hpp libs/vl53l0x-linux/I2Cdev.hpp libs/vl53l0x-linux/VL53L0X_defines.hpp)
 
-add_executable(robocup src/main.cc src/robot.cc src/utils.cc src/vision.cc src/line.cc src/rescue.cc src/silver_ml.cc src/victim_ml.cc)
+add_executable(robocup src/main.cc src/robot.cc src/utils.cc src/vision.cc src/line.cc src/rescue.cc src/silver_ml.cc src/victim_ml.cc src/green_nn.cc)
 
 target_link_libraries(robocup atomic)
 

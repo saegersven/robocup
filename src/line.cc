@@ -58,6 +58,7 @@ void Line::start() {
 	micros_start = micros();
 
 	silver_ml.start();
+	green_ml.start();
 
 	checked_silver_start = false;
 	silver_distance = false;
@@ -222,6 +223,10 @@ bool Line::check_silver(const cv::Mat& frame) {
 	return false;
 	//return v_c > CENTER_MINIMUM_VALUE;
 	*/
+}
+
+bool Line::check_green(const cv::Mat& frame) {
+	return green_ml.predict_green(frame);
 }
 
 bool Line::abort_obstacle(cv::Mat frame) {
@@ -753,6 +758,12 @@ void Line::green(cv::Mat& frame, cv::Mat& black) {
 
 		// Stop video to keep camera from freezing
 		robot->stop_video(front_cam_id);
+
+		if(!check_green(frame)) {
+			std::cout << "NN said no green" << std::endl;
+			robot->m(100, 100, 60);
+			return;
+		}
 
 		robot->stop();
 

@@ -157,7 +157,7 @@ void Rescue::rescue() {
 					uint16_t dist1 = robot->distance_avg(DIST_FORWARD, 10, 0.2f);
 					uint16_t dist2 = robot->distance_avg(DIST_SIDE_FRONT, 10, 0.2f);
 					std::cout << dist1 << " : " << dist2 << std::endl;
-					if() {
+					if(dist1 > dist2) {
 						center_long = false;
 					} else {
 						robot->turn(-RAD_90);

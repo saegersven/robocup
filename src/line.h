@@ -3,6 +3,7 @@
 
 #include "robot.h"
 #include "silver_ml.h"
+#include "green_nn.h"
 
 
 #define BLACK_MAX_SUM 250
@@ -105,6 +106,7 @@ private:
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_update;
 	
 	SilverML silver_ml;
+	GreenML green_ml;
 
 	bool abort_obstacle(cv::Mat frame);
 	void obstacle();
@@ -118,6 +120,8 @@ private:
 	float get_redness(cv::Mat& in);
 	bool check_silver(const cv::Mat& frame);
 	bool black_pixel_threshold_under(int threshold);
+
+	bool check_green(const cv::Mat& frame);
 
 	//std::vector<cv::Point> find_green_group_centers_old(cv::Mat frame, cv::Mat& green);
 
