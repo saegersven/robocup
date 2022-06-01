@@ -121,7 +121,7 @@ void Rescue::rescue() {
 					if(is_in_center) {
 						//robot->turn(deg_to_rad(20.0f));
 						//robot->m(100, 100, 1000);
-						robot->m(-100, -100, 1300);
+						robot->m(-100, -100, 1350);
 						if(center_long) {
 							robot->turn(deg_to_rad(-135.0f));
 						} else {
@@ -150,20 +150,20 @@ void Rescue::rescue() {
 					//robot->turn(-deg_to_rad(120.0f));
 					// Move to center
 					robot->turn(deg_to_rad(60.0f));
-					robot->m(100, 100, 1300);
+					robot->m(100, 100, 1450);
 
-					robot->m(-100, -100, 950);
-					robot->turn(deg_to_rad(135.0f));
+					robot->m(-100, -100, 1050);
+					robot->turn(deg_to_rad(-135.0f));
 					uint16_t dist1 = robot->distance_avg(DIST_FORWARD, 10, 0.2f);
 					uint16_t dist2 = robot->distance_avg(DIST_SIDE_FRONT, 10, 0.2f);
-					if(dist1 > dist2) {
-						robot->m(100, 100, 1300);
-						center_long = true;
-					} else {
-						robot->turn(RAD_90);
-						robot->m(100, 100, 1300);
+					std::cout << dist1 << " : " << dist2 << std::endl;
+					if() {
 						center_long = false;
+					} else {
+						robot->turn(-RAD_90);
+						center_long = true;
 					}
+					robot->m(100, 100, 1350);
 
 					//robot->m(-100, -100, 1200);
 					//robot->turn(-deg_to_rad(60.0f));
@@ -181,7 +181,7 @@ void Rescue::rescue() {
 				if(is_in_center) {
 					//robot->turn(deg_to_rad(20.0f));
 					//robot->m(100, 100, 1000);
-					robot->m(-100, -100, 1300);
+					robot->m(-100, -100, 1350);
 					if(center_long) {
 						robot->turn(deg_to_rad(-135.0f));
 					} else {
@@ -190,7 +190,7 @@ void Rescue::rescue() {
 				}
 				//robot->m(-100, -100, 100);
 				align_with_corner();
-				robot->m(100, 100, 1400);
+				robot->m(100, 100, 1450);
 
 			    robot->m(-100, -100, 600);
 				robot->turn(RAD_180);
@@ -287,8 +287,8 @@ void Rescue::turn_90_wall() {
 
 void Rescue::find_black_corner() {
 	std::cout << "Searching for corner" << std::endl;
-	while(robot->distance(DIST_FORWARD) < 460) {
-		robot->m(-100, -100);
+	while(robot->distance_avg(DIST_FORWARD, 10, 0.2f) < 300) {
+		robot->m(-100, -100, 200);
 	}
 	robot->stop();
 	const float DISTANCE_PER_STEP = 200.0f; // Approximate distance driven each step [mm]

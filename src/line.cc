@@ -315,7 +315,7 @@ bool Line::line(cv::Mat& frame) {
 		if(robot->distance(DIST_FORWARD) < 90.0f) {
 			std::cout << "Obstacle!" << std::endl;
 			robot->set_gpio(LED_2, true);				
-			robot->m(-80, -80, 110);
+			robot->m(-80, -80, 100);
 
 			robot->turn(-RAD_90);
 			robot->m(80, 80, 750);
@@ -325,7 +325,7 @@ bool Line::line(cv::Mat& frame) {
 			delay(50);
 			robot->start_video(front_cam_id);
 
-			const uint32_t durations[] = {1100, 1100, 1100, 450};
+			const uint32_t durations[] = {1150, 1200, 1050, 450};
 
 			for(int i = 0; i < 4; ++i) {
 				if(obstacle_straight_line(durations[i])) break;
@@ -336,7 +336,7 @@ bool Line::line(cv::Mat& frame) {
 			}
 
 			robot->set_gpio(LED_2, false);
-			robot->m(-40, -40, 150);
+			robot->m(-40, -40, 170);
 			robot->m(-40, 40, NIF(obstacle_direction, -200));
 			robot->m(80, 80, 400);
 			robot->m(-80, 80, NIF(obstacle_direction, -280));
@@ -409,7 +409,7 @@ bool Line::line(cv::Mat& frame) {
 			} else {
 				silver_distance = false;
 				std::cout << "NO SILVER" << std::endl;
-				robot->m(100, 100, 150);
+				robot->m(100, 100, 100);
 			}
 			robot->start_video(front_cam_id);
 		}
@@ -862,7 +862,7 @@ void Line::rescue_kit(cv::Mat& frame) {
 
 		robot->m(-60, -60, 720);
 		delay(200);
-		robot->turn(-RAD_180);
+		robot->turn(RAD_180);
 
 		//delay(1000);
 		robot->servo(SERVO_2, GRAB_OPEN, 750);
@@ -880,7 +880,7 @@ void Line::rescue_kit(cv::Mat& frame) {
 
 		delay(200);
 		// Reposition to continue
-		robot->turn(RAD_180);
+		robot->turn(-RAD_180);
 		delay(200);
 		robot->m(60, 60, 500);
 		delay(1000);
