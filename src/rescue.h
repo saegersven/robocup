@@ -48,6 +48,7 @@ private:
 	void rescue();
 	void align_with_corner();
 	float get_angle_to_right_wall();
+	float get_angle_to_right_wall(bool large_distance);
 	void turn_90_wall();
 	void find_black_corner();
 	bool rescue_victim(bool ignore_dead, float angle_offset);

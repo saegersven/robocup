@@ -9,9 +9,9 @@ import errno
 from skimage.util import random_noise
 import numpy as np
 
-pathToMimeographImages = "/data/Programmieren/Robocup/2022/Main Repo 2022/robocup/ml_data/green/no_green" 
+pathToMimeographImages = "/data/Programmieren/Robocup/2022/Main Repo 2022/robocup/ml_data/green/green_us" 
 
-"""
+
 # flip images:
 fileNames = os.listdir(pathToMimeographImages)
 for fileName in fileNames:
@@ -22,7 +22,7 @@ for fileName in fileNames:
 	pathToSave = pathToSave[:-4]
 	pathToSave = pathToSave + " f=180.jpg"
 	cv2.imwrite(pathToSave, image)
-
+"""
 # flip images:
 fileNames = os.listdir(pathToMimeographImages)
 for fileName in fileNames:
@@ -33,20 +33,20 @@ for fileName in fileNames:
 	pathToSave = pathToSave[:-4]
 	pathToSave = pathToSave + " f=1802.jpg"
 	cv2.imwrite(pathToSave, image)
-
+"""
 # change contrast:
 fileNames = os.listdir(pathToMimeographImages)
 for fileName in fileNames:
 	curPath = str(pathToMimeographImages + "/" + fileName)
 	image = Image.open(curPath)
 	enh = ImageEnhance.Contrast(image)
-	out = enh.enhance(0.8) # 0.8, 1.2, 1.4
+	out = enh.enhance(0.9) # 0.8, 1.2, 1.4
 
 	pathToSave = str(pathToMimeographImages + "/" + fileName)
 	pathToSave = pathToSave[:-4]
-	pathToSave = pathToSave + " c=0,8.jpg"
+	pathToSave = pathToSave + " c=0,9.jpg"
 	out.save(pathToSave)
-"""
+
 # change brightness:
 fileNames = os.listdir(pathToMimeographImages)
 for fileName in fileNames:

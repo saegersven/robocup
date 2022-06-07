@@ -323,14 +323,14 @@ bool Line::line(cv::Mat& frame) {
 			robot->m(-80, -80, 100);
 
 			robot->turn(-RAD_90);
-			robot->m(80, 80, 750);
+			robot->m(80, 80, 650);
 			robot->turn(RAD_90);
 
 			robot->stop_video(front_cam_id);
 			delay(50);
 			robot->start_video(front_cam_id);
 
-			const uint32_t durations[] = {1150, 1200, 1050, 450};
+			const uint32_t durations[] = {1100, 1200, 1050, 450};
 
 			for(int i = 0; i < 4; ++i) {
 				if(obstacle_straight_line(durations[i])) break;
@@ -344,7 +344,7 @@ bool Line::line(cv::Mat& frame) {
 			robot->m(-40, -40, 170);
 			robot->m(-40, 40, NIF(obstacle_direction, -200));
 			robot->m(80, 80, 400);
-			robot->m(-80, 80, NIF(obstacle_direction, -280));
+			robot->m(-80, 80, NIF(obstacle_direction, -180));
 			robot->m(-40, -40, 250);
 		}
 
@@ -385,7 +385,7 @@ bool Line::line(cv::Mat& frame) {
 		//std::cout << "Num black pixels: " << num_black_pixels << "  Silver distance: " << silver_distance << std::endl;
 
 		// Check for silver
-		if(num_black_pixels < 250 && silver_distance) {
+		if(num_black_pixels < 200 && silver_distance) {
 			std::cout << "check successfull" << std::endl;
 			robot->stop();
 			robot->stop_video(front_cam_id);
@@ -421,7 +421,7 @@ bool Line::line(cv::Mat& frame) {
 
 		if(!silver_start) {
 			follow(frame, black);
-			rescue_kit(frame);
+			//rescue_kit(frame);
 			check_red_stripe(frame);
 			green(frame, black);
 		}
@@ -559,7 +559,6 @@ void Line::follow(cv::Mat& frame, cv::Mat black) {
 
 #ifndef MOVEMENT_OFF
 	float pitch = robot->get_pitch();
-	std::cout << pitch << std::endl;
 
 	if(pitch > deg_to_rad(16.0f) && pitch < deg_to_rad(40.0f)) {
 		robot->set_gpio(LED_1, true);

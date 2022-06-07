@@ -10,14 +10,14 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 
-data_dir = pathlib.Path("../../ml_data/green")
+data_dir = pathlib.Path("../../ml_data/green_us")
 
 image_count = len(list(data_dir.glob("*/*.png")))
 print(f"Image count = {image_count}")
 
-left = list(data_dir.glob("green/*"))
+left = list(data_dir.glob("green_us/*"))
 
-right = list(data_dir.glob("no_green/*"))
+right = list(data_dir.glob("no_green_us/*"))
 
 batch_size = 16
 img_height = 48

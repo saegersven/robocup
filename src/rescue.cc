@@ -65,10 +65,11 @@ void Rescue::rescue() {
 
 	robot->stop();
 	robot->beep(100, BUZZER);
-	robot->m(100, 100, 350);
+	robot->m(100, 100, 220);
 
 	// Take time to align so that wall is on the right
-	if(robot->distance_avg(DIST_SIDE_FRONT, 5, 0.2f) > 250) {
+	if(robot->distance_avg(DIST_SIDE_FRONT, 5, 0.2f) > 220) {
+		robot->turn(-get_angle_to_right_wall(true));
 		// No wall on the right, so turn 90° clockwise and align
 		robot->turn(-RAD_90);
 		robot->m(-100, -100, 300);
@@ -91,6 +92,8 @@ void Rescue::rescue() {
 	}
 	robot->turn(-get_angle_to_right_wall());
 
+	robot->beep(700);
+
 	find_black_corner();
 
 	// Drop Rescue Kit
@@ -99,9 +102,16 @@ void Rescue::rescue() {
 	robot->servo(SERVO_2, GRAB_CLOSED, 500);
 	robot->servo(SERVO_1, ARM_UP, 500);
 
+#define FIND_VICTIMS
 
+#ifdef FIND_VICTIMS
 	robot->m(100, 100, 800);
 	robot->turn(RAD_180 - deg_to_rad(60.0f));
+#else
+	robot->m(100, 100, 150);
+	robot->turn(RAD_180);
+	robot->m(100, 100, 750);
+#endif
 
 	// Search for victims
 	uint8_t turn_counter = 0;
@@ -109,7 +119,11 @@ void Rescue::rescue() {
 	const int num_victims = 3;
 	bool searching_dead_victim = false;
 
+#ifdef FIND_VICTIMS
 	while(true) {
+#else
+	while(false) {
+#endif
 		bool searching_victim = true;
 		bool is_in_center = false;
 		bool center_long = false;
@@ -152,18 +166,37 @@ void Rescue::rescue() {
 					robot->turn(deg_to_rad(60.0f));
 					robot->m(100, 100, 1450);
 
-					robot->m(-100, -100, 1050);
-					robot->turn(deg_to_rad(-135.0f));
-					uint16_t dist1 = robot->distance_avg(DIST_FORWARD, 10, 0.2f);
-					uint16_t dist2 = robot->distance_avg(DIST_SIDE_FRONT, 10, 0.2f);
-					std::cout << dist1 << " : " << dist2 << std::endl;
-					if(dist1 > dist2) {
-						center_long = false;
-					} else {
-						robot->turn(-RAD_90);
-						center_long = true;
+					robot->m(-100, -100, 1100);
+					robot->turn(deg_to_rad(135.0f + 17.0f));
+
+					uint16_t min_forward_dist = 10000;
+					uint16_t min_side_dist = 10000;
+
+					for(int i = 0; i < 3; ++i) {
+						uint16_t forward_dist = robot->distance_avg(DIST_FORWARD, 10, 0.2f);
+						uint16_t side_dist = robot->distance_avg(DIST_SIDE_FRONT, 10, 0.2f);
+						if(forward_dist < min_forward_dist) {
+							min_forward_dist = forward_dist;
+						}
+						if(side_dist < min_side_dist) {
+							min_side_dist = side_dist;
+						}
+						if(i != 2) robot->turn(-deg_to_rad(17.0f));
 					}
-					robot->m(100, 100, 1350);
+					robot->turn(deg_to_rad(45.0f + 17.0f));
+					robot->m(-100, -100, 800);
+					robot->m(-40, -40, 400);
+					robot->m(100, 100, 1100);
+
+					std::cout << min_forward_dist << " : " << min_side_dist << std::endl;
+					if(min_side_dist < min_forward_dist) {
+						robot->turn(-RAD_45);
+						center_long = true;
+					} else {
+						robot->turn(RAD_45);
+						center_long = false;
+					}
+					robot->m(100, 100, 1250);
 
 					//robot->m(-100, -100, 1200);
 					//robot->turn(-deg_to_rad(60.0f));
@@ -181,7 +214,7 @@ void Rescue::rescue() {
 				if(is_in_center) {
 					//robot->turn(deg_to_rad(20.0f));
 					//robot->m(100, 100, 1000);
-					robot->m(-100, -100, 1350);
+					robot->m(-100, -100, 1250);
 					if(center_long) {
 						robot->turn(deg_to_rad(-135.0f));
 					} else {
@@ -259,16 +292,23 @@ void Rescue::align_with_corner() {
 	x /= num_black_pixels;
 
 	const float FAR_CAM_FOV = deg_to_rad(65.0f);
-	float angle = (x / frame.cols - 0.5f) * FAR_CAM_FOV;
+	const float CORNER_WIDTH = 0.8f;
+	float x_center = 2 * (x / frame.cols - 0.5f) - 0.5f + CORNER_WIDTH / 2;
+	float angle = (x_center) * FAR_CAM_FOV;
 
 	robot->turn(angle);
 }
 
 float Rescue::get_angle_to_right_wall() {
+	return get_angle_to_right_wall(false);
+}
+
+float Rescue::get_angle_to_right_wall(bool large_distance) {
 	float dist_front = robot->distance(DIST_SIDE_FRONT);
 	float dist_back = robot->distance(DIST_SIDE_BACK);
-	if(dist_front > 400 || dist_back > 400) return 0.0f;
+	if(large_distance || dist_front > 400 || dist_back > 400) return 0.0f;
 	float angle = std::atan((dist_back - dist_front) / 145.0f);
+	if(large_distance && std::abs(angle) > 30.0f) return 0.0f;
 	if(std::abs(angle) > deg_to_rad(10.0f)) {
 		dist_front = robot->distance_avg(DIST_SIDE_FRONT, 10, 0.2f);
 		dist_back = robot->distance_avg(DIST_SIDE_BACK, 10, 0.2f);
@@ -299,13 +339,18 @@ void Rescue::find_black_corner() {
 		if(micros() - last_turn >= 500000) {
 			uint16_t side_dist = robot->distance(DIST_SIDE_FRONT);
 			if(side_dist < 450) {
-				if(side_dist > 130) {
+				if(side_dist > 150) {
 					robot->turn(RAD_90);
-					while(robot->distance(DIST_FORWARD) > 155) {
-						robot->m(50, 50);
-					}
+					robot->m(50, 50, side_dist);
 					robot->stop();
 					robot->turn(-RAD_90);
+					robot->m(-100, -100, 200);
+				} else if(side_dist < 135) {
+					robot->turn(RAD_90);
+					robot->m(-50, -50, 70);
+					robot->stop();
+					robot->turn(-RAD_90);
+					robot->m(-100, -100, 200);
 				}
 			}
 			robot->turn(-get_angle_to_right_wall());
@@ -326,6 +371,7 @@ void Rescue::find_black_corner() {
 				std::cout << "Exit, turning" << std::endl;
 				robot->m(-100, -100, 400);
 				turn_90_wall();
+
 			} else {
 				robot->m(100, 100, 380);
 			}
@@ -361,14 +407,14 @@ void Rescue::find_black_corner() {
 
 				std::cout << "Aligning with corner" << std::endl;
 				robot->turn(deg_to_rad(120.0f));
-				robot->m(-100, -100, 600);
+				robot->m(-100, -100, 520);
 
 				//robot->turn(-RAD_90);
 				//robot->m(100, 100, 500);
 				//robot->m(-100, -100, 150);
 				robot->turn(deg_to_rad(95.0f));
 
-				robot->m(-30, -30, 800);
+				robot->m(-30, -30, 1400);
 
 				return;
 			} else {
@@ -419,6 +465,10 @@ bool Rescue::rescue_victim(bool ignore_dead, float angle_offset) {
 	float angle = (selected_victim.x / WIDTH - 0.5) * FAR_CAM_FOV;
 	robot->turn(angle);
 
+	float x_pos = 0.0f;
+	float y_pos = 0.0f; // Coordinates relative to starting position
+	float orientation = angle; // Angle relative to starting position
+
 	// save image for debugging and ml purposes:
 	uint32_t num_steps = 0;
 	uint32_t ms_travelled = 0;
@@ -434,6 +484,9 @@ bool Rescue::rescue_victim(bool ignore_dead, float angle_offset) {
 			std::cout << "Empty frame" << std::endl;
 			robot->m(-100, -100, approach_step_size);
 			continue;
+		} else {
+			x_pos += std::sin(orientation) * approach_step_size;
+			y_pos += std::cos(orientation) * approach_step_size;
 		}
 		probability_map = victimML.invoke(frame);
 		victims = victimML.extract_victims(probability_map);
@@ -459,6 +512,7 @@ bool Rescue::rescue_victim(bool ignore_dead, float angle_offset) {
 		std::cout << selected_victim.y << std::endl;
 
 		float angle2 = (selected_victim.x / WIDTH - 0.5) * FAR_CAM_FOV;
+		orientation += angle2;
 		robot->turn(angle2);
 	}
 
@@ -473,9 +527,14 @@ bool Rescue::rescue_victim(bool ignore_dead, float angle_offset) {
 	robot->m(50, 50, 180);
 	robot->servo(SERVO_1, ARM_UP, 750);
 
-	robot->m(100, 100, ms_travelled - 400);
+	float angle_to_start = std::atan2(x_pos, y_pos);
+	std::cout << y_pos << " / " << x_pos << std::endl;
+	std::cout << rad_to_deg(angle_to_start) << std::endl;
+	robot->turn(angle_to_start - orientation);
+	robot->m(100, 100, std::sqrt(x_pos * x_pos + y_pos * y_pos) - 250);
+	//robot->m(100, 100, ms_travelled - 400);
 
-	robot->turn(-angle);
+	robot->turn(-angle_to_start);
 
 	/*frame = capture(CAM_FAR);
 	cv::Mat thresh;
@@ -520,13 +579,24 @@ bool Rescue::check_for_green(cv::Mat frame) {
 void Rescue::find_exit() {
 	robot->m(-100, -100, 300);
 	robot->turn(RAD_45);
-	robot->m(-100, -100, 700);
+	robot->m(-100, -100, 600);
 	robot->turn(-RAD_90);
 
 	// TODO: Check for green
 
-	while(robot->distance(DIST_FORWARD) > 200) {
-		robot->m(60, 60);
+	std::cout << robot->distance(DIST_FORWARD) << std::endl;
+	if(robot->distance(DIST_FORWARD) > 400) {
+		robot->turn(-get_angle_to_right_wall(true));
+		robot->m(100, 100, 500);
+		cv::Mat frame = capture(CAM_SHORT);
+		if(check_for_green(frame)) {
+			robot->m(100, 100, 400);
+			return;
+		}
+	} else {
+		while(robot->distance(DIST_FORWARD) > 200) {
+			robot->m(60, 60);
+		}	
 	}
 	robot->stop();
 	robot->turn(-RAD_90);
@@ -543,10 +613,18 @@ void Rescue::find_exit() {
 		while(disable_side || dist < 350) {
 			if(micros() - last_turn >= 500000) {
 				if(dist < 450) {
-					if(dist > 130) {
+					if(dist > 150) {
 						robot->turn(RAD_90);
 						while(robot->distance(DIST_FORWARD) > 155) {
 							robot->m(50, 50);
+						}
+						robot->stop();
+						robot->turn(-RAD_90);
+						robot->m(-100, -100, 200);
+					} else if(dist < 135) {
+						robot->turn(RAD_90);
+						while(robot->distance(DIST_FORWARD) < 140) {
+							robot->m(-50, -50);
 						}
 						robot->stop();
 						robot->turn(-RAD_90);
