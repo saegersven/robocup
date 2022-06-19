@@ -3,12 +3,13 @@
 
 #include "robot.h"
 #include "silver_ml.h"
+#include "green_nn.h"
 
 
 #define BLACK_MAX_SUM 250
 
-#define GREEN_RATIO_THRESHOLD 0.6f
-#define GREEN_MIN_VALUE 5
+#define GREEN_RATIO_THRESHOLD 0.75f
+#define GREEN_MIN_VALUE 25
 
 #define BLUE_RATIO_THRESHOLD 1.7f
 #define BLUE_MIN_VALUE 50
@@ -42,8 +43,8 @@
 // OBSTACLE
 #define OBSTACLE_Y_UPPER 30
 #define OBSTACLE_Y_LOWER 10
-#define OBSTACLE_X_UPPER 60
-#define OBSTACLE_X_LOWER 20
+#define OBSTACLE_X_UPPER 80
+#define OBSTACLE_X_LOWER 60
 
 #define TURN_100_90 330
 
@@ -84,7 +85,8 @@ private:
 
 	std::atomic<bool> running;
 	std::atomic<bool> obstacle_enabled;
-	bool enable_no_difference = true;;
+	bool enable_no_difference = true;
+	uint64_t increased_error_time = 0;
 
 	bool obstacle_direction = true; // true = right, false = left
 	bool checked_silver_start = false;
@@ -105,6 +107,7 @@ private:
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_update;
 	
 	SilverML silver_ml;
+	GreenML green_ml;
 
 	bool abort_obstacle(cv::Mat frame);
 	void obstacle();
@@ -118,6 +121,8 @@ private:
 	float get_redness(cv::Mat& in);
 	bool check_silver(const cv::Mat& frame);
 	bool black_pixel_threshold_under(int threshold);
+
+	bool check_green(const cv::Mat& frame);
 
 	//std::vector<cv::Point> find_green_group_centers_old(cv::Mat frame, cv::Mat& green);
 

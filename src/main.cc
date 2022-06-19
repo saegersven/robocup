@@ -103,6 +103,22 @@ int main() {
 	std::cout << "\n/dev/cams/:" << std::endl;
    	system("ls /dev/cams/");
 
+   	try {
+   		cv::VideoCapture far_cam_cap("/dev/cams/back", cv::CAP_V4L2);
+   		far_cam_cap.grab();
+   		cv::Mat test_frame;
+   		far_cam_cap.retrieve(test_frame);
+
+   		if(test_frame.empty()) {
+   			throw std::runtime_error("Uh oh");
+   		}
+   	} catch(std::exception& e) {
+   		for(int i = 0; i < 5; ++i) {
+   			robot->beep(500);
+   			delay(200);
+   		}
+   	}
+
 	robot->set_gpio(LED_1, false);
 	robot->set_gpio(LED_2, true);
 	const auto start_time = std::chrono::system_clock::now();

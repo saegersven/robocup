@@ -1,6 +1,6 @@
 import csv
 
-LABEL_CSV_PATH = r"E:\Robocup\robocup\ml_data\victims\victims_labelled\vott-csv-export\victims-export.csv"
+LABEL_CSV_PATH = r"../../ml_data/victims/victims_labelled/vott-csv-export/victims-export.csv"
 OUTPUT_CSV_PATH = r"out.csv"
 NO_VICTIMS_PATH = "../../ml_data/victims/no_victims"
 

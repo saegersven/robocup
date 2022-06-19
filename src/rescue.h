@@ -46,7 +46,12 @@ private:
 	void close_camera(uint8_t cam_id);
 	cv::Mat capture(uint8_t cam_id);
 	void rescue();
+	void align_with_corner();
+	void align_with_exit();
 	float get_angle_to_right_wall();
+	float get_angle_to_right_wall(bool large_distance);
+	float get_angle_to_correct_distance(float alpha, float d1);
+	void turn_90_wall();
 	void find_black_corner();
 	bool rescue_victim(bool ignore_dead, float angle_offset);
 

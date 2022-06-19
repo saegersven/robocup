@@ -10,7 +10,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 
-data_dir = pathlib.Path("../../ml_data/silver_cropped")
+data_dir = pathlib.Path("/home/lukas/robocup/ml_data/silver_cropped_old")
 
 image_count = len(list(data_dir.glob("*/*.png")))
 print(f"Image count = {image_count}")
@@ -80,7 +80,7 @@ model.compile(optimizer="adam",
 
 model.summary()
 
-epochs = 20
+epochs = 40
 history = model.fit(
 	normalized_train_ds,
 	validation_data=normalized_val_ds,

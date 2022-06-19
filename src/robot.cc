@@ -64,11 +64,11 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	pinMode(DIST_2_TRIG, OUTPUT);
 
 	// Create PWM for the two drive motors
-	if(softPwmCreate(M1_E, 0, 100)) {
+	if(softPwmCreate(M1_E, 0, 101)) {
 		std::cout << "Error setting up PWM for M1" << std::endl;
 		exit(ERRCODE_BOT_SETUP_PWM);
 	}
-	if(softPwmCreate(M2_E, 0, 100)) {
+	if(softPwmCreate(M2_E, 0, 101)) {
 		std::cout << "Error setting up PWM for M2" << std::endl;
 		exit(ERRCODE_BOT_SETUP_PWM);
 	}
@@ -93,6 +93,7 @@ Robot::Robot() : asc_stop_time(std::chrono::high_resolution_clock::now()) {
 	delay(200);
 
 	for(int i = 0; i < 3; ++i) {
+		delay(100);
 		vl53l0x_vec[i]->initialize();
 		vl53l0x_vec[i]->setTimeout(200);
 		vl53l0x_vec[i]->setMeasurementTimingBudget(40000);
@@ -131,6 +132,7 @@ int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, const uint8_t* reg_data, ui
 
 int8_t i2c_write8(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data) {
 	wiringPiI2CWriteReg8(dev_addr, reg_addr, reg_data);
+	return 0;
 }
 
 int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
@@ -211,8 +213,33 @@ float Robot::get_pitch() {
 	return fl_euler_data_p;
 }
 
-uint16_t Robot::distance(uint8_t sensor_id) {
-	uint16_t distance = vl53l0x_vec[sensor_id]->readRangeSingleMillimeters();
+void Robot::reset_vl53l0x(uint8_t sensor_id) {
+	uint8_t addr = vl53l0x_vec[sensor_id]->getAddress();
+	int16_t xshut_pin = vl53l0x_vec[sensor_id]->getXshutGPIOPin();
+	vl53l0x_vec[sensor_id] = std::make_unique<VL53L0X>(xshut_pin);
+	vl53l0x_vec[sensor_id]->powerOff();
+	delay(200);
+	vl53l0x_vec[sensor_id]->initialize();
+	vl53l0x_vec[sensor_id]->setTimeout(200);
+	vl53l0x_vec[sensor_id]->setMeasurementTimingBudget(40000);
+	vl53l0x_vec[sensor_id]->setAddress(addr);
+	delay(200);
+}
+
+uint16_t Robot::distance(uint8_t sensor_id, uint8_t num_reboots) {
+	uint16_t distance = 9000;
+	if(num_reboots == 10) {
+		std::cout << "Uh oh: Still not working after 10 reboots" << std::endl;
+		return 9000;
+	}
+	try {
+		distance = vl53l0x_vec[sensor_id]->readRangeSingleMillimeters();
+	} catch(std::exception& e) {
+		std::cout << "Failed to read VL53L0X, resetting sensor" << std::endl;
+		std::cout << e.what() << std::endl;
+		this->reset_vl53l0x(sensor_id);
+		return this->distance(sensor_id, num_reboots + 1);
+	}
 	if(vl53l0x_vec[sensor_id]->timeoutOccurred()) {
 		std::cout << "VL53L0X (" << std::to_string(sensor_id) << ") timeout!" << std::endl;
 		return 4000;
@@ -251,8 +278,8 @@ void Robot::m(int8_t left, int8_t right, int32_t duration, uint8_t brake_duty_cy
 	// WARNING: left and rigth motor swapped
 	if(block_m) return;
 
-	left = clip(left, -100, 100);
-	right = clip(right, -100, 100);
+	left = clip(left, -100.0f, 100.0f);
+	right = clip(right, -100.0f, 100.0f);
 
 	// If duration is less than zero, flip motor pins
 	if(duration < 0) {
